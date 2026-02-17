@@ -194,12 +194,12 @@
     <h3 style="color:var(--primary); margin:0;">Pesanan Berhasil!</h3>
     <p style="font-size:13px; color:#666;">Mengalihkan ke WhatsApp...</p>
 </div>
+
 <script>
 (() => {
     "use strict";
 
     document.addEventListener('DOMContentLoaded', () => {
-        // --- KEAMANAN ---
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = e => { if ([123, 73, 67, 74, 85].includes(e.keyCode)) return false; };
 
@@ -211,9 +211,8 @@
         };
 
         const db = window.supabase.createClient(config.url, config.anon);
-        let map, marker, calculatedData = {};
+        let map, marker, geocoder, calculatedData = {};
 
-        // UI ELEMENTS
         const ui = {
             form: document.getElementById('orderForm'),
             jarak: document.getElementById('jarak'),
@@ -235,7 +234,6 @@
 
         const formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');
 
-        // --- HITUNG HARGA ---
         const hitungTotal = () => {
             const qty = parseFloat(ui.jumlah.value) || 0;
             const dist = parseFloat(ui.jarak.value) || 0;
@@ -271,14 +269,17 @@
             ui.txtOngkir.innerText = formatRupiah(ongkirMurni);
             ui.txtTotal.innerText = formatRupiah(totalBayar);
 
-            ui.rowDiscOngkir.className = discOngkir > 0 ? 'invoice-row discount' : 'invoice-row discount hidden';
-            ui.txtDiscOngkir.innerText = '-' + formatRupiah(discOngkir);
+            if (discOngkir > 0) {
+                ui.rowDiscOngkir.classList.remove('hidden');
+                ui.txtDiscOngkir.innerText = '-' + formatRupiah(discOngkir);
+            } else { ui.rowDiscOngkir.classList.add('hidden'); }
 
-            ui.rowDiscBarang.className = discBarang > 0 ? 'invoice-row discount' : 'invoice-row discount hidden';
-            ui.txtDiscBarang.innerText = '-' + formatRupiah(discBarang);
+            if (discBarang > 0) {
+                ui.rowDiscBarang.classList.remove('hidden');
+                ui.txtDiscBarang.innerText = '-' + formatRupiah(discBarang);
+            } else { ui.rowDiscBarang.classList.add('hidden'); }
         };
 
-        // --- MAPS LOGIC ---
         const fetchRouteOSRM = async (lat, lng) => {
             try {
                 const url = `https://router.project-osrm.org/route/v1/driving/${config.store.lng},${config.store.lat};${lng},${lat}?overview=false`;
@@ -295,7 +296,7 @@
 
         const updateMarkerPopup = async (m) => {
             const { lat, lng } = m.getLatLng();
-            m.bindPopup("Mencari nama tempat...").openPopup();
+            m.bindPopup("Memuat nama tempat...").openPopup();
             try {
                 // Menggunakan Nominatim untuk Reverse Geocoding (Klik Peta -> Nama)
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
@@ -463,6 +464,3 @@
 </script>
 </body>
 </html>
-
-
-
