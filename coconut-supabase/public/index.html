@@ -6,23 +6,18 @@
     <title>Order Coconut Bumi Jelly D'Hasna</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        :root {
-            --primary: #2e7d32; --accent: #81c784; --bg: #f4f7f6; --white: #ffffff;
-            --text-main: #333333; --text-light: #777777; --danger: #e53935; --success: #43a047;
-            --radius: 12px; --shadow: 0 8px 30px rgba(0,0,0,0.08);
-        }
+        /* Gaya CSS sama persis agar desain tetap konsisten */
+        :root { --primary: #2e7d32; --accent: #81c784; --bg: #f4f7f6; --white: #ffffff; --text-main: #333333; --text-light: #777777; --danger: #e53935; --success: #43a047; --radius: 12px; --shadow: 0 8px 30px rgba(0,0,0,0.08); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Poppins', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text-main); -webkit-user-select: none; user-select: none; }
         .container { background: var(--white); width: 100%; max-width: 480px; padding: 30px; border-radius: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
         
-        /* Header */
         header { text-align: center; margin-bottom: 25px; }
         .jelly-anim { width: 70px; height: 60px; margin: 0 auto 10px; background: linear-gradient(180deg, #fff 40%, #e0e0e0 100%); border-radius: 50% 50% 40% 40% / 60% 60% 35% 35%; border: 4px solid #5d4037; position: relative; animation: bounce 3s ease-in-out infinite; }
         .jelly-anim::after { content: ''; position: absolute; top: 5px; left: 10%; width: 80%; height: 20px; background: rgba(255,255,255,0.7); border-radius: 50%; }
@@ -30,14 +25,12 @@
         h2 { color: var(--primary); font-weight: 700; margin: 0; font-size: 20px; }
         .subtitle { color: var(--text-light); font-size: 13px; }
 
-        /* Form */
         .form-group { margin-bottom: 18px; }
         label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; color: var(--text-main); }
         input, textarea, select { width: 100%; padding: 12px 15px; border: 2px solid #eee; border-radius: var(--radius); font-family: inherit; font-size: 14px; transition: 0.3s; background: #fafafa; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); background: #fff; }
         input[readonly] { background-color: #e9ecef; color: #495057; cursor: not-allowed; border-color: #ddd; }
 
-        /* Buttons */
         .btn-action { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; border-radius: var(--radius); border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 5px; }
         .btn-gps { background: #e8f5e9; color: var(--primary); border: 1px dashed var(--primary); }
         .btn-map { background: #e3f2fd; color: #1565c0; border: 1px dashed #1565c0; }
@@ -49,7 +42,6 @@
         .note { font-size: 10px; color: var(--text-light); margin-top: 4px; }
         .gps-status { font-size: 11px; text-align: center; margin: -5px 0 10px; }
 
-        /* Invoice & Payment */
         .invoice-box { background: #fff; border: 1px solid #eee; border-radius: var(--radius); padding: 20px; margin-top: 25px; }
         .invoice-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 8px; color: var(--text-light); }
         .invoice-row.highlight { color: var(--text-main); font-weight: 500; }
@@ -62,42 +54,18 @@
         #qris-image { width: 180px; border-radius: 10px; border: 4px solid #eee; }
         #area-upload { background: #fff8e1; padding: 15px; border-radius: var(--radius); border: 1px dashed #ffb300; margin-top: 15px; }
 
-        /* --- MODAL PETA & PENCARIAN (Style Baru) --- */
+        /* Mapbox Specific Styles */
         #map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: end; }
-        .map-box { background: #fff; width: 100%; height: 90vh; border-radius: 20px 20px 0 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        
-        /* Header Modal Peta */
-        .map-header { padding: 15px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; z-index: 1002; }
+        .map-box { background: #fff; width: 100%; height: 90vh; border-radius: 20px 20px 0 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+        .map-header { padding: 15px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
         .map-header h3 { margin: 0; font-size: 16px; color: var(--primary); }
         #close-map { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
-
-        /* Peta */
-        #map { flex: 1; width: 100%; z-index: 1000; }
-
-        /* Tombol Konfirmasi Melayang */
-        .map-footer { padding: 15px; background: #fff; border-top: 1px solid #eee; z-index: 1002; }
+        #map { flex: 1; width: 100%; }
+        .map-footer { padding: 15px; background: #fff; border-top: 1px solid #eee; z-index: 10; }
         
-        /* Kostumisasi Kotak Pencarian Leaflet agar Full Width & Modern */
-        .leaflet-control-geocoder { 
-            position: absolute !important; top: 10px; left: 10px; right: 10px; width: auto !important; 
-            z-index: 1001; background: transparent; border: none; box-shadow: none; margin: 0 !important;
-        }
-        .leaflet-control-geocoder-form { float: none !important; }
-        .leaflet-control-geocoder-form input {
-            width: 100%; padding: 12px 15px; border-radius: 50px; border: 1px solid #ddd;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Poppins'; font-size: 14px;
-            background: #fff url('https://img.icons8.com/ios-glyphs/30/999999/search--v1.png') no-repeat 95% center;
-            background-size: 20px;
-        }
-        .leaflet-control-geocoder-icon { display: none !important; } /* Hapus ikon default */
-        .leaflet-control-geocoder-alternatives { 
-            width: 100% !important; max-height: 200px; overflow-y: auto; border-radius: 10px;
-            margin-top: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: none;
-        }
-        .leaflet-control-geocoder-alternatives li { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
-        .leaflet-control-geocoder-alternatives li:hover { background-color: #f5f5f5; }
-
-        /* Popup */
+        /* Mapbox Geocoder Customization */
+        .mapboxgl-ctrl-geocoder { width: 100% !important; max-width: none !important; box-shadow: none !important; border: 1px solid #eee; border-radius: 8px; }
+        
         .success-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.3s; }
         .success-overlay.active { opacity: 1; visibility: visible; }
         .check-icon { width: 60px; height: 60px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; margin-bottom: 15px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -127,11 +95,11 @@
         <div class="form-group">
             <label>Penentuan Jarak Pengiriman</label>
             <button type="button" id="btn-gps" class="btn-action btn-gps">📡 Hitung Jarak Otomatis (GPS)</button>
-            <div class="helper-text">Gunakan ini jika Anda sedang di lokasi (Sesuai GPS HP).</div>
+            <div class="helper-text">Gunakan ini jika sedang di lokasi (Sesuai GPS HP).</div>
             <div id="gps-status" class="gps-status hidden"></div>
 
             <button type="button" id="btn-maps" class="btn-action btn-map">📍 Pilih Lokasi di Peta</button>
-            <div class="helper-text">Cari nama gedung/jalan jika lokasi berbeda dengan GPS.</div>
+            <div class="helper-text">Cari nama gedung/jalan di peta yang canggih.</div>
 
             <label style="margin-top: 15px;">Jarak Terhitung (KM)</label>
             <input type="number" id="jarak" step="0.1" min="0" placeholder="Wajib klik tombol di atas" required readonly>
@@ -195,6 +163,8 @@
     <p style="font-size:13px; color:#666;">Mengalihkan ke WhatsApp...</p>
 </div>
 
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
 <script>
 (() => {
     "use strict";
@@ -203,16 +173,20 @@
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = e => { if ([123, 73, 67, 74, 85].includes(e.keyCode)) return false; };
 
+        // --- KONFIGURASI ---
         const config = {
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
             anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU",
             store: { lat: -6.369596, lng: 107.400326 }, 
-            wa: "62895336907868"
+            wa: "62895336907868",
+            // GANTI INI DENGAN TOKEN MAPBOX ANDA SENDIRI
+            mapboxToken: "MASUKKAN_TOKEN_MAPBOX_ANDA_DISINI" 
         };
 
         const db = window.supabase.createClient(config.url, config.anon);
-        let map, marker, geocoder, calculatedData = {};
+        let map, marker, calculatedData = {};
 
+        // UI ELEMENTS
         const ui = {
             form: document.getElementById('orderForm'),
             jarak: document.getElementById('jarak'),
@@ -234,6 +208,7 @@
 
         const formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');
 
+        // HITUNG HARGA
         const hitungTotal = () => {
             const qty = parseFloat(ui.jumlah.value) || 0;
             const dist = parseFloat(ui.jarak.value) || 0;
@@ -294,72 +269,89 @@
             return false;
         };
 
+        // GPS Button
         document.getElementById('btn-gps').onclick = () => {
             ui.statusGps.classList.remove('hidden');
             ui.statusGps.innerText = "🛰️ Mencari lokasi GPS...";
             navigator.geolocation.getCurrentPosition(async pos => {
                 const success = await fetchRouteOSRM(pos.coords.latitude, pos.coords.longitude);
                 ui.statusGps.innerText = success ? "✅ Jarak Sesuai GPS Terkunci" : "❌ Gagal menghitung";
-                ui.statusGps.style.color = success ? "green" : "red";
             }, () => {
                 ui.statusGps.innerText = "❌ Akses GPS Ditolak";
-                ui.statusGps.style.color = "red";
             });
         };
 
-        // --- PETA CANGGIH (AUTOCOMPLETE & CLICK) ---
+        // MAPBOX LOGIC
         const mapModal = document.getElementById('map-modal');
-        const updateMarkerPopup = async (m) => {
-            const { lat, lng } = m.getLatLng();
-            m.bindPopup("Memuat alamat...").openPopup();
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
-                const data = await res.json();
-                const cleanName = (data.display_name || "").split(",").slice(0,3).join(",");
-                m.bindPopup(`<div style="font-size:12px;width:180px;"><b>Lokasi:</b><br>${cleanName}</div>`).openPopup();
-            } catch (e) { m.closePopup(); }
-        };
+        let selectedCoords = null;
 
         document.getElementById('btn-maps').onclick = () => {
-            mapModal.style.display = "flex";
-            if (!map) {
-                map = L.map('map').setView([config.store.lat, config.store.lng], 15);
-                L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
-                
-                marker = L.marker([config.store.lat, config.store.lng], {draggable:true}).addTo(map);
-                
-                // 1. Pencarian Autocomplete
-                geocoder = L.Control.geocoder({
-                    defaultMarkGeocode: false,
-                    placeholder: "🔍 Cari nama jalan / gedung..."
-                })
-                .on('markgeocode', function(e) {
-                    const center = e.geocode.center;
-                    map.setView(center, 18);
-                    marker.setLatLng(center);
-                    marker.bindPopup(`<div style="font-size:12px;"><b>${e.geocode.name}</b></div>`).openPopup();
-                })
-                .addTo(map);
-
-                // 2. Klik Peta (Reverse Geocode)
-                map.on('click', e => { 
-                    marker.setLatLng(e.latlng); 
-                    updateMarkerPopup(marker); 
-                });
-                marker.on('dragend', e => updateMarkerPopup(e.target));
+            if (config.mapboxToken === "MASUKKAN_TOKEN_MAPBOX_ANDA_DISINI") {
+                alert("Mohon masukkan Token Mapbox di dalam kode script.");
+                return;
             }
-            setTimeout(() => map.invalidateSize(), 200);
+            
+            mapModal.style.display = "flex";
+            
+            if (!map) {
+                mapboxgl.accessToken = config.mapboxToken;
+                map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v12',
+                    center: [config.store.lng, config.store.lat],
+                    zoom: 14
+                });
+
+                // Marker yang bisa digeser
+                marker = new mapboxgl.Marker({ draggable: true })
+                    .setLngLat([config.store.lng, config.store.lat])
+                    .addTo(map);
+
+                // Tambah Kontrol Pencarian (Geocoder)
+                const geocoder = new MapboxGeocoder({
+                    accessToken: mapboxgl.accessToken,
+                    mapboxgl: mapboxgl,
+                    marker: false, // Kita pakai marker sendiri
+                    placeholder: 'Cari alamat, gedung, dll...'
+                });
+                
+                map.addControl(geocoder);
+
+                // Saat pencarian dipilih
+                geocoder.on('result', (e) => {
+                    const coords = e.result.center;
+                    marker.setLngLat(coords);
+                    selectedCoords = { lng: coords[0], lat: coords[1] };
+                });
+
+                // Saat marker digeser
+                marker.on('dragend', () => {
+                    const lngLat = marker.getLngLat();
+                    selectedCoords = lngLat;
+                });
+                
+                // Saat peta diklik
+                map.on('click', (e) => {
+                    marker.setLngLat(e.lngLat);
+                    selectedCoords = e.lngLat;
+                });
+                
+                selectedCoords = { lng: config.store.lng, lat: config.store.lat };
+            }
+            
+            setTimeout(() => map.resize(), 200);
         };
 
         document.getElementById('confirm-map').onclick = async () => {
-            const { lat, lng } = marker.getLatLng();
-            await fetchRouteOSRM(lat, lng);
-            mapModal.style.display = "none";
+            if(selectedCoords) {
+                await fetchRouteOSRM(selectedCoords.lat, selectedCoords.lng);
+                mapModal.style.display = "none";
+            }
         };
 
         document.getElementById('close-map').onclick = () => mapModal.style.display = "none";
 
-        // UI Helpers
+        // Helpers
         ui.jumlah.oninput = hitungTotal;
         ui.pembayaran.onchange = () => {
             const isQris = ui.pembayaran.value === 'QRIS';
