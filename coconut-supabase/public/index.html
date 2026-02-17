@@ -77,83 +77,74 @@
         /* Map Footer */
         .map-footer { padding: 15px; background: #fff; border-top: 1px solid #eee; z-index: 1002; }
 
-        /* --- TAMPILAN PENCARIAN DI TENGAH ATAS --- */
-
-        /* 1. Posisikan Wadah Utama di Tengah */
+        /* --- Custom Styling for Geocoder Control (Search Bar) --- */
         .leaflet-control-geocoder { 
-            position: absolute !important; /* Wajib absolute agar bisa digeser bebas */
-            top: 20px !important;          /* Jarak dari atas peta */
-            left: 50% !important;          /* Titik awal di tengah */
-            transform: translateX(-50%) !important; /* Geser balik agar presisi di tengah */
-            width: 85% !important;         /* Lebar kolom pencarian (responsif) */
-            max-width: 400px;              /* Batas lebar maksimal di layar besar */
-            margin: 0 !important;          /* Hapus margin bawaan Leaflet */
-            z-index: 5000 !important;      /* Pastikan selalu di atas peta */
-            background: transparent !important; /* Hapus background kotak pembungkus */
-            border: none !important;       /* Hapus border kotak pembungkus */
-            box-shadow: none !important;   /* Hapus bayangan kotak pembungkus */
+            position: absolute !important; 
+            top: 20px; 
+            left: 50% !important; 
+            transform: translateX(-50%); 
+            width: 85% !important; 
+            max-width: 400px;
+            z-index: 2000; 
+            background: transparent; border: none; box-shadow: none; margin: 0 !important;
         }
         
-        /* 2. Pastikan Formulir Mengisi Lebar Wadah */
-        .leaflet-control-geocoder-form {
-            float: none !important;
-            display: block !important;
-        }
+        .leaflet-control-geocoder-form { float: none !important; }
         
-        /* 3. Desain Kolom Input (Oval Modern) */
         .leaflet-control-geocoder-form input {
-            width: 100% !important;        /* Isi penuh wadah */
-            padding: 12px 20px 12px 40px !important; /* Padding (kiri lebih besar untuk ikon) */
-            border-radius: 50px !important; /* Bentuk Oval */
-            border: 1px solid #ddd !important;
-            font-family: 'Poppins', sans-serif !important;
-            font-size: 14px !important;
-            background: #fff url('https://img.icons8.com/ios-glyphs/30/777777/search--v1.png') no-repeat 15px center !important;
-            background-size: 18px !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important; /* Bayangan halus */
-            outline: none !important;
+            width: 100%; 
+            padding: 14px 20px; 
+            border-radius: 30px; 
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+            font-family: 'Poppins', sans-serif; 
+            font-size: 14px;
+            background: #fff url('https://img.icons8.com/ios-glyphs/30/777777/search--v1.png') no-repeat 95% center;
+            background-size: 18px;
+            color: #333;
         }
-        
-        /* 4. Sembunyikan Tombol Ikon Kaca Pembesar Bawaan */
-        /* Kita sembunyikan karena input sudah dibuat selalu terbuka */
-        .leaflet-control-geocoder-icon {
-            display: none !important; 
-            width: 0 !important;
-            height: 0 !important;
-        }
-        
-        /* 5. Sembunyikan Loading Icon Bawaan (Opsional, agar bersih) */
-        .leaflet-control-geocoder-throbber {
-            display: none !important;
-        }
-        
-        /* 6. Desain Dropdown Hasil Pencarian */
-        .leaflet-control-geocoder-alternatives {
-            width: 100% !important;
-            max-height: 250px;
-            overflow-y: auto;
+        .leaflet-control-geocoder-form input:focus { outline: none; box-shadow: 0 4px 20px rgba(46, 125, 50, 0.2); }
+
+        .leaflet-control-geocoder-icon { display: none !important; }
+        .leaflet-control-geocoder-throbber { display: none !important; }
+
+        /* Dropdown Hasil Pencarian */
+        .leaflet-control-geocoder-alternatives { 
+            width: 100% !important; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            border-radius: 15px;
+            margin-top: 10px; 
             background: white;
-            border-radius: 15px !important;
-            margin-top: 10px !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
-            padding: 0 !important;
-            border: none !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            border: none;
+            padding: 0;
         }
         
-        .leaflet-control-geocoder-alternatives li {
-            padding: 12px 15px !important;
-            border-bottom: 1px solid #f0f0f0 !important;
-            font-size: 13px !important;
-            text-align: left;
+        .leaflet-control-geocoder-alternatives li { 
+            padding: 12px 15px; 
+            border-bottom: 1px solid #f0f0f0; 
+            font-size: 13px; 
+            color: #444;
+            display: flex;
+            align-items: center;
         }
-        
-        .leaflet-control-geocoder-alternatives li:hover, 
-        .leaflet-control-geocoder-selected {
-            background-color: #f0f7f1 !important;
-            color: var(--primary) !important;
-            font-weight: 600;
+        .leaflet-control-geocoder-alternatives li:before {
+            content: '📍'; margin-right: 10px; font-size: 16px;
         }
-        
+        .leaflet-control-geocoder-alternatives li:last-child { border-bottom: none; }
+        .leaflet-control-geocoder-alternatives li:hover,
+        .leaflet-control-geocoder-selected { 
+            background-color: #f0f7f1; 
+            color: var(--primary); 
+            font-weight: 500;
+        }
+
+        /* Popup */
+        .success-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .success-overlay.active { opacity: 1; visibility: visible; }
+        .check-icon { width: 60px; height: 60px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; margin-bottom: 15px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -516,5 +507,3 @@
 </script>
 </body>
 </html>
-
-
