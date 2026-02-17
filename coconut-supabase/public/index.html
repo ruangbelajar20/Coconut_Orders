@@ -30,7 +30,7 @@
             margin: 0; padding: 20px;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; color: var(--text-main);
-            -webkit-user-select: none; user-select: none; /* Anti-select text */
+            -webkit-user-select: none; user-select: none;
         }
 
         .container {
@@ -39,7 +39,6 @@
             box-shadow: var(--shadow); position: relative; overflow: hidden;
         }
 
-        /* Header & Animasi */
         header { text-align: center; margin-bottom: 25px; }
         .jelly-anim { 
             width: 70px; height: 60px; margin: 0 auto 10px;
@@ -57,7 +56,6 @@
         h2 { color: var(--primary); font-weight: 700; margin: 0; font-size: 20px; }
         .subtitle { color: var(--text-light); font-size: 13px; }
 
-        /* Form Elements */
         .form-group { margin-bottom: 18px; }
         label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; color: var(--text-main); }
         
@@ -67,7 +65,6 @@
         }
         input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); background: #fff; }
 
-        /* Buttons */
         .btn-action {
             display: flex; align-items: center; justify-content: center; gap: 8px;
             width: 100%; padding: 10px; border-radius: var(--radius); border: none;
@@ -77,10 +74,8 @@
         .btn-map { background: #e3f2fd; color: #1565c0; border: 1px dashed #1565c0; }
         .btn-main { background: var(--text-main); color: #fff; padding: 15px; font-size: 15px; margin-top: 15px; }
         .btn-pay { background: #1976d2; color: #fff; padding: 15px; font-size: 15px; margin-top: 15px; display: none; }
-        
         .btn-action:active { transform: scale(0.98); }
 
-        /* Rincian Harga (Invoice Style) */
         .invoice-box {
             background: #fff; border: 1px solid #eee; border-radius: var(--radius);
             padding: 20px; margin-top: 25px;
@@ -97,17 +92,14 @@
             font-size: 18px; font-weight: 700; color: var(--primary);
         }
 
-        /* Utility */
         .hidden { display: none !important; }
-        .note { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+        .note { font-size: 10px; color: var(--text-light); margin-top: 4px; line-height: 1.4; }
         .gps-status { font-size: 11px; text-align: center; margin: -5px 0 10px; }
         
-        /* QRIS & Upload */
         #qris-container { text-align: center; margin-top: 15px; display: none; }
         #qris-image { width: 180px; border-radius: 10px; border: 4px solid #eee; }
         #area-upload { background: #fff8e1; padding: 15px; border-radius: var(--radius); border: 1px dashed #ffb300; margin-top: 15px; }
 
-        /* Modal & Popup */
         #map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: end; }
         .map-box { background: #fff; width: 100%; height: 80vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; }
         #map { flex: 1; border-radius: 15px; margin-bottom: 10px; }
@@ -144,13 +136,16 @@
             <div id="gps-status" class="gps-status hidden"></div>
             <button type="button" id="btn-maps" class="btn-action btn-map">📍 Pilih Lokasi di Peta (Manual)</button>
             <input type="number" id="jarak" step="0.1" min="0" placeholder="0.0" required>
-            <div class="note">*Gratis 2.5 KM pertama. Selebihnya +Rp 1.000/500m</div>
+            <div class="note">
+                *Gratis 2.5 KM pertama. Selebihnya +Rp 1.000/500m.<br>
+                *Diskon Ongkir tersedia untuk pembelian jumlah tertentu.
+            </div>
         </div>
 
         <div class="form-group">
             <label>Jumlah Pesanan (Butir)</label>
             <input type="number" id="jumlah" min="1" value="1" required>
-            <div class="note">*Diskon Rp 5.000 setiap kelipatan 5 butir.</div>
+            <div class="note">*Diskon Barang Rp 5.000 setiap kelipatan 5 butir.</div>
         </div>
 
         <div class="form-group">
@@ -170,12 +165,13 @@
                 <span>Ongkos Kirim</span>
                 <span id="txt-ongkir">Rp 0</span>
             </div>
+            
             <div class="invoice-row discount hidden" id="row-disc-ongkir">
-                <span>Potongan Ongkir (Promo)</span>
+                <span>Potongan Ongkir</span>
                 <span id="txt-disc-ongkir">-Rp 0</span>
             </div>
             <div class="invoice-row discount hidden" id="row-disc-barang">
-                <span>Diskon Quantity</span>
+                <span>Diskon Barang</span>
                 <span id="txt-disc-barang">-Rp 0</span>
             </div>
             
@@ -222,36 +218,31 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// IIFE untuk keamanan Scope (Anti-Console Inspection)
 (() => {
     "use strict";
 
     document.addEventListener('DOMContentLoaded', () => {
-        // 1. KEAMANAN: Cegah Klik Kanan & Inspeksi
+        // --- KEAMANAN ---
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = e => {
             if ([123, 73, 67, 74, 85].includes(e.keyCode)) return false; 
         };
 
-        // 2. KONFIGURASI
         const config = {
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
             anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU",
-            store: { lat: -6.369596, lng: 107.400326 }, // Ganti koordinat toko Anda
+            store: { lat: -6.369596, lng: 107.400326 },
             wa: "62895336907868"
         };
 
         const db = window.supabase.createClient(config.url, config.anon);
         let map, marker, calculatedData = {};
 
-        // 3. UI ELEMENTS
         const ui = {
             form: document.getElementById('orderForm'),
             jarak: document.getElementById('jarak'),
             jumlah: document.getElementById('jumlah'),
             pembayaran: document.getElementById('pembayaran'),
-            
-            // Elemen Harga
             txtSubtotal: document.getElementById('txt-subtotal'),
             txtOngkir: document.getElementById('txt-ongkir'),
             txtDiscOngkir: document.getElementById('txt-disc-ongkir'),
@@ -259,8 +250,6 @@
             txtTotal: document.getElementById('txt-total'),
             rowDiscOngkir: document.getElementById('row-disc-ongkir'),
             rowDiscBarang: document.getElementById('row-disc-barang'),
-
-            // Tombol & Area
             btnSubmit: document.getElementById('btn-submit'),
             btnPay: document.getElementById('btn-pay-qris'),
             qrisArea: document.getElementById('qris-container'),
@@ -268,7 +257,6 @@
             statusGps: document.getElementById('gps-status')
         };
 
-        // 4. LOGIKA PERHITUNGAN (INTI)
         const formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');
 
         const hitungTotal = () => {
@@ -276,43 +264,49 @@
             const dist = parseFloat(ui.jarak.value) || 0;
             const HARGA_SATUAN = 15000;
 
-            // A. Subtotal Barang
+            // 1. Subtotal Barang
             const subtotal = qty * HARGA_SATUAN;
 
-            // B. Ongkir Murni
-            // Aturan: Gratis 2.5KM, selebihnya 1000 per 500m (0.5km)
+            // 2. Ongkir Murni (Gratis 2.5KM, +1000/500m)
             let ongkirMurni = 0;
             if (dist > 2.5) {
                 let sisaJarak = dist - 2.5;
-                // Math.ceil membulatkan ke atas (misal 2.6km -> kelebihan 0.1 -> dihitung 1 blok)
                 let blok = Math.ceil(sisaJarak / 0.5); 
                 ongkirMurni = blok * 1000;
             }
 
-            // C. Diskon Ongkir
-            // Aturan: Jarak >2.5 s/d 5KM DAN Qty >2 s/d 5 butir => Diskon 50%
+            // 3. Logic Diskon Ongkir Bertingkat
             let discOngkir = 0;
-            if (dist > 2.5 && dist <= 5 && qty > 2 && qty <= 5) {
-                discOngkir = ongkirMurni * 0.5;
+
+            if (dist > 2.5 && dist <= 5) {
+                // Jarak 2.5 - 5 KM
+                if (qty > 2 && qty <= 5) discOngkir = ongkirMurni * 0.5; // 50%
+                else if (qty > 5) discOngkir = ongkirMurni; // 100% (Gratis)
+            } 
+            else if (dist > 5 && dist <= 10) {
+                // Jarak 5 - 10 KM
+                if (qty >= 6 && qty <= 10) discOngkir = ongkirMurni * 0.5; // 50%
+                else if (qty > 10) discOngkir = ongkirMurni; // 100% (Gratis)
+            }
+            else if (dist > 10 && dist <= 15) {
+                // Jarak 10 - 15 KM
+                if (qty > 10 && qty <= 15) discOngkir = ongkirMurni * 0.5; // 50%
+                else if (qty > 15) discOngkir = ongkirMurni; // 100% (Gratis)
             }
 
-            // D. Diskon Barang
-            // Aturan: Kelipatan 5 butir dapat potongan 5000
-            // 5 butir -> 5000, 10 butir -> 10000, 13 butir -> 10000
+            // 4. Diskon Barang (Kelipatan 5)
             let discBarang = Math.floor(qty / 5) * 5000;
 
-            // E. Total Akhir
+            // 5. Total Akhir
             const totalBayar = subtotal + ongkirMurni - discOngkir - discBarang;
 
-            // Simpan data untuk dikirim ke DB
             calculatedData = { subtotal, ongkirMurni, discOngkir, discBarang, totalBayar };
 
-            // Update Tampilan
+            // Update UI
             ui.txtSubtotal.innerText = formatRupiah(subtotal);
             ui.txtOngkir.innerText = formatRupiah(ongkirMurni);
             ui.txtTotal.innerText = formatRupiah(totalBayar);
 
-            // Toggle Tampilan Baris Diskon
             if (discOngkir > 0) {
                 ui.rowDiscOngkir.classList.remove('hidden');
                 ui.txtDiscOngkir.innerText = '-' + formatRupiah(discOngkir);
@@ -328,7 +322,7 @@
             }
         };
 
-        // 5. LOGIKA PETA & GPS
+        // --- MAPS & GPS Logic ---
         const fetchRouteOSRM = async (lat, lng) => {
             try {
                 const url = `https://router.project-osrm.org/route/v1/driving/${config.store.lng},${config.store.lat};${lng},${lat}?overview=false`;
@@ -343,7 +337,6 @@
             return false;
         };
 
-        // GPS Button
         document.getElementById('btn-gps').onclick = () => {
             ui.statusGps.classList.remove('hidden');
             ui.statusGps.innerText = "🛰️ Mencari koordinat...";
@@ -351,15 +344,14 @@
             
             navigator.geolocation.getCurrentPosition(async pos => {
                 const success = await fetchRouteOSRM(pos.coords.latitude, pos.coords.longitude);
-                ui.statusGps.innerText = success ? "✅ Jarak terhitung via Rute Jalan" : "❌ Gagal menghitung rute";
+                ui.statusGps.innerText = success ? "✅ Jarak terhitung" : "❌ Gagal menghitung rute";
                 ui.statusGps.style.color = success ? "green" : "red";
             }, () => {
-                ui.statusGps.innerText = "❌ Izin GPS ditolak browser.";
+                ui.statusGps.innerText = "❌ Izin GPS ditolak.";
                 ui.statusGps.style.color = "red";
             });
         };
 
-        // Map Manual Logic
         const mapModal = document.getElementById('map-modal');
         const updateMarkerPopup = async (m) => {
             const { lat, lng } = m.getLatLng();
@@ -402,11 +394,9 @@
         
         document.getElementById('close-map').onclick = () => mapModal.style.display = "none";
 
-        // 6. EVENT LISTENER LAINNYA
         ui.jarak.oninput = hitungTotal;
         ui.jumlah.oninput = hitungTotal;
 
-        // Toggle QRIS
         ui.pembayaran.onchange = () => {
             const isQris = ui.pembayaran.value === 'QRIS';
             ui.btnSubmit.style.display = isQris ? 'none' : 'block';
@@ -422,14 +412,12 @@
             ui.btnSubmit.style.display = 'block';
         };
 
-        // 7. SUBMIT FORM
         ui.form.onsubmit = async e => {
             e.preventDefault();
             ui.btnSubmit.disabled = true;
             ui.btnSubmit.innerText = "⏳ Memproses...";
 
             try {
-                // Kalkulasi ulang untuk keamanan data
                 hitungTotal(); 
 
                 const data = {
@@ -438,7 +426,6 @@
                     jarak: parseFloat(ui.jarak.value),
                     jumlah: parseInt(ui.jumlah.value),
                     metode: ui.pembayaran.value,
-                    // Data Finansial Terpisah
                     harga_awal: calculatedData.subtotal,
                     ongkir: calculatedData.ongkirMurni,
                     potongan_ongkir: calculatedData.discOngkir,
@@ -456,12 +443,6 @@
                     buktiUrl = db.storage.from('bukti-transfer').getPublicUrl(fName).data.publicUrl;
                 }
 
-                // Simpan ke Supabase (Pastikan nama kolom di tabel 'orders' sesuai)
-                /* Struktur tabel DB yang disarankan:
-                   nama (text), alamat (text), jarak (float), jumlah (int), 
-                   metode (text), bukti_url (text),
-                   harga_awal (int), ongkir (int), potongan_ongkir (int), diskon_barang (int), total_akhir (int)
-                */
                 const { error: dbError } = await db.from('orders').insert([{
                     nama: data.nama,
                     alamat: data.alamat,
@@ -478,10 +459,8 @@
 
                 if (dbError) throw dbError;
 
-                // Tampilkan Sukses
                 document.getElementById('successPopup').classList.add('active');
 
-                // Format Pesan WA
                 const waMsg = 
                     `*PESANAN BARU - COCONUT BUMI JELLY*\n` +
                     `----------------------------------\n` +
@@ -510,7 +489,6 @@
             }
         };
 
-        // Init pertama kali
         hitungTotal();
     });
 })();
