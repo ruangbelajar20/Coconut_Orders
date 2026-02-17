@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -67,15 +68,9 @@
         }
         input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); background: #fff; }
         
-        /* Readonly Input Style */
-        input[readonly] {
-            background-color: #e9ecef;
-            color: #495057;
-            cursor: not-allowed;
-            border-color: #ddd;
-        }
+        input[readonly] { background-color: #e9ecef; color: #495057; cursor: not-allowed; border-color: #ddd; }
 
-        /* Buttons & Helper Text */
+        /* Buttons */
         .btn-action {
             display: flex; align-items: center; justify-content: center; gap: 8px;
             width: 100%; padding: 12px; border-radius: var(--radius); border: none;
@@ -85,30 +80,17 @@
         .btn-map { background: #e3f2fd; color: #1565c0; border: 1px dashed #1565c0; }
         .btn-action:active { transform: scale(0.98); }
 
-        .helper-text {
-            font-size: 11px; color: var(--text-light); margin-bottom: 15px; 
-            margin-top: 2px; line-height: 1.4; padding-left: 2px;
-        }
-
+        .helper-text { font-size: 11px; color: var(--text-light); margin-bottom: 15px; margin-top: 2px; padding-left: 2px; }
         .btn-main { background: var(--text-main); color: #fff; padding: 15px; font-size: 15px; margin-top: 15px; }
         .btn-pay { background: #1976d2; color: #fff; padding: 15px; font-size: 15px; margin-top: 15px; display: none; }
 
         /* Invoice Style */
-        .invoice-box {
-            background: #fff; border: 1px solid #eee; border-radius: var(--radius);
-            padding: 20px; margin-top: 25px;
-        }
-        .invoice-row {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 13px; margin-bottom: 8px; color: var(--text-light);
-        }
+        .invoice-box { background: #fff; border: 1px solid #eee; border-radius: var(--radius); padding: 20px; margin-top: 25px; }
+        .invoice-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 8px; color: var(--text-light); }
         .invoice-row.highlight { color: var(--text-main); font-weight: 500; }
         .invoice-row.discount { color: var(--success); }
         .invoice-divider { border-bottom: 1px dashed #ddd; margin: 10px 0; }
-        .invoice-total {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 18px; font-weight: 700; color: var(--primary);
-        }
+        .invoice-total { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 700; color: var(--primary); }
 
         .hidden { display: none !important; }
         .note { font-size: 10px; color: var(--text-light); margin-top: 4px; }
@@ -118,11 +100,25 @@
         #qris-image { width: 180px; border-radius: 10px; border: 4px solid #eee; }
         #area-upload { background: #fff8e1; padding: 15px; border-radius: var(--radius); border: 1px dashed #ffb300; margin-top: 15px; }
 
-        /* Map Modal */
+        /* Map Modal & Search Results */
         #map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: end; }
-        .map-box { background: #fff; width: 100%; height: 85vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; }
-        #map { flex: 1; border-radius: 15px; margin-bottom: 10px; }
+        .map-box { background: #fff; width: 100%; height: 85vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; position: relative; }
+        #map { flex: 1; border-radius: 15px; margin-bottom: 10px; z-index: 1; }
         
+        /* Style Hasil Pencarian (Autocomplete) */
+        .search-container { position: relative; width: 100%; margin-bottom: 10px; }
+        #map-search { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+        #search-results { 
+            position: absolute; top: 100%; left: 0; width: 100%; 
+            background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px;
+            max-height: 200px; overflow-y: auto; z-index: 9999; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none;
+        }
+        .search-item { padding: 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 13px; color: #333; }
+        .search-item:hover { background-color: #e8f5e9; color: var(--primary); }
+        .search-item:last-child { border-bottom: none; }
+
+        /* Success Popup */
         .success-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.3s; }
         .success-overlay.active { opacity: 1; visibility: visible; }
         .check-icon { width: 60px; height: 60px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; margin-bottom: 15px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -151,22 +147,16 @@
 
         <div class="form-group">
             <label>Penentuan Jarak Pengiriman</label>
-            
             <button type="button" id="btn-gps" class="btn-action btn-gps">📡 Hitung Jarak Otomatis (GPS)</button>
-            <div class="helper-text">
-                Gunakan ini jika Anda sedang berada di lokasi pengiriman saat ini (Sesuai GPS HP).
-            </div>
-            
+            <div class="helper-text">Gunakan ini jika Anda di lokasi pengiriman (Sesuai GPS HP).</div>
             <div id="gps-status" class="gps-status hidden"></div>
 
             <button type="button" id="btn-maps" class="btn-action btn-map">📍 Pilih Lokasi di Peta</button>
-            <div class="helper-text">
-                Gunakan ini jika lokasi pengiriman berbeda dengan lokasi Anda sekarang (Misal: Kirim ke Rumah/Kantor).
-            </div>
+            <div class="helper-text">Gunakan ini jika lokasi kirim berbeda/GPS tidak akurat.</div>
 
             <label style="margin-top: 15px;">Jarak Terhitung (KM)</label>
-            <input type="number" id="jarak" step="0.1" min="0" placeholder="Wajib klik tombol di atas" required readonly>
-            <div class="note" style="color: var(--danger);">*Jarak terisi otomatis, tidak bisa diketik manual.</div>
+            <input type="number" id="jarak" step="0.1" min="0" placeholder="Klik tombol di atas" required readonly>
+            <div class="note" style="color: var(--danger);">*Otomatis terisi, tidak bisa diedit manual.</div>
         </div>
 
         <div class="form-group">
@@ -184,27 +174,12 @@
         </div>
 
         <div class="invoice-box">
-            <div class="invoice-row highlight">
-                <span>Subtotal Barang</span>
-                <span id="txt-subtotal">Rp 15.000</span>
-            </div>
-            <div class="invoice-row">
-                <span>Ongkos Kirim</span>
-                <span id="txt-ongkir">Rp 0</span>
-            </div>
-            <div class="invoice-row discount hidden" id="row-disc-ongkir">
-                <span>Potongan Ongkir</span>
-                <span id="txt-disc-ongkir">-Rp 0</span>
-            </div>
-            <div class="invoice-row discount hidden" id="row-disc-barang">
-                <span>Diskon Barang</span>
-                <span id="txt-disc-barang">-Rp 0</span>
-            </div>
+            <div class="invoice-row highlight"><span>Subtotal Barang</span><span id="txt-subtotal">Rp 15.000</span></div>
+            <div class="invoice-row"><span>Ongkos Kirim</span><span id="txt-ongkir">Rp 0</span></div>
+            <div class="invoice-row discount hidden" id="row-disc-ongkir"><span>Potongan Ongkir</span><span id="txt-disc-ongkir">-Rp 0</span></div>
+            <div class="invoice-row discount hidden" id="row-disc-barang"><span>Diskon Barang</span><span id="txt-disc-barang">-Rp 0</span></div>
             <div class="invoice-divider"></div>
-            <div class="invoice-total">
-                <span>Total Bayar</span>
-                <span id="txt-total">Rp 15.000</span>
-            </div>
+            <div class="invoice-total"><span>Total Bayar</span><span id="txt-total">Rp 15.000</span></div>
         </div>
 
         <div id="qris-container">
@@ -225,10 +200,15 @@
 <div id="map-modal">
     <div class="map-box">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="margin:0; font-size:16px; color:var(--primary);">Geser Pin ke Titik Lokasi</h3>
+            <h3 style="margin:0; font-size:16px; color:var(--primary);">Cari Alamat / Geser Pin</h3>
             <button id="close-map" style="background:none; border:none; font-size:20px;">✕</button>
         </div>
-        <input type="text" id="map-search" placeholder="Cari nama jalan / kelurahan..." style="padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+        
+        <div class="search-container">
+            <input type="text" id="map-search" placeholder="Ketik nama jalan, gedung, atau kelurahan..." autocomplete="off">
+            <div id="search-results"></div>
+        </div>
+
         <div id="map"></div>
         <button id="confirm-map" class="btn-action btn-main" style="margin:0;">✅ Gunakan Lokasi Ini</button>
     </div>
@@ -246,16 +226,14 @@
     "use strict";
 
     document.addEventListener('DOMContentLoaded', () => {
-        // --- KEAMANAN ---
+        // --- 1. KEAMANAN ---
         document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = e => {
-            if ([123, 73, 67, 74, 85].includes(e.keyCode)) return false; 
-        };
+        document.onkeydown = e => { if ([123, 73, 67, 74, 85].includes(e.keyCode)) return false; };
 
         const config = {
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
             anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU",
-            store: { lat: -6.369596, lng: 107.400326 }, 
+            store: { lat: -6.369596, lng: 107.400326 },
             wa: "62895336907868"
         };
 
@@ -278,20 +256,20 @@
             btnPay: document.getElementById('btn-pay-qris'),
             qrisArea: document.getElementById('qris-container'),
             uploadArea: document.getElementById('area-upload'),
-            statusGps: document.getElementById('gps-status')
+            statusGps: document.getElementById('gps-status'),
+            mapSearch: document.getElementById('map-search'),
+            searchResults: document.getElementById('search-results')
         };
 
         const formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');
 
+        // --- 2. LOGIKA HITUNG (Sama seperti sebelumnya) ---
         const hitungTotal = () => {
             const qty = parseFloat(ui.jumlah.value) || 0;
             const dist = parseFloat(ui.jarak.value) || 0;
             const HARGA_SATUAN = 15000;
 
-            // 1. Subtotal
             const subtotal = qty * HARGA_SATUAN;
-
-            // 2. Ongkir Murni
             let ongkirMurni = 0;
             if (dist > 2.5) {
                 let sisaJarak = dist - 2.5;
@@ -299,49 +277,34 @@
                 ongkirMurni = blok * 1000;
             }
 
-            // 3. Logic Diskon Ongkir Bertingkat
             let discOngkir = 0;
-            if (dist > 2.5 && dist <= 7) {
+            if (dist > 2.5 && dist <= 5) {
                 if (qty > 2 && qty <= 5) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 5) discOngkir = ongkirMurni; 
-            } 
-            else if (dist > 5 && dist <= 10) {
+            } else if (dist > 5 && dist <= 10) {
                 if (qty >= 6 && qty <= 10) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 10) discOngkir = ongkirMurni; 
-            }
-            else if (dist > 10 && dist <= 15) {
+            } else if (dist > 10 && dist <= 15) {
                 if (qty > 10 && qty <= 15) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 15) discOngkir = ongkirMurni; 
             }
 
-            // 4. Diskon Barang
             let discBarang = Math.floor(qty / 5) * 5000;
-
-            // 5. Total
             const totalBayar = subtotal + ongkirMurni - discOngkir - discBarang;
+            
             calculatedData = { subtotal, ongkirMurni, discOngkir, discBarang, totalBayar };
 
-            // Update UI
             ui.txtSubtotal.innerText = formatRupiah(subtotal);
             ui.txtOngkir.innerText = formatRupiah(ongkirMurni);
             ui.txtTotal.innerText = formatRupiah(totalBayar);
 
-            if (discOngkir > 0) {
-                ui.rowDiscOngkir.classList.remove('hidden');
-                ui.txtDiscOngkir.innerText = '-' + formatRupiah(discOngkir);
-            } else {
-                ui.rowDiscOngkir.classList.add('hidden');
-            }
-
-            if (discBarang > 0) {
-                ui.rowDiscBarang.classList.remove('hidden');
-                ui.txtDiscBarang.innerText = '-' + formatRupiah(discBarang);
-            } else {
-                ui.rowDiscBarang.classList.add('hidden');
-            }
+            ui.rowDiscOngkir.classList.toggle('hidden', discOngkir <= 0);
+            ui.txtDiscOngkir.innerText = '-' + formatRupiah(discOngkir);
+            ui.rowDiscBarang.classList.toggle('hidden', discBarang <= 0);
+            ui.txtDiscBarang.innerText = '-' + formatRupiah(discBarang);
         };
 
-        // --- MAPS & GPS Logic ---
+        // --- 3. FUNGSI GPS ---
         const fetchRouteOSRM = async (lat, lng) => {
             try {
                 const url = `https://router.project-osrm.org/route/v1/driving/${config.store.lng},${config.store.lat};${lng},${lat}?overview=false`;
@@ -358,26 +321,28 @@
 
         document.getElementById('btn-gps').onclick = () => {
             ui.statusGps.classList.remove('hidden');
-            ui.statusGps.innerText = "🛰️ Mencari koordinat...";
+            ui.statusGps.innerText = "🛰️ Mencari lokasi GPS...";
             ui.statusGps.style.color = "#666";
             
             navigator.geolocation.getCurrentPosition(async pos => {
                 const success = await fetchRouteOSRM(pos.coords.latitude, pos.coords.longitude);
-                ui.statusGps.innerText = success ? "✅ Jarak terkunci via Rute Jalan" : "❌ Gagal menghitung rute";
+                ui.statusGps.innerText = success ? "✅ Jarak terkunci (GPS Akurat)" : "❌ Gagal menghitung rute";
                 ui.statusGps.style.color = success ? "green" : "red";
             }, () => {
-                ui.statusGps.innerText = "❌ Izin GPS ditolak.";
+                ui.statusGps.innerText = "❌ Akses GPS ditolak. Gunakan Peta Manual.";
                 ui.statusGps.style.color = "red";
             });
         };
 
+        // --- 4. MAPS & AUTOCOMPLETE SEARCH ---
         const mapModal = document.getElementById('map-modal');
         const updateMarkerPopup = async (m) => {
             const { lat, lng } = m.getLatLng();
             try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
                 const data = await res.json();
-                m.bindPopup(data.display_name || "Lokasi Terpilih").openPopup();
+                let namaTempat = data.display_name.split(',')[0];
+                m.bindPopup(`<div style="text-align:center;"><b>Lokasi Terpilih</b><br>${namaTempat}</div>`).openPopup();
             } catch (e) {}
         };
 
@@ -385,33 +350,61 @@
             mapModal.style.display = "flex";
             if (!map) {
                 map = L.map('map').setView([config.store.lat, config.store.lng], 13);
-                L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
+                L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {maxZoom:20, subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
                 marker = L.marker([config.store.lat, config.store.lng], {draggable:true}).addTo(map);
+                
                 marker.on('dragend', e => updateMarkerPopup(e.target));
                 map.on('click', e => { marker.setLatLng(e.latlng); updateMarkerPopup(marker); });
             }
             setTimeout(() => map.invalidateSize(), 200);
         };
 
+        // Logika Pencarian Cerdas (Typeahead)
+        let debounceTimer;
+        ui.mapSearch.addEventListener('input', (e) => {
+            const query = e.target.value;
+            ui.searchResults.innerHTML = '';
+            ui.searchResults.style.display = 'none';
+            
+            clearTimeout(debounceTimer);
+            if (query.length < 3) return;
+
+            debounceTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`);
+                    const data = await res.json();
+                    
+                    if (data.length > 0) {
+                        ui.searchResults.style.display = 'block';
+                        data.forEach(place => {
+                            const item = document.createElement('div');
+                            item.className = 'search-item';
+                            item.innerText = place.display_name;
+                            item.onclick = () => {
+                                const lat = parseFloat(place.lat);
+                                const lon = parseFloat(place.lon);
+                                map.setView([lat, lon], 17);
+                                marker.setLatLng([lat, lon]);
+                                updateMarkerPopup(marker);
+                                ui.mapSearch.value = place.display_name;
+                                ui.searchResults.style.display = 'none';
+                            };
+                            ui.searchResults.appendChild(item);
+                        });
+                    }
+                } catch(err) {}
+            }, 300); // Tunggu 300ms setelah user berhenti mengetik
+        });
+
         document.getElementById('confirm-map').onclick = async () => {
             const { lat, lng } = marker.getLatLng();
             await fetchRouteOSRM(lat, lng);
             mapModal.style.display = "none";
         };
-
-        document.getElementById('map-search').onchange = async (e) => {
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(e.target.value)}`);
-                const data = await res.json();
-                if(data.length){
-                    const loc = [data[0].lat, data[0].lon];
-                    map.setView(loc, 16); marker.setLatLng(loc); updateMarkerPopup(marker);
-                }
-            } catch(e){}
-        };
         
         document.getElementById('close-map').onclick = () => mapModal.style.display = "none";
 
+        // --- 5. EVENT HANDLERS ---
         ui.jumlah.oninput = hitungTotal;
 
         ui.pembayaran.onchange = () => {
@@ -435,8 +428,7 @@
             ui.btnSubmit.innerText = "⏳ Memproses...";
 
             try {
-                hitungTotal(); 
-
+                hitungTotal();
                 const data = {
                     nama: document.getElementById('nama').value,
                     alamat: document.getElementById('alamat').value,
@@ -446,7 +438,7 @@
                     ...calculatedData
                 };
 
-                if(!data.jarak) throw new Error("Mohon hitung jarak terlebih dahulu.");
+                if(!data.jarak) throw new Error("Mohon hitung jarak terlebih dahulu via GPS atau Peta.");
 
                 let buktiUrl = "";
                 if (data.metode === 'QRIS') {
@@ -459,17 +451,10 @@
                 }
 
                 const { error: dbError } = await db.from('orders').insert([{
-                    nama: data.nama,
-                    alamat: data.alamat,
-                    jarak_km: data.jarak,
-                    jumlah_butir: data.jumlah,
-                    metode_bayar: data.metode,
-                    bukti_url: buktiUrl,
-                    harga_awal: data.subtotal,
-                    ongkir: data.ongkirMurni,
-                    potongan_ongkir: data.discOngkir,
-                    diskon_barang: data.discBarang,
-                    total_bayar: data.totalBayar
+                    nama: data.nama, alamat: data.alamat, jarak_km: data.jarak,
+                    jumlah_butir: data.jumlah, metode_bayar: data.metode, bukti_url: buktiUrl,
+                    harga_awal: data.subtotal, ongkir: data.ongkirMurni,
+                    potongan_ongkir: data.discOngkir, diskon_barang: data.discBarang, total_bayar: data.totalBayar
                 }]);
 
                 if (dbError) throw dbError;
@@ -498,7 +483,7 @@
                 }, 2000);
 
             } catch (err) {
-                alert(err.message);
+                alert("Info: " + err.message);
                 ui.btnSubmit.disabled = false;
                 ui.btnSubmit.innerText = "KIRIM PESANAN";
             }
@@ -510,4 +495,3 @@
 </script>
 </body>
 </html>
-
