@@ -1,158 +1,117 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Coconut Bumi Jelly</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        input, select, textarea, button { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;}
-        button { background: #2e7d32; color: white; font-weight: bold; cursor: pointer; border: none; }
-        button:hover { background: #1b5e20; }
-        .hidden { display: none; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h2 style="text-align: center; color: #2e7d32;">Formulir Pemesanan</h2>
-    
-    <form id="orderForm">
-        <label>Nama Pemesan:</label>
-        <input type="text" id="nama" required>
-
-        <label>Alamat Lengkap:</label>
-        <textarea id="alamat" rows="3" required></textarea>
-
-        <label>Jarak (KM):</label>
-        <input type="number" id="jarak" step="0.1" oninput="hitungEstimasi()" required>
-
-        <label>Jumlah Pesanan (Butir):</label>
-        <input type="number" id="jumlah" min="1" value="1" oninput="hitungEstimasi()" required>
-
-        <label>Metode Pembayaran:</label>
-        <select id="pembayaran" onchange="cekMetodeBayar()">
-            <option value="Cash">Cash (Tunai)</option>
-            <option value="QRIS">QRIS / Transfer</option>
-        </select>
-
-        <div id="area-upload" class="hidden">
-            <label style="color: red;">Upload Bukti Transfer (Wajib):</label>
-            <input type="file" id="bukti_file" accept="image/*">
-        </div>
-
-        <div style="background: #e8f5e9; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
-            <strong>Total Estimasi: <span id="total-display">Rp 15.000</span></strong>
-        </div>
-
-        <button type="submit" id="btn-submit">KIRIM PESANAN</button>
-    </form>
-</div>
-
 <script>
-    // --- KONFIGURASI SUPABASE CLIENT (PUBLIC) ---
-    // GANTI DENGAN DATA DARI SUPABASE > PROJECT SETTINGS > API
+    // --- 1. SETTING SUPABASE ---
     const SUPABASE_URL = "https://iltvpnplysjeaxufiokg.supabase.co"; 
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU";
+
+    // PERBAIKAN: Ganti nama variabel 'supabase' jadi 'db' agar tidak bentrok
+    let db; 
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    try {
+        // Kita panggil window.supabase (Pabriknya) untuk membuat client (db)
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log("Database berhasil terhubung");
+    } catch (err) {
+        console.error("Error Koneksi:", err);
+    }
 
-    // Hitung Harga di Tampilan (Hanya Estimasi Visual)
-    function hitungEstimasi() {
-        const jumlah = document.getElementById('jumlah').value || 0;
-        const jarak = document.getElementById('jarak').value || 0;
-        let total = (jumlah * 15000);
+    // --- 2. LOGIKA HITUNG HARGA ---
+    const inputJarak = document.getElementById('jarak');
+    const inputJumlah = document.getElementById('jumlah');
+    const inputPembayaran = document.getElementById('pembayaran');
+    const displayTotal = document.getElementById('total-display');
+    const areaUpload = document.getElementById('area-upload');
+
+    // Fungsi ini sekarang akan terbaca karena error di atas sudah hilang
+    function hitungTotal() {
+        const jumlah = parseFloat(inputJumlah.value) || 0;
+        const jarak = parseFloat(inputJarak.value) || 0;
         
-        if (jarak > 4) {
-            total += Math.ceil(jarak - 4) * 1000;
+        const HARGA_PER_BUTIR = 15000;
+        const JARAK_DASAR = 4; 
+        const ONGKIR_PER_KM = 1000;
+
+        let total = jumlah * HARGA_PER_BUTIR;
+
+        if (jarak > JARAK_DASAR) {
+            let kelebihan = Math.ceil(jarak - JARAK_DASAR); 
+            total += (kelebihan * ONGKIR_PER_KM);
         }
-        document.getElementById('total-display').innerText = "Rp " + total.toLocaleString('id-ID');
+
+        displayTotal.innerText = "Rp " + total.toLocaleString('id-ID');
     }
 
-    function cekMetodeBayar() {
-        const metode = document.getElementById('pembayaran').value;
-        const areaUpload = document.getElementById('area-upload');
-        if (metode === 'QRIS') {
-            areaUpload.classList.remove('hidden');
+    function cekMetode() {
+        if (inputPembayaran.value === 'QRIS') {
+            areaUpload.style.display = 'block';
         } else {
-            areaUpload.classList.add('hidden');
+            areaUpload.style.display = 'none';
         }
     }
 
-    // PROSES PENGIRIMAN DATA
+    // Event Listeners
+    if(inputJarak) inputJarak.addEventListener('input', hitungTotal);
+    if(inputJumlah) inputJumlah.addEventListener('input', hitungTotal);
+    if(inputPembayaran) inputPembayaran.addEventListener('change', cekMetode);
+
+
+    // --- 3. PROSES KIRIM ---
     document.getElementById('orderForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const btn = document.getElementById('btn-submit');
-        btn.innerText = "Mengupload & Menyimpan...";
+        const originalText = btn.innerText;
+        btn.innerText = "Sedang Mengirim...";
         btn.disabled = true;
 
-        const nama = document.getElementById('nama').value;
-        const alamat = document.getElementById('alamat').value;
-        const jarak = document.getElementById('jarak').value;
-        const jumlah = document.getElementById('jumlah').value;
-        const metode = document.getElementById('pembayaran').value;
-        const fileInput = document.getElementById('bukti_file');
-
-        let buktiUrl = "";
-
         try {
-            // 1. UPLOAD GAMBAR DULU (Jika QRIS)
-            if (metode === 'QRIS') {
-                if (fileInput.files.length === 0) {
-                    throw new Error("Harap upload bukti transfer!");
-                }
-                const file = fileInput.files[0];
-                const fileName = `bukti-${Date.now()}-${nama.replace(/\s+/g, '')}.jpg`;
+            const nama = document.getElementById('nama').value;
+            const alamat = document.getElementById('alamat').value;
+            const jarak = document.getElementById('jarak').value;
+            const jumlah = document.getElementById('jumlah').value;
+            const metode = document.getElementById('pembayaran').value;
+            const fileInput = document.getElementById('bukti_file');
+            
+            let buktiUrl = "";
 
-                // Upload ke Supabase Storage
-                const { data, error } = await supabase.storage
+            if (metode === 'QRIS') {
+                if (fileInput.files.length === 0) throw new Error("Wajib upload bukti transfer!");
+                
+                const file = fileInput.files[0];
+                const fileName = `bukti-${Date.now()}.jpg`;
+                
+                // PERBAIKAN: Gunakan 'db' bukan 'supabase'
+                const { data, error } = await db.storage
                     .from('bukti-transfer')
                     .upload(fileName, file);
 
                 if (error) throw error;
 
-                // Dapatkan Link Gambar
-                const { data: publicUrlData } = supabase.storage
+                const { data: urlData } = db.storage
                     .from('bukti-transfer')
                     .getPublicUrl(fileName);
                 
-                buktiUrl = publicUrlData.publicUrl;
+                buktiUrl = urlData.publicUrl;
             }
 
-            // 2. KIRIM DATA KE BACKEND (Vercel API)
-            const payload = {
-                nama, alamat, jarak, jumlah, metode, buktiUrl
-            };
-
+            // Kirim ke Backend
             const response = await fetch('/api/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ nama, alamat, jarak, jumlah, metode, buktiUrl })
             });
 
-            const result = await response.json();
+            if (!response.ok) throw new Error("Gagal menyimpan ke database");
 
-            if (response.ok) {
-                alert("Pesanan Berhasil Disimpan!");
-                // Redirect ke WA
-                const pesanWA = `Halo Admin, saya ${nama} sudah order via web.\nTotal: ${result.total_formatted}\nBukti: ${buktiUrl || '-'}`;
-                window.open(`https://wa.me/6281234567890?text=${encodeURIComponent(pesanWA)}`, '_blank');
-                location.reload();
-            } else {
-                throw new Error(result.message || "Gagal menyimpan");
-            }
+            alert("Pesanan Berhasil!");
+            const pesanWA = `Halo, saya order. Nama: ${nama}. Total: ${displayTotal.innerText}`;
+            window.open(`https://wa.me/6281234567890?text=${encodeURIComponent(pesanWA)}`, '_blank');
+            location.reload();
 
         } catch (err) {
             alert("Error: " + err.message);
-            console.error(err);
         } finally {
-            btn.innerText = "KIRIM PESANAN";
+            btn.innerText = originalText;
             btn.disabled = false;
         }
     });
 </script>
-
-</body>
-</html>
