@@ -7,9 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -62,83 +60,70 @@
         #qris-image { width: 180px; border-radius: 10px; border: 4px solid #eee; }
         #area-upload { background: #fff8e1; padding: 15px; border-radius: var(--radius); border: 1px dashed #ffb300; margin-top: 15px; }
 
-        /* --- MODAL PETA & PENCARIAN (Updated Position) --- */
-        #map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: end; }
-        .map-box { background: #fff; width: 100%; height: 90vh; border-radius: 20px 20px 0 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        
-        /* Map Header */
-        .map-header { padding: 15px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; z-index: 1002; }
-        .map-header h3 { margin: 0; font-size: 16px; color: var(--primary); }
-        #close-map { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
-
-        /* Peta */
-        #map { flex: 1; width: 100%; z-index: 1000; position: relative; }
-
-        /* Map Footer */
-        .map-footer { padding: 15px; background: #fff; border-top: 1px solid #eee; z-index: 1002; }
-
-        /* --- Custom Styling for Geocoder Control (POSISI DI KIRI SETELAH ZOOM) --- */
-        .leaflet-control-geocoder { 
-            position: absolute !important; 
-            top: 10px !important; 
-            left: 55px !important; /* Geser ke kanan dari tombol zoom */
-            width: auto !important; 
-            min-width: 250px;
-            max-width: 60%;
-            z-index: 2000; 
-            background: transparent; border: none; box-shadow: none; margin: 0 !important;
+        /* --- MODAL PETA BARU (ShopeeFood Style) --- */
+        #map-modal { 
+            position: fixed; inset: 0; background: #fff; z-index: 2000; 
+            display: none; flex-direction: column; 
         }
         
-        .leaflet-control-geocoder-form { float: none !important; }
-        
-        .leaflet-control-geocoder-form input {
-            width: 100%; 
-            padding: 10px 15px 10px 35px; /* Padding kiri untuk ikon search */
-            border-radius: 8px; 
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2); 
-            font-family: 'Poppins', sans-serif; 
-            font-size: 13px;
-            background: #fff url('https://img.icons8.com/ios-glyphs/30/777777/search--v1.png') no-repeat 10px center;
-            background-size: 16px;
-            color: #333;
+        /* Area Pencarian di Atas (Fixed) */
+        .search-container {
+            padding: 15px; background: #fff; border-bottom: 1px solid #f0f0f0;
+            z-index: 2002; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .leaflet-control-geocoder-form input:focus { outline: none; border-color: var(--primary); }
-
-        .leaflet-control-geocoder-icon { display: none !important; }
-        .leaflet-control-geocoder-throbber { display: none !important; }
-
-        /* Dropdown Hasil Pencarian */
-        .leaflet-control-geocoder-alternatives { 
-            width: 100% !important; 
-            max-height: 250px; 
-            overflow-y: auto; 
+        
+        .search-header {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+        }
+        
+        #close-map { 
+            background: none; border: none; font-size: 24px; cursor: pointer; color: #333; padding: 0; 
+        }
+        
+        .search-input-wrapper {
+            position: relative; width: 100%;
+        }
+        
+        #custom-map-search {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
             border-radius: 8px;
-            margin-top: 5px; 
-            background: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
-            border: none;
-            padding: 0;
+            border: 1px solid #ddd;
+            background: #f9f9f9 url('https://img.icons8.com/ios-glyphs/30/999999/search--v1.png') no-repeat 12px center;
+            background-size: 18px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+        }
+        #custom-map-search:focus { outline: none; border-color: var(--primary); background-color: #fff; }
+
+        /* Hasil Pencarian (Dropdown) */
+        #search-results {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #fff; border: 1px solid #eee;
+            border-top: none; border-radius: 0 0 8px 8px;
+            max-height: 300px; overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none; z-index: 2005;
         }
         
-        .leaflet-control-geocoder-alternatives li { 
-            padding: 10px 12px; 
-            border-bottom: 1px solid #f0f0f0; 
-            font-size: 12px; 
-            color: #444;
-            display: flex;
-            align-items: flex-start;
-            line-height: 1.4;
+        .search-item {
+            padding: 12px 15px; border-bottom: 1px solid #f5f5f5; cursor: pointer;
+            display: flex; align-items: flex-start; gap: 10px;
         }
-        .leaflet-control-geocoder-alternatives li:before {
-            content: '📍'; margin-right: 8px; font-size: 14px; margin-top: 1px;
-        }
-        .leaflet-control-geocoder-alternatives li:last-child { border-bottom: none; }
-        .leaflet-control-geocoder-alternatives li:hover,
-        .leaflet-control-geocoder-selected { 
-            background-color: #f0f7f1; 
-            color: var(--primary); 
-            font-weight: 500;
+        .search-item:last-child { border-bottom: none; }
+        .search-item:hover { background: #f0f9f0; }
+        
+        .si-icon { font-size: 16px; margin-top: 2px; }
+        .si-text { display: flex; flex-direction: column; }
+        .si-title { font-weight: 600; font-size: 13px; color: #333; }
+        .si-desc { font-size: 11px; color: #888; margin-top: 2px; line-height: 1.3; }
+
+        /* Peta di Tengah */
+        #map { flex: 1; width: 100%; z-index: 1000; }
+
+        /* Tombol Konfirmasi di Bawah (Floating) */
+        .map-footer { 
+            padding: 15px; background: #fff; border-top: 1px solid #eee; z-index: 2002; 
         }
 
         /* Popup */
@@ -221,15 +206,21 @@
 </div>
 
 <div id="map-modal">
-    <div class="map-box">
-        <div class="map-header">
-            <h3>Cari Alamat / Geser Pin</h3>
+    <div class="search-container">
+        <div class="search-header">
             <button id="close-map">✕</button>
+            <div class="search-input-wrapper">
+                <input type="text" id="custom-map-search" placeholder="Cari alamat, gedung, sekolah...">
+                <div id="search-results"></div>
+            </div>
         </div>
-        <div id="map"></div>
-        <div class="map-footer">
-            <button id="confirm-map" class="btn-action btn-main" style="margin:0;">✅ Gunakan Lokasi Ini</button>
-        </div>
+        <div style="font-size:11px; color:#666;">*Ketik nama tempat lalu pilih dari daftar. Geser pin untuk presisi.</div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="map-footer">
+        <button id="confirm-map" class="btn-action btn-main" style="margin:0;">✅ Gunakan Lokasi Ini</button>
     </div>
 </div>
 
@@ -256,6 +247,7 @@
 
         const db = window.supabase.createClient(config.url, config.anon);
         let map, marker, calculatedData = {};
+        let searchTimeout;
 
         const ui = {
             form: document.getElementById('orderForm'),
@@ -273,7 +265,10 @@
             btnPay: document.getElementById('btn-pay-qris'),
             qrisArea: document.getElementById('qris-container'),
             uploadArea: document.getElementById('area-upload'),
-            statusGps: document.getElementById('gps-status')
+            statusGps: document.getElementById('gps-status'),
+            // Search Elements
+            searchInput: document.getElementById('custom-map-search'),
+            searchResults: document.getElementById('search-results')
         };
 
         const formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');
@@ -340,33 +335,30 @@
 
         const updateMarkerPopup = async (m) => {
             const { lat, lng } = m.getLatLng();
-            m.bindPopup("Memuat detail alamat...").openPopup();
+            m.bindPopup("Memuat detail...").openPopup();
             try {
-                // Reverse Geocode dengan tampilan lengkap
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
                 const data = await res.json();
                 
-                // Format Alamat Lebih Lengkap (Google Maps Style)
-                let displayName = data.display_name; // Default jika yang lain kosong
+                // Format Tampilan Nama (Shopee Style)
+                let title = data.name || ""; 
+                let subtitle = data.display_name || "";
+
+                if (!title) {
+                    // Jika tidak ada nama spesifik, ambil komponen alamat
+                    const addr = data.address || {};
+                    title = addr.amenity || addr.shop || addr.building || addr.road || "Lokasi Terpilih";
+                }
                 
-                if (data.address) {
-                    const place = data.address.amenity || data.address.shop || data.address.building || data.address.leisure || data.address.tourism || data.address.office;
-                    const road = data.address.road || data.address.street;
-                    const suburb = data.address.suburb || data.address.village || data.address.neighbourhood;
-                    const city = data.address.city || data.address.town || data.address.county;
-                    
-                    let parts = [];
-                    if (place) parts.push(`<b>${place}</b>`);
-                    if (road) parts.push(road);
-                    if (suburb) parts.push(suburb);
-                    if (city) parts.push(city);
-                    
-                    if (parts.length > 1) {
-                        displayName = parts.join('<br>');
-                    }
+                // Bersihkan subtitle agar tidak duplikat dengan title
+                if (subtitle.startsWith(title)) {
+                    subtitle = subtitle.replace(title + ", ", "");
                 }
 
-                m.bindPopup(`<div style="font-size:12px;width:200px;line-height:1.4;">${displayName}</div>`).openPopup();
+                m.bindPopup(`<div style="font-size:13px;width:200px;">
+                    <b style="color:#2e7d32;">${title}</b><br>
+                    <span style="font-size:11px;color:#666;">${subtitle}</span>
+                </div>`).openPopup();
             } catch (e) { m.closePopup(); }
         };
 
@@ -383,42 +375,18 @@
             });
         };
 
-        // --- MAPS SETUP ---
+        // --- PETA & PENCARIAN CUSTOM (Shopee Style) ---
         const mapModal = document.getElementById('map-modal');
         
         document.getElementById('btn-maps').onclick = () => {
             mapModal.style.display = "flex";
             if (!map) {
-                map = L.map('map').setView([config.store.lat, config.store.lng], 15);
+                map = L.map('map', { zoomControl: false }).setView([config.store.lat, config.store.lng], 15);
                 L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
-                
+                L.control.zoom({ position: 'bottomright' }).addTo(map);
+
                 marker = L.marker([config.store.lat, config.store.lng], {draggable:true}).addTo(map);
                 
-                // GEOCODER: PHOTON (Pencarian Lebih Banyak & Akurat)
-                const geocoder = L.Control.geocoder({
-                    defaultMarkGeocode: false,
-                    geocoder: L.Control.Geocoder.photon(), 
-                    placeholder: "Cari nama jalan, gedung, atau toko...",
-                    collapsed: false, 
-                    showResultIcons: true
-                })
-                .on('markgeocode', function(e) {
-                    const center = e.geocode.center;
-                    map.setView(center, 18);
-                    marker.setLatLng(center);
-                    // Tampilkan Nama Hasil Pencarian di Popup
-                    let resultName = e.geocode.name;
-                    if(e.geocode.properties) {
-                       // Menambah detail jika tersedia dari Photon properties
-                       const props = e.geocode.properties;
-                       const details = [props.street, props.city, props.state].filter(Boolean).join(", ");
-                       if(details) resultName = `<b>${resultName}</b><br><span style="font-size:11px;color:#555;">${details}</span>`;
-                    }
-                    marker.bindPopup(`<div style="font-size:12px;">${resultName}</div>`).openPopup();
-                })
-                .addTo(map);
-
-                // Klik Peta
                 map.on('click', e => { 
                     marker.setLatLng(e.latlng); 
                     updateMarkerPopup(marker); 
@@ -427,6 +395,81 @@
             }
             setTimeout(() => map.invalidateSize(), 200);
         };
+
+        // --- LOGIKA PENCARIAN (Custom Fetch Photon) ---
+        const performSearch = async (query) => {
+            if (!query || query.length < 3) return;
+            
+            ui.searchResults.style.display = "block";
+            ui.searchResults.innerHTML = '<div style="padding:10px;font-size:12px;color:#888;">Mencari...</div>';
+
+            try {
+                // Fetch ke Photon API (Limit 10 hasil, Prioritas Indonesia)
+                const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10`);
+                const data = await res.json();
+                
+                ui.searchResults.innerHTML = ""; // Clear loading
+
+                if (data.features.length === 0) {
+                    ui.searchResults.innerHTML = '<div style="padding:10px;font-size:12px;">Tidak ditemukan.</div>';
+                    return;
+                }
+
+                data.features.forEach(f => {
+                    const props = f.properties;
+                    const name = props.name || props.street || "Lokasi Tanpa Nama";
+                    
+                    // Susun alamat detail
+                    let details = [];
+                    if (props.street && props.street !== name) details.push(props.street);
+                    if (props.city) details.push(props.city);
+                    if (props.state) details.push(props.state);
+                    const desc = details.join(", ");
+
+                    const item = document.createElement("div");
+                    item.className = "search-item";
+                    item.innerHTML = `
+                        <div class="si-icon">📍</div>
+                        <div class="si-text">
+                            <div class="si-title">${name}</div>
+                            <div class="si-desc">${desc}</div>
+                        </div>
+                    `;
+                    
+                    item.onclick = () => {
+                        const lat = f.geometry.coordinates[1];
+                        const lng = f.geometry.coordinates[0];
+                        const newLatLng = [lat, lng];
+                        
+                        map.setView(newLatLng, 17);
+                        marker.setLatLng(newLatLng);
+                        
+                        // Tampilkan popup info
+                        marker.bindPopup(`<div style="font-size:13px;"><b>${name}</b><br><span style="font-size:11px;">${desc}</span></div>`).openPopup();
+                        
+                        ui.searchResults.style.display = "none";
+                        ui.searchInput.value = name;
+                    };
+                    ui.searchResults.appendChild(item);
+                });
+
+            } catch (e) {
+                ui.searchResults.innerHTML = '<div style="padding:10px;color:red;">Gagal memuat.</div>';
+            }
+        };
+
+        // Event Listener Pencarian
+        ui.searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => performSearch(e.target.value), 500); // Delay 500ms agar tidak spam
+        });
+
+        // Klik di luar hasil = tutup dropdown
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                ui.searchResults.style.display = "none";
+            }
+        });
 
         document.getElementById('confirm-map').onclick = async () => {
             const { lat, lng } = marker.getLatLng();
