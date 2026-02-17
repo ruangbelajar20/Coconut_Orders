@@ -39,6 +39,7 @@
             box-shadow: var(--shadow); position: relative; overflow: hidden;
         }
 
+        /* Header & Animasi */
         header { text-align: center; margin-bottom: 25px; }
         .jelly-anim { 
             width: 70px; height: 60px; margin: 0 auto 10px;
@@ -56,6 +57,7 @@
         h2 { color: var(--primary); font-weight: 700; margin: 0; font-size: 20px; }
         .subtitle { color: var(--text-light); font-size: 13px; }
 
+        /* Form Elements */
         .form-group { margin-bottom: 18px; }
         label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; color: var(--text-main); }
         
@@ -64,18 +66,34 @@
             font-family: inherit; font-size: 14px; transition: 0.3s; background: #fafafa;
         }
         input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); background: #fff; }
+        
+        /* Readonly Input Style */
+        input[readonly] {
+            background-color: #e9ecef;
+            color: #495057;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
 
+        /* Buttons & Helper Text */
         .btn-action {
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%; padding: 10px; border-radius: var(--radius); border: none;
-            font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-bottom: 8px;
+            width: 100%; padding: 12px; border-radius: var(--radius); border: none;
+            font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 5px;
         }
         .btn-gps { background: #e8f5e9; color: var(--primary); border: 1px dashed var(--primary); }
         .btn-map { background: #e3f2fd; color: #1565c0; border: 1px dashed #1565c0; }
-        .btn-main { background: var(--text-main); color: #fff; padding: 15px; font-size: 15px; margin-top: 15px; }
-        .btn-pay { background: #1976d2; color: #fff; padding: 15px; font-size: 15px; margin-top: 15px; display: none; }
         .btn-action:active { transform: scale(0.98); }
 
+        .helper-text {
+            font-size: 11px; color: var(--text-light); margin-bottom: 15px; 
+            margin-top: 2px; line-height: 1.4; padding-left: 2px;
+        }
+
+        .btn-main { background: var(--text-main); color: #fff; padding: 15px; font-size: 15px; margin-top: 15px; }
+        .btn-pay { background: #1976d2; color: #fff; padding: 15px; font-size: 15px; margin-top: 15px; display: none; }
+
+        /* Invoice Style */
         .invoice-box {
             background: #fff; border: 1px solid #eee; border-radius: var(--radius);
             padding: 20px; margin-top: 25px;
@@ -93,15 +111,16 @@
         }
 
         .hidden { display: none !important; }
-        .note { font-size: 10px; color: var(--text-light); margin-top: 4px; line-height: 1.4; }
+        .note { font-size: 10px; color: var(--text-light); margin-top: 4px; }
         .gps-status { font-size: 11px; text-align: center; margin: -5px 0 10px; }
         
         #qris-container { text-align: center; margin-top: 15px; display: none; }
         #qris-image { width: 180px; border-radius: 10px; border: 4px solid #eee; }
         #area-upload { background: #fff8e1; padding: 15px; border-radius: var(--radius); border: 1px dashed #ffb300; margin-top: 15px; }
 
+        /* Map Modal */
         #map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: end; }
-        .map-box { background: #fff; width: 100%; height: 80vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; }
+        .map-box { background: #fff; width: 100%; height: 85vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; }
         #map { flex: 1; border-radius: 15px; margin-bottom: 10px; }
         
         .success-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.3s; }
@@ -131,21 +150,29 @@
         </div>
 
         <div class="form-group">
-            <label>Jarak Pengiriman (KM)</label>
+            <label>Penentuan Jarak Pengiriman</label>
+            
             <button type="button" id="btn-gps" class="btn-action btn-gps">📡 Hitung Jarak Otomatis (GPS)</button>
-            <div id="gps-status" class="gps-status hidden"></div>
-            <button type="button" id="btn-maps" class="btn-action btn-map">📍 Pilih Lokasi di Peta (Manual)</button>
-            <input type="number" id="jarak" step="0.1" min="0" placeholder="0.0" required>
-            <div class="note">
-                *Gratis 2.5 KM pertama. Selebihnya +Rp 1.000/500m.<br>
-                *Diskon Ongkir tersedia untuk pembelian jumlah tertentu.
+            <div class="helper-text">
+                Gunakan ini jika Anda sedang berada di lokasi pengiriman saat ini (Sesuai GPS HP).
             </div>
+            
+            <div id="gps-status" class="gps-status hidden"></div>
+
+            <button type="button" id="btn-maps" class="btn-action btn-map">📍 Pilih Lokasi di Peta</button>
+            <div class="helper-text">
+                Gunakan ini jika lokasi pengiriman berbeda dengan lokasi Anda sekarang (Misal: Kirim ke Rumah/Kantor).
+            </div>
+
+            <label style="margin-top: 15px;">Jarak Terhitung (KM)</label>
+            <input type="number" id="jarak" step="0.1" min="0" placeholder="Wajib klik tombol di atas" required readonly>
+            <div class="note" style="color: var(--danger);">*Jarak terisi otomatis, tidak bisa diketik manual.</div>
         </div>
 
         <div class="form-group">
             <label>Jumlah Pesanan (Butir)</label>
             <input type="number" id="jumlah" min="1" value="1" required>
-            <div class="note">*Diskon Barang Rp 5.000 setiap kelipatan 5 butir.</div>
+            <div class="note">*Diskon Rp 5.000 setiap kelipatan 5 butir.</div>
         </div>
 
         <div class="form-group">
@@ -165,7 +192,6 @@
                 <span>Ongkos Kirim</span>
                 <span id="txt-ongkir">Rp 0</span>
             </div>
-            
             <div class="invoice-row discount hidden" id="row-disc-ongkir">
                 <span>Potongan Ongkir</span>
                 <span id="txt-disc-ongkir">-Rp 0</span>
@@ -174,9 +200,7 @@
                 <span>Diskon Barang</span>
                 <span id="txt-disc-barang">-Rp 0</span>
             </div>
-            
             <div class="invoice-divider"></div>
-            
             <div class="invoice-total">
                 <span>Total Bayar</span>
                 <span id="txt-total">Rp 15.000</span>
@@ -201,12 +225,12 @@
 <div id="map-modal">
     <div class="map-box">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="margin:0; font-size:16px; color:var(--primary);">Pilih Lokasi</h3>
+            <h3 style="margin:0; font-size:16px; color:var(--primary);">Geser Pin ke Titik Lokasi</h3>
             <button id="close-map" style="background:none; border:none; font-size:20px;">✕</button>
         </div>
-        <input type="text" id="map-search" placeholder="Cari nama jalan..." style="padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+        <input type="text" id="map-search" placeholder="Cari nama jalan / kelurahan..." style="padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
         <div id="map"></div>
-        <button id="confirm-map" class="btn-action btn-main" style="margin:0;">Gunakan Lokasi Ini</button>
+        <button id="confirm-map" class="btn-action btn-main" style="margin:0;">✅ Gunakan Lokasi Ini</button>
     </div>
 </div>
 
@@ -231,7 +255,7 @@
         const config = {
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
             anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU",
-            store: { lat: -6.369596, lng: 107.400326 },
+            store: { lat: -6.369596, lng: 107.400326 }, 
             wa: "62895336907868"
         };
 
@@ -264,10 +288,10 @@
             const dist = parseFloat(ui.jarak.value) || 0;
             const HARGA_SATUAN = 15000;
 
-            // 1. Subtotal Barang
+            // 1. Subtotal
             const subtotal = qty * HARGA_SATUAN;
 
-            // 2. Ongkir Murni (Gratis 2.5KM, +1000/500m)
+            // 2. Ongkir Murni
             let ongkirMurni = 0;
             if (dist > 2.5) {
                 let sisaJarak = dist - 2.5;
@@ -277,29 +301,24 @@
 
             // 3. Logic Diskon Ongkir Bertingkat
             let discOngkir = 0;
-
             if (dist > 2.5 && dist <= 5) {
-                // Jarak 2.5 - 5 KM
-                if (qty > 2 && qty <= 5) discOngkir = ongkirMurni * 0.5; // 50%
-                else if (qty > 5) discOngkir = ongkirMurni; // 100% (Gratis)
+                if (qty > 2 && qty <= 5) discOngkir = ongkirMurni * 0.5;
+                else if (qty > 5) discOngkir = ongkirMurni; 
             } 
             else if (dist > 5 && dist <= 10) {
-                // Jarak 5 - 10 KM
-                if (qty >= 6 && qty <= 10) discOngkir = ongkirMurni * 0.5; // 50%
-                else if (qty > 10) discOngkir = ongkirMurni; // 100% (Gratis)
+                if (qty >= 6 && qty <= 10) discOngkir = ongkirMurni * 0.5;
+                else if (qty > 10) discOngkir = ongkirMurni; 
             }
             else if (dist > 10 && dist <= 15) {
-                // Jarak 10 - 15 KM
-                if (qty > 10 && qty <= 15) discOngkir = ongkirMurni * 0.5; // 50%
-                else if (qty > 15) discOngkir = ongkirMurni; // 100% (Gratis)
+                if (qty > 10 && qty <= 15) discOngkir = ongkirMurni * 0.5;
+                else if (qty > 15) discOngkir = ongkirMurni; 
             }
 
-            // 4. Diskon Barang (Kelipatan 5)
+            // 4. Diskon Barang
             let discBarang = Math.floor(qty / 5) * 5000;
 
-            // 5. Total Akhir
+            // 5. Total
             const totalBayar = subtotal + ongkirMurni - discOngkir - discBarang;
-
             calculatedData = { subtotal, ongkirMurni, discOngkir, discBarang, totalBayar };
 
             // Update UI
@@ -344,7 +363,7 @@
             
             navigator.geolocation.getCurrentPosition(async pos => {
                 const success = await fetchRouteOSRM(pos.coords.latitude, pos.coords.longitude);
-                ui.statusGps.innerText = success ? "✅ Jarak terhitung" : "❌ Gagal menghitung rute";
+                ui.statusGps.innerText = success ? "✅ Jarak terkunci via Rute Jalan" : "❌ Gagal menghitung rute";
                 ui.statusGps.style.color = success ? "green" : "red";
             }, () => {
                 ui.statusGps.innerText = "❌ Izin GPS ditolak.";
@@ -368,7 +387,6 @@
                 map = L.map('map').setView([config.store.lat, config.store.lng], 13);
                 L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
                 marker = L.marker([config.store.lat, config.store.lng], {draggable:true}).addTo(map);
-                
                 marker.on('dragend', e => updateMarkerPopup(e.target));
                 map.on('click', e => { marker.setLatLng(e.latlng); updateMarkerPopup(marker); });
             }
@@ -383,7 +401,7 @@
 
         document.getElementById('map-search').onchange = async (e) => {
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${e.target.value}`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(e.target.value)}`);
                 const data = await res.json();
                 if(data.length){
                     const loc = [data[0].lat, data[0].lon];
@@ -394,7 +412,6 @@
         
         document.getElementById('close-map').onclick = () => mapModal.style.display = "none";
 
-        ui.jarak.oninput = hitungTotal;
         ui.jumlah.oninput = hitungTotal;
 
         ui.pembayaran.onchange = () => {
@@ -426,12 +443,10 @@
                     jarak: parseFloat(ui.jarak.value),
                     jumlah: parseInt(ui.jumlah.value),
                     metode: ui.pembayaran.value,
-                    harga_awal: calculatedData.subtotal,
-                    ongkir: calculatedData.ongkirMurni,
-                    potongan_ongkir: calculatedData.discOngkir,
-                    diskon_barang: calculatedData.discBarang,
-                    total_akhir: calculatedData.totalBayar
+                    ...calculatedData
                 };
+
+                if(!data.jarak) throw new Error("Mohon hitung jarak terlebih dahulu.");
 
                 let buktiUrl = "";
                 if (data.metode === 'QRIS') {
@@ -450,11 +465,11 @@
                     jumlah_butir: data.jumlah,
                     metode_bayar: data.metode,
                     bukti_url: buktiUrl,
-                    harga_awal: data.harga_awal,
-                    ongkir: data.ongkir,
-                    potongan_ongkir: data.potongan_ongkir,
-                    diskon_barang: data.diskon_barang,
-                    total_bayar: data.total_akhir
+                    harga_awal: data.subtotal,
+                    ongkir: data.ongkirMurni,
+                    potongan_ongkir: data.discOngkir,
+                    diskon_barang: data.discBarang,
+                    total_bayar: data.totalBayar
                 }]);
 
                 if (dbError) throw dbError;
@@ -468,12 +483,12 @@
                     `📍 ${data.alamat} (${data.jarak} KM)\n` +
                     `🥥 Order: ${data.jumlah} Butir\n` +
                     `----------------------------------\n` +
-                    `💵 Subtotal: ${formatRupiah(data.harga_awal)}\n` +
-                    `🚚 Ongkir: ${formatRupiah(data.ongkir)}\n` +
-                    (data.potongan_ongkir > 0 ? `✂️ Disc Ongkir: -${formatRupiah(data.potongan_ongkir)}\n` : '') +
-                    (data.diskon_barang > 0 ? `🎁 Disc Barang: -${formatRupiah(data.diskon_barang)}\n` : '') +
+                    `💵 Subtotal: ${formatRupiah(data.subtotal)}\n` +
+                    `🚚 Ongkir: ${formatRupiah(data.ongkirMurni)}\n` +
+                    (data.discOngkir > 0 ? `✂️ Disc Ongkir: -${formatRupiah(data.discOngkir)}\n` : '') +
+                    (data.discBarang > 0 ? `🎁 Disc Barang: -${formatRupiah(data.discBarang)}\n` : '') +
                     `----------------------------------\n` +
-                    `*TOTAL: ${formatRupiah(data.total_akhir)}*\n` +
+                    `*TOTAL: ${formatRupiah(data.totalBayar)}*\n` +
                     `💳 Via: ${data.metode}\n` +
                     `📄 Bukti: ${buktiUrl || 'Cash'}`;
 
@@ -483,7 +498,7 @@
                 }, 2000);
 
             } catch (err) {
-                alert("Terjadi kesalahan: " + err.message);
+                alert(err.message);
                 ui.btnSubmit.disabled = false;
                 ui.btnSubmit.innerText = "KIRIM PESANAN";
             }
