@@ -259,7 +259,10 @@
             document.getElementById('map-modal').style.display = "flex";
             if (!map) {
                 map = L.map('map').setView([config.store.lat, config.store.lng], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains:['mt0','mt1','mt2','mt3']
+            }).addTo(map);
                 marker = L.marker([config.store.lat, config.store.lng], {draggable: true}).addTo(map);
             }
             setTimeout(() => map.invalidateSize(), 200);
@@ -355,5 +358,6 @@
 </script>
 </body>
 </html>
+
 
 
