@@ -170,17 +170,15 @@
     "use strict";
 
     document.addEventListener('DOMContentLoaded', () => {
+        // --- KEAMANAN ---
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = e => { if ([123, 73, 67, 74, 85].includes(e.keyCode)) return false; };
 
-        // --- KONFIGURASI ---
         const config = {
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
             anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU",
             store: { lat: -6.369596, lng: 107.400326 }, 
-            wa: "62895336907868",
-            // GANTI INI DENGAN TOKEN MAPBOX ANDA SENDIRI
-            mapboxToken: "pk.eyJ1IjoiZGhhc25hIiwiYSI6ImNtbHFvZXl3azAyeDgzZ3B1d3pjdmF5aDYifQ.QAyjKIdL4ZLkSrWIEBFzpA" 
+            wa: "62895336907868"
         };
 
         const db = window.supabase.createClient(config.url, config.anon);
@@ -208,7 +206,7 @@
 
         const formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');
 
-        // HITUNG HARGA
+        // --- HITUNG HARGA ---
         const hitungTotal = () => {
             const qty = parseFloat(ui.jumlah.value) || 0;
             const dist = parseFloat(ui.jarak.value) || 0;
@@ -244,17 +242,14 @@
             ui.txtOngkir.innerText = formatRupiah(ongkirMurni);
             ui.txtTotal.innerText = formatRupiah(totalBayar);
 
-            if (discOngkir > 0) {
-                ui.rowDiscOngkir.classList.remove('hidden');
-                ui.txtDiscOngkir.innerText = '-' + formatRupiah(discOngkir);
-            } else { ui.rowDiscOngkir.classList.add('hidden'); }
+            ui.rowDiscOngkir.className = discOngkir > 0 ? 'invoice-row discount' : 'invoice-row discount hidden';
+            ui.txtDiscOngkir.innerText = '-' + formatRupiah(discOngkir);
 
-            if (discBarang > 0) {
-                ui.rowDiscBarang.classList.remove('hidden');
-                ui.txtDiscBarang.innerText = '-' + formatRupiah(discBarang);
-            } else { ui.rowDiscBarang.classList.add('hidden'); }
+            ui.rowDiscBarang.className = discBarang > 0 ? 'invoice-row discount' : 'invoice-row discount hidden';
+            ui.txtDiscBarang.innerText = '-' + formatRupiah(discBarang);
         };
 
+        // --- MAPS LOGIC ---
         const fetchRouteOSRM = async (lat, lng) => {
             try {
                 const url = `https://router.project-osrm.org/route/v1/driving/${config.store.lng},${config.store.lat};${lng},${lat}?overview=false`;
@@ -269,89 +264,88 @@
             return false;
         };
 
-        // GPS Button
+        const updateMarkerPopup = async (m) => {
+            const { lat, lng } = m.getLatLng();
+            m.bindPopup("Mencari nama tempat...").openPopup();
+            try {
+                // Menggunakan Nominatim untuk Reverse Geocoding (Klik Peta -> Nama)
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+                const data = await res.json();
+                
+                // Membersihkan nama agar tidak terlalu panjang
+                let displayName = data.display_name;
+                if(data.address) {
+                    // Prioritaskan nama gedung/toko jika ada
+                    const building = data.address.amenity || data.address.shop || data.address.building || data.address.leisure;
+                    const road = data.address.road || "";
+                    const suburb = data.address.suburb || data.address.village || "";
+                    if(building) displayName = `<b>${building}</b><br>${road}, ${suburb}`;
+                }
+
+                m.bindPopup(`<div style="font-size:12px;width:180px;text-align:center;">${displayName}</div>`).openPopup();
+            } catch (e) { m.closePopup(); }
+        };
+
         document.getElementById('btn-gps').onclick = () => {
             ui.statusGps.classList.remove('hidden');
             ui.statusGps.innerText = "🛰️ Mencari lokasi GPS...";
+            ui.statusGps.style.color = "#666";
             navigator.geolocation.getCurrentPosition(async pos => {
                 const success = await fetchRouteOSRM(pos.coords.latitude, pos.coords.longitude);
                 ui.statusGps.innerText = success ? "✅ Jarak Sesuai GPS Terkunci" : "❌ Gagal menghitung";
+                ui.statusGps.style.color = success ? "green" : "red";
             }, () => {
                 ui.statusGps.innerText = "❌ Akses GPS Ditolak";
+                ui.statusGps.style.color = "red";
             });
         };
 
-        // MAPBOX LOGIC
+        // --- SETUP PETA LEAFLET ---
         const mapModal = document.getElementById('map-modal');
-        let selectedCoords = null;
-
+        
         document.getElementById('btn-maps').onclick = () => {
-            if (config.mapboxToken === "MASUKKAN_TOKEN_MAPBOX_ANDA_DISINI") {
-                alert("Mohon masukkan Token Mapbox di dalam kode script.");
-                return;
-            }
-            
             mapModal.style.display = "flex";
-            
             if (!map) {
-                mapboxgl.accessToken = config.mapboxToken;
-                map = new mapboxgl.Map({
-                    container: 'map',
-                    style: 'mapbox://styles/mapbox/streets-v12',
-                    center: [config.store.lng, config.store.lat],
-                    zoom: 14
-                });
-
-                // Marker yang bisa digeser
-                marker = new mapboxgl.Marker({ draggable: true })
-                    .setLngLat([config.store.lng, config.store.lat])
-                    .addTo(map);
-
-                // Tambah Kontrol Pencarian (Geocoder)
-                const geocoder = new MapboxGeocoder({
-                    accessToken: mapboxgl.accessToken,
-                    mapboxgl: mapboxgl,
-                    marker: false, // Kita pakai marker sendiri
-                    placeholder: 'Cari alamat, gedung, dll...'
-                });
+                map = L.map('map').setView([config.store.lat, config.store.lng], 15);
+                L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
                 
-                map.addControl(geocoder);
-
-                // Saat pencarian dipilih
-                geocoder.on('result', (e) => {
-                    const coords = e.result.center;
-                    marker.setLngLat(coords);
-                    selectedCoords = { lng: coords[0], lat: coords[1] };
-                });
-
-                // Saat marker digeser
-                marker.on('dragend', () => {
-                    const lngLat = marker.getLngLat();
-                    selectedCoords = lngLat;
-                });
+                marker = L.marker([config.store.lat, config.store.lng], {draggable:true}).addTo(map);
                 
-                // Saat peta diklik
-                map.on('click', (e) => {
-                    marker.setLngLat(e.lngLat);
-                    selectedCoords = e.lngLat;
+                // 1. UPDATE PENTING: Menggunakan Provider PHOTON (Lebih banyak alamat & Toleransi Typo)
+                const geocoder = L.Control.geocoder({
+                    defaultMarkGeocode: false,
+                    geocoder: L.Control.Geocoder.photon(), // Menggunakan Photon, bukan Nominatim default
+                    placeholder: "Cari nama toko, gedung, atau jalan...",
+                    errorMessage: "Tidak ditemukan."
+                })
+                .on('markgeocode', function(e) {
+                    const center = e.geocode.center;
+                    map.setView(center, 18);
+                    marker.setLatLng(center);
+                    // Tampilkan nama tempat dari hasil pencarian
+                    marker.bindPopup(`<div style="font-size:12px;"><b>${e.geocode.name}</b><br>${e.geocode.html || ""}</div>`).openPopup();
+                })
+                .addTo(map);
+
+                // 2. Klik Peta
+                map.on('click', e => { 
+                    marker.setLatLng(e.latlng); 
+                    updateMarkerPopup(marker); 
                 });
-                
-                selectedCoords = { lng: config.store.lng, lat: config.store.lat };
+                marker.on('dragend', e => updateMarkerPopup(e.target));
             }
-            
-            setTimeout(() => map.resize(), 200);
+            setTimeout(() => map.invalidateSize(), 200);
         };
 
         document.getElementById('confirm-map').onclick = async () => {
-            if(selectedCoords) {
-                await fetchRouteOSRM(selectedCoords.lat, selectedCoords.lng);
-                mapModal.style.display = "none";
-            }
+            const { lat, lng } = marker.getLatLng();
+            await fetchRouteOSRM(lat, lng);
+            mapModal.style.display = "none";
         };
 
         document.getElementById('close-map').onclick = () => mapModal.style.display = "none";
 
-        // Helpers
+        // EVENT LISTENERS
         ui.jumlah.oninput = hitungTotal;
         ui.pembayaran.onchange = () => {
             const isQris = ui.pembayaran.value === 'QRIS';
@@ -440,4 +434,5 @@
 </script>
 </body>
 </html>
+
 
