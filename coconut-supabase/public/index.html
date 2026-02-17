@@ -275,17 +275,19 @@
 
         ui.pembayaran.onchange = () => {
             const isQris = ui.pembayaran.value === 'QRIS';
-            ui.btnSubmit.classList.toggle('hidden', isQris);
-            ui.btnPay.style.display = isQris ? "block" : "none";
-            ui.qrisArea.style.display = ui.uploadArea.style.display = "none";
-            ui.uploadArea.classList.add('hidden');
+            ui.btnSubmit.classList.toggle('hidden', isQris); 
+            ui.btnPay.style.display = isQris ? "block" : "none"; 
+            ui.qrisArea.style.display = "none";  
+            ui.uploadArea.classList.add('hidden'); 
+            ui.uploadArea.style.display = "none";  
         };
 
         ui.btnPay.onclick = () => {
-            ui.btnPay.style.display = "none";
-            ui.qrisArea.style.display = "block";
-            ui.uploadArea.classList.remove('hidden');
-            ui.btnSubmit.classList.remove('hidden');
+            ui.btnPay.style.display = "none";      // Sembunyikan tombol biru
+            ui.qrisArea.style.display = "block";    // Tampilkan gambar QRIS
+            ui.uploadArea.classList.remove('hidden'); // HAPUS class 'hidden' pada upload
+            ui.uploadArea.style.display = "block";  // PASTIKAN display menjadi block
+            ui.btnSubmit.classList.remove('hidden'); // Tampilkan tombol Kirim Pesanan
         };
 
         ui.jarak.oninput = ui.jumlah.oninput = hitungTotal;
@@ -353,3 +355,4 @@
 </script>
 </body>
 </html>
+
