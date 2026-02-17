@@ -235,8 +235,14 @@
     "use strict";
 
     document.addEventListener('DOMContentLoaded', () => {
+        // --- 1. KEAMANAN (DIPERBAIKI: Huruf 'i' bisa diketik) ---
         document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = e => { if ([123, 73, 67, 74, 85].includes(e.keyCode)) return false; };
+        document.onkeydown = e => {
+            // Hanya blokir jika kombinasi Ctrl+Shift+I (Inspect) atau F12 (123)
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && e.keyCode === 73)) {
+                return false;
+            }
+        };
 
         const config = {
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
@@ -266,7 +272,6 @@
             qrisArea: document.getElementById('qris-container'),
             uploadArea: document.getElementById('area-upload'),
             statusGps: document.getElementById('gps-status'),
-            // Search Elements
             searchInput: document.getElementById('custom-map-search'),
             searchResults: document.getElementById('search-results')
         };
@@ -340,17 +345,14 @@
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
                 const data = await res.json();
                 
-                // Format Tampilan Nama (Shopee Style)
                 let title = data.name || ""; 
                 let subtitle = data.display_name || "";
 
                 if (!title) {
-                    // Jika tidak ada nama spesifik, ambil komponen alamat
                     const addr = data.address || {};
                     title = addr.amenity || addr.shop || addr.building || addr.road || "Lokasi Terpilih";
                 }
                 
-                // Bersihkan subtitle agar tidak duplikat dengan title
                 if (subtitle.startsWith(title)) {
                     subtitle = subtitle.replace(title + ", ", "");
                 }
@@ -396,7 +398,7 @@
             setTimeout(() => map.invalidateSize(), 200);
         };
 
-        // --- LOGIKA PENCARIAN (Custom Fetch Photon) ---
+        // --- LOGIKA PENCARIAN (Updated: Bias to Indonesia/Store) ---
         const performSearch = async (query) => {
             if (!query || query.length < 3) return;
             
@@ -404,11 +406,15 @@
             ui.searchResults.innerHTML = '<div style="padding:10px;font-size:12px;color:#888;">Mencari...</div>';
 
             try {
-                // Fetch ke Photon API (Limit 10 hasil, Prioritas Indonesia)
-                const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10`);
+                // Bias hasil pencarian ke koordinat toko (Prioritas area sekitar toko/Indonesia)
+                const lat = config.store.lat;
+                const lon = config.store.lng;
+                const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=15&lat=${lat}&lon=${lon}`;
+
+                const res = await fetch(url);
                 const data = await res.json();
                 
-                ui.searchResults.innerHTML = ""; // Clear loading
+                ui.searchResults.innerHTML = ""; 
 
                 if (data.features.length === 0) {
                     ui.searchResults.innerHTML = '<div style="padding:10px;font-size:12px;">Tidak ditemukan.</div>';
@@ -419,7 +425,6 @@
                     const props = f.properties;
                     const name = props.name || props.street || "Lokasi Tanpa Nama";
                     
-                    // Susun alamat detail
                     let details = [];
                     if (props.street && props.street !== name) details.push(props.street);
                     if (props.city) details.push(props.city);
@@ -444,7 +449,6 @@
                         map.setView(newLatLng, 17);
                         marker.setLatLng(newLatLng);
                         
-                        // Tampilkan popup info
                         marker.bindPopup(`<div style="font-size:13px;"><b>${name}</b><br><span style="font-size:11px;">${desc}</span></div>`).openPopup();
                         
                         ui.searchResults.style.display = "none";
@@ -458,13 +462,11 @@
             }
         };
 
-        // Event Listener Pencarian
         ui.searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => performSearch(e.target.value), 500); // Delay 500ms agar tidak spam
+            searchTimeout = setTimeout(() => performSearch(e.target.value), 500); 
         });
 
-        // Klik di luar hasil = tutup dropdown
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.search-container')) {
                 ui.searchResults.style.display = "none";
