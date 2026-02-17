@@ -164,6 +164,7 @@
 <div id="map-modal">
     <div class="map-box">
         <h3>Geser Pin ke Lokasi Rumah</h3>
+        <input type="text" id="map-search" placeholder="Cari nama jalan/gedung..." style="margin-bottom:10px; padding:8px;">
         <div id="map"></div>
         <button type="button" class="btn-maps" id="confirm-map" style="background: var(--primary-color); color: white;">KONFIRMASI LOKASI</button>
         <button type="button" class="btn-maps" id="close-map" style="border:none;">BATAL</button>
@@ -260,18 +261,51 @@
             if (!map) {
                 map = L.map('map').setView([config.store.lat, config.store.lng], 13);
                 L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-                maxZoom: 20,
-                subdomains:['mt0','mt1','mt2','mt3']
-            }).addTo(map);
+                    maxZoom: 20,
+                    subdomains:['mt0','mt1','mt2','mt3']
+                }).addTo(map);
+                // Marker awal
                 marker = L.marker([config.store.lat, config.store.lng], {draggable: true}).addTo(map);
-            }
+
             setTimeout(() => map.invalidateSize(), 200);
         };
+
+                // Tambahkan fungsi ini agar saat marker digeser/diklik muncul nama jalan
+        const updatePopup = async (m) => {
+            const p = m.getLatLng();
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${p.lat}&lon=${p.lng}`);
+                const data = await res.json();
+                m.bindPopup(`<div style="font-size:12px"><b>Lokasi Terpilih:</b><br>${data.display_name}</div>`).openPopup();
+            } catch (e) {}
+        };
+        
+        // Jalankan fungsi saat marker berhenti digeser
+        marker.on('dragend', (e) => updatePopup(e.target));
+        // Jalankan fungsi saat peta diklik (pindah marker)
+        map.on('click', (e) => {
+            marker.setLatLng(e.latlng);
+            updatePopup(marker);
+        });
 
         document.getElementById('confirm-map').onclick = async () => {
             const pos = marker.getLatLng();
             await calculateDistance(pos.lat, pos.lng);
             document.getElementById('map-modal').style.display = "none";
+        };
+
+        document.getElementById('map-search').onchange = async (e) => {
+            const query = e.target.value;
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`);
+            const data = await res.json();
+            if (data.length > 0) {
+                const newPos = [data[0].lat, data[0].lon];
+                map.setView(newPos, 17);
+                marker.setLatLng(newPos);
+                marker.bindPopup(data[0].display_name).openPopup();
+            } else {
+                alert("Lokasi tidak ditemukan");
+            }
         };
 
         document.getElementById('close-map').onclick = () => document.getElementById('map-modal').style.display = "none";
@@ -358,6 +392,7 @@
 </script>
 </body>
 </html>
+
 
 
 
