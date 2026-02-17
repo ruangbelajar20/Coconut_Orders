@@ -247,6 +247,15 @@
             return false;
         };
 
+        const updatePopup = async (m) => {
+            const p = m.getLatLng();
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${p.lat}&lon=${p.lng}`);
+                const data = await res.json();
+                m.bindPopup(`<div style="font-size:12px"><b>Lokasi Terpilih:</b><br>${data.display_name}</div>`).openPopup();
+            } catch (e) {}
+        };
+
         document.getElementById('btn-gps').onclick = () => {
             ui.statusGps.classList.remove('hidden');
             ui.statusGps.innerText = "🛰️ Menghitung jarak...";
@@ -264,29 +273,17 @@
                     maxZoom: 20,
                     subdomains:['mt0','mt1','mt2','mt3']
                 }).addTo(map);
-                // Marker awal
+                
                 marker = L.marker([config.store.lat, config.store.lng], {draggable: true}).addTo(map);
 
+                marker.on('dragend', (e) => updatePopup(e.target));
+                map.on('click', (e) => {
+                    marker.setLatLng(e.latlng);
+                    updatePopup(marker);
+                });
+            }
             setTimeout(() => map.invalidateSize(), 200);
         };
-
-                // Tambahkan fungsi ini agar saat marker digeser/diklik muncul nama jalan
-        const updatePopup = async (m) => {
-            const p = m.getLatLng();
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${p.lat}&lon=${p.lng}`);
-                const data = await res.json();
-                m.bindPopup(`<div style="font-size:12px"><b>Lokasi Terpilih:</b><br>${data.display_name}</div>`).openPopup();
-            } catch (e) {}
-        };
-        
-        // Jalankan fungsi saat marker berhenti digeser
-        marker.on('dragend', (e) => updatePopup(e.target));
-        // Jalankan fungsi saat peta diklik (pindah marker)
-        map.on('click', (e) => {
-            marker.setLatLng(e.latlng);
-            updatePopup(marker);
-        });
 
         document.getElementById('confirm-map').onclick = async () => {
             const pos = marker.getLatLng();
@@ -296,16 +293,18 @@
 
         document.getElementById('map-search').onchange = async (e) => {
             const query = e.target.value;
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`);
-            const data = await res.json();
-            if (data.length > 0) {
-                const newPos = [data[0].lat, data[0].lon];
-                map.setView(newPos, 17);
-                marker.setLatLng(newPos);
-                marker.bindPopup(data[0].display_name).openPopup();
-            } else {
-                alert("Lokasi tidak ditemukan");
-            }
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                if (data.length > 0) {
+                    const newPos = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                    map.setView(newPos, 17);
+                    marker.setLatLng(newPos);
+                    updatePopup(marker);
+                } else {
+                    alert("Lokasi tidak ditemukan");
+                }
+            } catch(err) { console.error(err); }
         };
 
         document.getElementById('close-map').onclick = () => document.getElementById('map-modal').style.display = "none";
@@ -320,11 +319,11 @@
         };
 
         ui.btnPay.onclick = () => {
-            ui.btnPay.style.display = "none";      // Sembunyikan tombol biru
-            ui.qrisArea.style.display = "block";    // Tampilkan gambar QRIS
-            ui.uploadArea.classList.remove('hidden'); // HAPUS class 'hidden' pada upload
-            ui.uploadArea.style.display = "block";  // PASTIKAN display menjadi block
-            ui.btnSubmit.classList.remove('hidden'); // Tampilkan tombol Kirim Pesanan
+            ui.btnPay.style.display = "none";
+            ui.qrisArea.style.display = "block";
+            ui.uploadArea.classList.remove('hidden');
+            ui.uploadArea.style.display = "block";
+            ui.btnSubmit.classList.remove('hidden');
         };
 
         ui.jarak.oninput = ui.jumlah.oninput = hitungTotal;
@@ -347,7 +346,8 @@
 
                 let buktiUrl = "";
                 if (data.metode === 'QRIS') {
-                    const file = document.getElementById('bukti_file').files[0];
+                    const fileInput = document.getElementById('bukti_file');
+                    const file = fileInput.files[0];
                     if (!file) throw new Error("Mohon upload bukti transfer!");
                     const fName = `bukti-${Date.now()}.jpg`;
                     const { error } = await db.storage.from('bukti-transfer').upload(fName, file);
@@ -392,7 +392,3 @@
 </script>
 </body>
 </html>
-
-
-
-
