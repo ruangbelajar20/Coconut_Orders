@@ -222,7 +222,7 @@
 
             let mult = 1, msg = "";
             if (qty > 5 && dist <= 25) { mult = 0; msg = "🎉 Gratis Ongkir (>5 Butir)"; }
-            else if (qty > 4 && dist >= 20) { mult = 0.5; msg = "🔥 Diskon Ongkir 50% (>4 Butir)"; }
+            else if (qty >= 4 && dist >= 20) { mult = 0.5; msg = "🔥 Diskon Ongkir 50% ( 4+ Butir)"; }
             else if (qty >= 3 && dist <= 15) { mult = 0; msg = "🎉 Gratis Ongkir (3+ Butir)"; }
             else if (qty >= 2 && dist <= 15) { mult = 0.5; msg = "✨ Diskon Ongkir 50% (2+ Butir)"; }
 
@@ -355,4 +355,5 @@
 </script>
 </body>
 </html>
+
 
