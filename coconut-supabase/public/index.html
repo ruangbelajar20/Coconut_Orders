@@ -5,16 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Order Coconut Bumi Jelly D'Hasna</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <style>
         :root {
-            --primary-color: #2e7d32;
-            --accent-color: #81c784;
+            --primary-color: #2e7d32; 
+            --accent-color: #81c784; 
             --bg-color: #f7f9fc; 
             --card-bg: #ffffff;
             --text-dark: #333333;
@@ -27,128 +23,298 @@
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
-            margin: 0; padding: 20px;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; color: var(--text-dark);
-            -webkit-user-select: none; user-select: none;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-dark);
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         .container {
-            background: var(--card-bg); width: 100%; max-width: 480px;
-            padding: 40px 30px; border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-soft); position: relative; overflow: hidden;
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 480px;
+            padding: 40px 30px;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Desain Header & Jelly (Tetap) */
-        header { text-align: center; margin-bottom: 30px; }
-        .jelly-mascot-container { height: 80px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .jelly-mascot-container {
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
         .coconut-jelly {
-            width: 70px; height: 60px;
+            width: 70px;
+            height: 60px;
             background: linear-gradient(to bottom, #ffffff 40%, #e0e0e0 100%);
             border-radius: 50% 50% 40% 40% / 60% 60% 35% 35%;
-            border: 4px solid #6d4c41; position: relative; overflow: hidden;
+            border: 4px solid #6d4c41;
+            position: relative;
+            overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             animation: floatJelly 3s ease-in-out infinite;
         }
+        
         .coconut-jelly::after {
-            content: ''; position: absolute; top: 5px; left: 10%; width: 80%; height: 20px;
-            background: rgba(255, 255, 255, 0.6); border-radius: 50%;
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 10%;
+            width: 80%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
         }
+
         @keyframes floatJelly {
             0%, 100% { transform: translateY(0) scale(1); }
             50% { transform: translateY(-8px) scale(1.02); }
         }
-        h2 { color: var(--primary-color); font-weight: 700; margin: 0; font-size: 22px; }
-        .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
 
-        /* Form styling */
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; font-size: 13px; color: var(--text-dark); margin-bottom: 8px; }
-        input, textarea, select {
-            width: 100%; padding: 14px 16px; border: 2px solid #eee; border-radius: var(--radius-md);
-            font-family: 'Poppins', sans-serif; font-size: 16px; transition: all 0.3s ease;
-            box-sizing: border-box; background: #fafafa; -webkit-appearance: none;
+        h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+            font-size: 22px;
         }
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #eee;
+            border-radius: var(--radius-md);
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px; 
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            background: #fafafa;
+            -webkit-appearance: none;
+        }
+
         input:focus, textarea:focus, select:focus {
-            outline: none; border-color: var(--accent-color); background: #fff;
+            outline: none;
+            border-color: var(--accent-color);
+            background: #fff;
             box-shadow: 0 0 0 4px rgba(129, 199, 132, 0.1);
         }
 
-        /* Tombol Peta & GPS */
-        .btn-action {
-            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px;
-            font-size: 13px; font-weight: 600; cursor: pointer; border: none;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: 0.2s;
+        .note {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
         }
-        .btn-gps { background: #e3f2fd; color: #1565c0; border: 1px dashed #1565c0; }
-        .btn-map-manual { background: #fff3e0; color: #e65100; border: 1px dashed #e65100; }
-        .btn-gps:active, .btn-map-manual:active { transform: scale(0.98); }
+
+        .btn-maps, .btn-gps {
+            padding: 10px 15px;
+            font-size: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            margin-bottom: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        .btn-maps {
+            background-color: #fff;
+            color: #1976d2;
+            border: 1px solid #1976d2;
+        }
+        .btn-maps:hover { background-color: #e3f2fd; }
+
+        .btn-gps {
+            background-color: #e8f5e9;
+            color: var(--primary-color);
+            border: 1px dashed var(--primary-color);
+        }
+        .btn-gps:hover { background-color: #c8e6c9; }
+        .btn-gps.loading { opacity: 0.6; cursor: wait; }
+
+        .gps-status {
+            font-size: 11px; margin-top: -5px; margin-bottom: 8px; text-align: center;
+        }
 
         .total-box {
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            color: white; padding: 20px; border-radius: var(--radius-md);
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 16px; font-weight: 600; margin-top: 30px;
+            color: white;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 30px;
+            box-shadow: 0 10px 20px -10px rgba(46, 125, 50, 0.5);
+        }
+
+        #total-display {
+            font-size: 24px;
+            font-weight: 700;
         }
 
         #btn-submit {
-            width: 100%; padding: 16px; margin-top: 20px; background-color: var(--text-dark);
-            color: white; border: none; border-radius: var(--radius-md); font-size: 16px;
-            font-weight: 700; cursor: pointer; transition: all 0.3s ease;
+            width: 100%;
+            padding: 16px;
+            margin-top: 20px;
+            background-color: var(--text-dark);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            touch-action: manipulation; 
+        }
+
+        #btn-submit:hover {
+            background-color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        #btn-submit:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .hidden { display: none; }
-        #area-upload { background: #fff0f0; padding: 15px; border-radius: var(--radius-md); border: 1px dashed #e57373; }
         
-        /* Modal Peta (Popup) */
-        .map-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 2000;
-            display: none; align-items: flex-end; /* Muncul dari bawah di HP */
+        #area-upload {
+            background: #fff0f0;
+            padding: 15px;
+            border-radius: var(--radius-md);
+            border: 1px dashed #e57373;
         }
-        .map-modal.active { display: flex; }
-        .map-content {
-            background: white; width: 100%; height: 85vh; /* Tinggi peta 85% layar */
-            border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box;
-            display: flex; flex-direction: column; animation: slideUp 0.3s ease-out;
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
-        #map { flex-grow: 1; width: 100%; border-radius: 15px; margin-bottom: 15px; z-index: 10; }
-        
-        .btn-close-map {
-            background: #f44336; color: white; padding: 12px; border: none;
-            border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%;
+        input[type="file"] {
+            background: white;
+            padding: 10px;
+            font-size: 14px;
         }
 
-        /* Success Overlay */
         .success-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px);
-            display: flex; justify-content: center; align-items: center; z-index: 3000;
-            opacity: 0; visibility: hidden; transition: all 0.4s ease;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
         }
-        .success-overlay.active { opacity: 1; visibility: visible; }
+
+        .success-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .success-card {
-            background: white; padding: 40px; border-radius: 30px; text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1); transform: scale(0.8);
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transform: scale(0.8);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .success-overlay.active .success-card { transform: scale(1); }
-        .pulse-icon {
-            width: 80px; height: 80px; background: var(--primary-color); color: white;
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            font-size: 40px; margin: 0 auto 20px; animation: pulseEffect 2s infinite;
+
+        .success-overlay.active .success-card {
+            transform: scale(1);
         }
-        @keyframes pulseEffect { 0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(46, 125, 50, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); } }
+
+        .pulse-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            animation: pulseEffect 2s infinite;
+        }
+
+        @keyframes pulseEffect {
+            0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(46, 125, 50, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+        }
+
+        .success-card h3 {
+            margin: 0 0 10px;
+            color: var(--primary-color);
+        }
+        .success-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        /* Tambahan style untuk info diskon */
+        .discount-info {
+            font-size: 12px;
+            color: #2e7d32;
+            font-weight: bold;
+            margin-top: 5px;
+            text-align: right;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <div class="jelly-mascot-container"><div class="coconut-jelly"></div></div>
+        <div class="jelly-mascot-container">
+            <div class="coconut-jelly"></div>
+        </div>
         <h2>Coconut Bumi Jelly D'Hasna</h2>
         <div class="subtitle">Segar Alami, Nikmat Tiada Henti</div>
     </header>
@@ -167,23 +333,19 @@
         <div class="form-group">
             <label for="jarak">Jarak dari Toko (KM)</label>
             
-            <button type="button" id="btn-gps" class="btn-action btn-gps">
-                📡 Gunakan Lokasi Saya Saat Ini (GPS)
-            </button>
+            <button type="button" id="btn-gps" class="btn-gps">📡 Hitung Jarak Otomatis (GPS)</button>
+            <div id="gps-status" class="gps-status hidden"></div>
             
-            <button type="button" id="btn-map-manual" class="btn-action btn-map-manual">
-                🗺️ Pilih Lokasi di Peta (Jika beda lokasi)
-            </button>
-
-            <div id="status-msg" style="font-size: 11px; text-align: center; margin-bottom: 8px; color: #666;"></div>
-
-            <input type="number" id="jarak" step="0.1" min="0" placeholder="Jarak terisi otomatis..." required>
+            <button type="button" id="btn-maps" class="btn-maps">📍 Buka Google Maps (Cek Manual)</button>
+            
+            <input type="number" id="jarak" step="0.1" min="0" placeholder="Hasil jarak akan muncul di sini" required style="margin-top: 8px;">
             <div class="note">Gratis ongkir untuk 4 KM pertama.</div>
         </div>
 
         <div class="form-group">
             <label for="jumlah">Jumlah Pesanan (Butir)</label>
             <input type="number" id="jumlah" min="1" value="1" required>
+            <div class="note">Harga per butir: Rp 15.000</div>
         </div>
 
         <div class="form-group">
@@ -201,154 +363,204 @@
 
         <div class="total-box">
             <span>Total Bayar</span>
-            <span id="total-display">Rp 15.000</span>
+            <div>
+                <span id="total-display">Rp 15.000</span>
+                <div id="discount-display" class="discount-info"></div>
+            </div>
         </div>
 
         <button type="submit" id="btn-submit">KIRIM PESANAN SEKARANG</button>
     </form>
 </div>
 
-<div class="map-modal" id="mapModal">
-    <div class="map-content">
-        <h3 style="margin: 0 0 10px 0; color: #2e7d32; text-align: center;">Geser Pin ke Lokasi Rumah</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 10px; text-align: center;">Tarik jarum biru ke alamat pengiriman, lalu klik 'Pilih Lokasi Ini'</p>
-        <div id="map"></div>
-        <button class="btn-action" style="background: #2e7d32; color: white;" onclick="confirmMapLocation()">✅ Pilih Lokasi Ini</button>
-        <button class="btn-close-map" onclick="closeMap()">Batal</button>
-    </div>
-</div>
-
 <div class="success-overlay" id="successPopup">
     <div class="success-card">
         <div class="pulse-icon">✓</div>
         <h3>Pesanan Berhasil!</h3>
-        <p>Terima kasih.<br>Mengalihkan ke WhatsApp...</p>
+        <p>Terima kasih telah memesan.<br>Mengalihkan ke WhatsApp...</p>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- KONFIGURASI ---
+
+        // --- 0. KEAMANAN ---
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } 
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } 
+        }
+
+        // --- 1. SUPABASE ---
         const SUPABASE_URL = "https://iltvpnplysjeaxufiokg.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU";
-        
-        // KOORDINAT TOKO (GANTI DENGAN YANG ASLI)
-        const STORE_LAT = -6.369581; 
+
+        let db; 
+        try {
+            db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("System Ready.");
+        } catch (err) {
+            console.error("Init Error");
+        }
+
+        // --- 2. LOGIKA LOKASI (GPS & MAPS) ---
+        const STORE_LAT = -6.369581;
         const STORE_LNG = 107.400325;
+        const STORE_LOCATION_STRING = "-6.369581,107.400325"; 
 
-        // Inisialisasi Supabase
-        let db; try { db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) {}
+        document.getElementById('btn-maps').addEventListener('click', function() {
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=$${STORE_LOCATION_STRING}&travelmode=driving`;
+            window.open(mapsUrl, '_blank');
+        });
 
-        // --- VARIABEL UI ---
+        const btnGps = document.getElementById('btn-gps');
+        const gpsStatus = document.getElementById('gps-status');
+
+        btnGps.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                alert("Browser tidak mendukung GPS.");
+                return;
+            }
+
+            btnGps.innerText = "🛰️ Mencari Lokasi...";
+            btnGps.classList.add('loading');
+            gpsStatus.classList.remove('hidden');
+            gpsStatus.style.color = "#666";
+            gpsStatus.innerText = "Mengunci koordinat GPS...";
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+
+                gpsStatus.innerText = `Lokasi didapat (Akurasi: ${Math.round(accuracy)}m). Menghitung rute...`;
+
+                const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${STORE_LNG},${STORE_LAT};${userLng},${userLat}?overview=false`;
+
+                try {
+                    const response = await fetch(osrmUrl);
+                    const data = await response.json();
+
+                    if (data.code === "Ok") {
+                        const distMeter = data.routes[0].distance;
+                        const distKm = (distMeter / 1000).toFixed(1);
+
+                        inputJarak.value = distKm;
+                        hitungTotal();
+
+                        gpsStatus.style.color = "green";
+                        gpsStatus.innerText = `✅ Jarak Rute Jalan: ${distKm} KM`;
+                    } else {
+                        throw new Error("Gagal hitung rute");
+                    }
+                } catch (e) {
+                    gpsStatus.style.color = "red";
+                    gpsStatus.innerText = "❌ Gagal menghitung rute. Coba input manual.";
+                    inputJarak.focus();
+                } finally {
+                    btnGps.innerText = "📡 Hitung Jarak Otomatis (GPS)";
+                    btnGps.classList.remove('loading');
+                }
+
+            }, (error) => {
+                btnGps.innerText = "📡 Hitung Jarak Otomatis (GPS)";
+                btnGps.classList.remove('loading');
+                gpsStatus.style.color = "red";
+                gpsStatus.innerText = "❌ Gagal akses GPS. Pastikan izin lokasi aktif.";
+            }, { enableHighAccuracy: true });
+        });
+
+
+        // --- 3. LOGIKA FRONTEND ---
         const inputJarak = document.getElementById('jarak');
-        const statusMsg = document.getElementById('status-msg');
-        const mapModal = document.getElementById('mapModal');
-        let map, marker; // Variabel Peta Leaflet
-
-        // --- LOGIKA HITUNG HARGA ---
         const inputJumlah = document.getElementById('jumlah');
+        const inputPembayaran = document.getElementById('pembayaran');
         const displayTotal = document.getElementById('total-display');
-        
+        const displayDiscount = document.getElementById('discount-display');
+        const areaUpload = document.getElementById('area-upload');
+        const successPopup = document.getElementById('successPopup');
+        const formOrder = document.getElementById('orderForm');
+
         function hitungTotal() {
             const jumlah = parseFloat(inputJumlah.value) || 0;
             const jarak = parseFloat(inputJarak.value) || 0;
-            let total = jumlah * 15000;
-            if (jarak > 4) { total += Math.ceil(jarak - 4) * 1000; }
+            
+            const HARGA_PER_BUTIR = 15000;
+            const JARAK_DASAR = 4; 
+            const ONGKIR_PER_KM = 1000;
+
+            let hargaBarang = jumlah * HARGA_PER_BUTIR;
+            let ongkirNormal = 0;
+
+            // Hitung Ongkir Normal
+            if (jarak > JARAK_DASAR) {
+                let kelebihan = Math.ceil(jarak - JARAK_DASAR); 
+                ongkirNormal = (kelebihan * ONGKIR_PER_KM);
+            }
+
+            let ongkirFinal = ongkirNormal;
+            let pesanDiskon = "";
+
+            // --- LOGIKA DISKON ONGKIR ---
+            if (jumlah > 4) {
+                // Pesan > 4
+                if (jarak <= 15) {
+                    // Jarak <= 15 KM: GRATIS ONGKIR
+                    ongkirFinal = 0;
+                    pesanDiskon = "🎉 Gratis Ongkir!";
+                } else if (jarak >= 20) {
+                    // Jarak >= 20 KM: Ongkir Bayar Setengah
+                    ongkirFinal = ongkirNormal / 2;
+                    pesanDiskon = "🎉 Diskon Ongkir 50%!";
+                }
+            } else if (jumlah >= 2) {
+                // Pesan 2 - 4
+                if (jarak <= 15) {
+                    // Jarak <= 15 KM: Ongkir Bayar Setengah
+                    ongkirFinal = ongkirNormal / 2;
+                    pesanDiskon = "🎉 Diskon Ongkir 50%!";
+                }
+            }
+
+            let total = hargaBarang + ongkirFinal;
+
             displayTotal.innerText = "Rp " + total.toLocaleString('id-ID');
+            
+            // Tampilkan Info Diskon
+            if (pesanDiskon && ongkirNormal > 0) {
+                displayDiscount.innerText = pesanDiskon;
+                displayDiscount.style.display = "block";
+            } else {
+                displayDiscount.style.display = "none";
+            }
+        }
+
+        function cekMetode() {
+            if (inputPembayaran.value === 'QRIS') {
+                areaUpload.classList.remove('hidden');
+                setTimeout(() => areaUpload.style.opacity = 1, 50);
+            } else {
+                areaUpload.classList.add('hidden');
+            }
         }
 
         inputJarak.addEventListener('input', hitungTotal);
         inputJumlah.addEventListener('input', hitungTotal);
-        document.getElementById('pembayaran').addEventListener('change', function() {
-            const upload = document.getElementById('area-upload');
-            if (this.value === 'QRIS') {
-                upload.classList.remove('hidden');
-            } else {
-                upload.classList.add('hidden');
-            }
-        });
+        inputPembayaran.addEventListener('change', cekMetode);
 
-        // --- FUNGSI 1: GPS OTOMATIS (LOKASI SAAT INI) ---
-        document.getElementById('btn-gps').addEventListener('click', function() {
-            statusMsg.innerText = "🛰️ Mencari sinyal GPS...";
-            statusMsg.style.color = "#666";
-            
-            if (!navigator.geolocation) { alert("GPS tidak didukung."); return; }
-            
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
-                hitungJarakOSRM(lat, lng, "GPS");
-            }, (err) => {
-                statusMsg.innerText = "❌ Gagal akses GPS. Coba tombol Peta Manual.";
-                statusMsg.style.color = "red";
-            }, { enableHighAccuracy: true });
-        });
 
-        // --- FUNGSI 2: PETA MANUAL (LOKASI BEDA) ---
-        document.getElementById('btn-map-manual').addEventListener('click', function() {
-            mapModal.classList.add('active');
-            
-            // Inisialisasi Peta (Jika belum ada)
-            if (!map) {
-                // Set peta default ke koordinat Toko
-                map = L.map('map').setView([STORE_LAT, STORE_LNG], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-
-                // Buat Marker yang bisa digeser (Draggable)
-                marker = L.marker([STORE_LAT, STORE_LNG], {draggable: true}).addTo(map);
-                marker.bindPopup("Geser saya ke rumah Anda!").openPopup();
-            }
-            
-            // Render ulang peta agar ukurannya pas
-            setTimeout(() => { map.invalidateSize(); }, 200);
-        });
-
-        // Fungsi Tombol "Pilih Lokasi Ini" di dalam Modal
-        window.confirmMapLocation = function() {
-            const position = marker.getLatLng(); // Ambil koordinat marker terakhir
-            closeMap();
-            hitungJarakOSRM(position.lat, position.lng, "Peta Manual");
-        };
-
-        window.closeMap = function() {
-            mapModal.classList.remove('active');
-        };
-
-        // --- FUNGSI UTAMA: HITUNG JARAK VIA OSRM ---
-        async function hitungJarakOSRM(userLat, userLng, sumber) {
-            statusMsg.innerText = `⏳ Menghitung rute jalan dari ${sumber}...`;
-            statusMsg.style.color = "blue";
-
-            const url = `https://router.project-osrm.org/route/v1/driving/${STORE_LNG},${STORE_LAT};${userLng},${userLat}?overview=false`;
-
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                
-                if (data.code === "Ok") {
-                    const distKm = (data.routes[0].distance / 1000).toFixed(1);
-                    inputJarak.value = distKm;
-                    hitungTotal();
-                    statusMsg.innerText = `✅ Sukses! Jarak rute: ${distKm} KM (via ${sumber})`;
-                    statusMsg.style.color = "green";
-                } else {
-                    throw new Error("Gagal hitung rute");
-                }
-            } catch (e) {
-                statusMsg.innerText = "❌ Gagal menghitung. Silakan isi jarak manual.";
-                statusMsg.style.color = "red";
-                inputJarak.focus();
-            }
-        }
-
-        // --- FUNGSI SUBMIT (SAMA SEPERTI SEBELUMNYA) ---
-        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+        // --- 4. PROSES SUBMIT ---
+        formOrder.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
             const btn = document.getElementById('btn-submit');
-            btn.innerText = "⏳ Memproses..."; btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Sedang Memproses...";
+            btn.disabled = true;
+            btn.style.opacity = 0.7;
 
             try {
                 const nama = document.getElementById('nama').value;
@@ -357,44 +569,73 @@
                 const jumlah = document.getElementById('jumlah').value;
                 const metode = document.getElementById('pembayaran').value;
                 const fileInput = document.getElementById('bukti_file');
+                
                 let buktiUrl = "";
 
                 if (metode === 'QRIS') {
-                    if (fileInput.files.length === 0) throw new Error("Wajib upload bukti transfer.");
+                    if (fileInput.files.length === 0) {
+                        throw new Error("Anda memilih QRIS, wajib upload bukti transfer.");
+                    }
+                    
                     const file = fileInput.files[0];
-                    const fileName = `bukti-${Date.now()}.jpg`;
-                    const { error } = await db.storage.from('bukti-transfer').upload(fileName, file);
-                    if (error) throw error;
-                    const { data } = db.storage.from('bukti-transfer').getPublicUrl(fileName);
-                    buktiUrl = data.publicUrl;
+                    const fileName = `bukti-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+                    
+                    const { data, error: uploadError } = await db.storage
+                        .from('bukti-transfer')
+                        .upload(fileName, file);
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: urlData } = db.storage
+                        .from('bukti-transfer')
+                        .getPublicUrl(fileName);
+                    
+                    buktiUrl = urlData.publicUrl;
                 }
 
-                const res = await fetch('/api/submit', {
+                const response = await fetch('/api/submit', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ nama, alamat, jarak, jumlah, metode, buktiUrl })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nama, alamat, jarak, jumlah, metode, buktiUrl
+                    })
                 });
 
-                if (!res.ok) throw new Error("Gagal menyimpan.");
+                const result = await response.json();
 
-                document.getElementById('successPopup').classList.add('active');
-                document.getElementById('orderForm').reset();
+                if (!response.ok) {
+                    throw new Error(result.message || "Terjadi kesalahan saat menyimpan data.");
+                }
+
+                // SUKSES
+                successPopup.classList.add('active');
+
+                // BERSIHKAN FORMULIR
+                formOrder.reset();
+                gpsStatus.innerText = "";
+                cekMetode(); 
                 hitungTotal();
-                statusMsg.innerText = "";
 
-                const pesan = `Halo, saya pesan via web.\nNama: ${nama}\nAlamat: ${alamat}\nJarak: ${jarak} KM\nTotal: ${document.getElementById('total-display').innerText}\nBukti: ${buktiUrl || '-'}`;
+                const pesanWA = `Halo Admin Coconut Bumi Jelly,\nSaya baru saja memesan via website.\n\nNama: *${nama}*\nAlamat: ${alamat}\nJumlah: ${jumlah} butir\nTotal: *${displayTotal.innerText}*\n${displayDiscount.innerText ? `(${displayDiscount.innerText})` : ''}\nMetode: ${metode}\n\nLink Bukti Bayar: ${buktiUrl || '-'}`;
+                const linkWA = `https://wa.me/62895336907868?text=${encodeURIComponent(pesanWA)}`;
+
                 setTimeout(() => {
-                    window.open(`https://wa.me/62895336907868?text=${encodeURIComponent(pesan)}`, '_blank');
-                    window.location.reload();
+                    window.open(linkWA, '_blank');
+                    window.location.reload(); 
                 }, 2500);
 
             } catch (err) {
-                alert("Gagal: " + err.message);
-                btn.innerText = "KIRIM PESANAN SEKARANG"; btn.disabled = false;
+                console.error(err);
+                alert("❌ Gagal: " + err.message);
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.style.opacity = 1;
             }
         });
-        
-        hitungTotal(); // Init awal
+
+        // Jalankan fungsi awal
+        hitungTotal();
+        cekMetode();
     });
 </script>
 
