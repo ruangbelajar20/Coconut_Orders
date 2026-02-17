@@ -16,6 +16,7 @@
             --card-bg: #ffffff;
             --text-dark: #333333;
             --text-muted: #777777;
+            --danger-color: #d32f2f;
             --shadow-soft: 0 10px 30px -10px rgba(46, 125, 50, 0.1);
             --radius-xl: 24px;
             --radius-md: 12px;
@@ -68,10 +69,25 @@
 
         .gps-status { font-size: 11px; margin-top: -5px; margin-bottom: 8px; text-align: center; }
 
-        .total-box { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 20px; border-radius: var(--radius-md); display: flex; flex-direction: column; justify-content: center; align-items: center; margin-top: 30px; box-shadow: 0 10px 20px -10px rgba(46, 125, 50, 0.5); }
-        .total-row { display: flex; justify-content: space-between; width: 100%; }
-        #total-display { font-size: 24px; font-weight: 700; }
-        #promo-display { font-size: 11px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 10px; margin-top: 5px; display: none; }
+        /* Total Box yang lebih detail */
+        .total-box { 
+            background: #fff; 
+            border: 1px solid #eee;
+            padding: 20px; 
+            border-radius: var(--radius-md); 
+            margin-top: 30px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+        }
+        .detail-row {
+            display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 5px;
+        }
+        .detail-row.discount { color: var(--danger-color); }
+        .total-final {
+            display: flex; justify-content: space-between;
+            margin-top: 10px; padding-top: 10px;
+            border-top: 1px dashed #ccc;
+            font-size: 18px; font-weight: 700; color: var(--primary-color);
+        }
 
         #btn-submit, #btn-pay-qris { 
             width: 100%; padding: 16px; margin-top: 20px; color: white; border: none; 
@@ -125,12 +141,13 @@
             <div id="gps-status" class="gps-status hidden"></div>
             <button type="button" id="btn-maps" class="btn-maps">🗺️ Pilih Lokasi di Peta (Manual)</button>
             <input type="number" id="jarak" step="0.1" min="0" placeholder="Hasil jarak otomatis..." required style="margin-top: 8px;">
-            <div class="note">Gratis ongkir untuk 4 KM pertama.</div>
+            <div class="note">Gratis ongkir untuk 2.5 KM pertama. +1000/500m.</div>
         </div>
 
         <div class="form-group">
             <label for="jumlah">Jumlah Pesanan (Butir)</label>
             <input type="number" id="jumlah" min="1" value="1" required>
+            <div class="note">Harga: Rp 15.000/butir. Diskon tiap kelipatan 5 butir.</div>
         </div>
 
         <div class="form-group">
@@ -152,8 +169,23 @@
         </div>
 
         <div class="total-box">
-            <div class="total-row"><span>Total Bayar</span><span id="total-display">Rp 15.000</span></div>
-            <div id="promo-display"></div>
+            <div class="detail-row">
+                <span>Harga Awal (Item + Ongkir):</span>
+                <span id="txt-harga-awal">Rp 0</span>
+            </div>
+            <div class="detail-row discount" id="row-diskon-ongkir" style="display:none;">
+                <span>Potongan Ongkir:</span>
+                <span id="txt-diskon-ongkir">-Rp 0</span>
+            </div>
+            <div class="detail-row discount" id="row-diskon-barang" style="display:none;">
+                <span>Diskon Barang (Promo):</span>
+                <span id="txt-diskon-barang">-Rp 0</span>
+            </div>
+            
+            <div class="total-final">
+                <span>TOTAL BAYAR</span>
+                <span id="total-display">Rp 15.000</span>
+            </div>
         </div>
 
         <button type="button" id="btn-pay-qris">BAYAR SEKARANG</button>
@@ -164,7 +196,7 @@
 <div id="map-modal">
     <div class="map-box">
         <h3>Geser Pin ke Lokasi Rumah</h3>
-        <input type="text" id="map-search" placeholder="Cari nama jalan/gedung..." style="margin-bottom:10px; padding:8px;">
+        <input type="text" id="map-search" placeholder="Cari nama jalan/gedung..." style="margin-bottom:10px; padding:8px; width:100%; box-sizing:border-box;">
         <div id="map"></div>
         <button type="button" class="btn-maps" id="confirm-map" style="background: var(--primary-color); color: white;">KONFIRMASI LOKASI</button>
         <button type="button" class="btn-maps" id="close-map" style="border:none;">BATAL</button>
@@ -206,8 +238,15 @@
             jarak: document.getElementById('jarak'),
             jumlah: document.getElementById('jumlah'),
             pembayaran: document.getElementById('pembayaran'),
-            total: document.getElementById('total-display'),
-            promo: document.getElementById('promo-display'),
+            
+            // Elemen Tampilan Harga
+            txtHargaAwal: document.getElementById('txt-harga-awal'),
+            txtDiskonOngkir: document.getElementById('txt-diskon-ongkir'),
+            txtDiskonBarang: document.getElementById('txt-diskon-barang'),
+            rowDiskonOngkir: document.getElementById('row-diskon-ongkir'),
+            rowDiskonBarang: document.getElementById('row-diskon-barang'),
+            totalFinal: document.getElementById('total-display'),
+
             btnSubmit: document.getElementById('btn-submit'),
             btnPay: document.getElementById('btn-pay-qris'),
             qrisArea: document.getElementById('qris-container'),
@@ -215,23 +254,73 @@
             statusGps: document.getElementById('gps-status')
         };
 
+        // --- LOGIKA HITUNG HARGA BARU ---
+        let kalkulasiData = {}; // Menyimpan data hasil hitungan untuk dikirim
+
         const hitungTotal = () => {
             const qty = parseFloat(ui.jumlah.value) || 0;
             const dist = parseFloat(ui.jarak.value) || 0;
-            const basePrice = qty * 15000;
-            const rawOngkir = dist > 4 ? Math.ceil(dist - 4) * 1000 : 0;
+            
+            const HARGA_PER_BUTIR = 15000;
+            const JARAK_FREE = 2.5;
+            const BIAYA_PER_BLOCK = 1000; // Per 500m
+            const BLOCK_SIZE = 0.5; // 500 meter
 
-            let mult = 1, msg = "";
-            if (qty > 5 && dist <= 25) { mult = 0; msg = "🎉 Gratis Ongkir (>5 Butir)"; }
-            else if (qty >= 4 && dist >= 20) { mult = 0.5; msg = "🔥 Diskon Ongkir 50% ( 4+ Butir)"; }
-            else if (qty >= 3 && dist <= 15) { mult = 0; msg = "🎉 Gratis Ongkir (3+ Butir)"; }
-            else if (qty >= 2 && dist <= 15) { mult = 0.5; msg = "✨ Diskon Ongkir 50% (2+ Butir)"; }
+            // 1. Subtotal Barang
+            let subtotalBarang = qty * HARGA_PER_BUTIR;
 
-            const finalTotal = basePrice + (rawOngkir * mult);
-            ui.total.innerText = `Rp ${finalTotal.toLocaleString('id-ID')}`;
-            ui.promo.innerText = msg;
-            ui.promo.style.display = msg ? "block" : "none";
-            return { total: finalTotal, promo: msg };
+            // 2. Hitung Ongkir Murni (Sebelum Diskon)
+            let ongkirMurni = 0;
+            if (dist > JARAK_FREE) {
+                let kelebihan = dist - JARAK_FREE;
+                // Pembulatan ke atas untuk setiap 500m
+                let blok = Math.ceil(kelebihan / BLOCK_SIZE);
+                ongkirMurni = blok * BIAYA_PER_BLOCK;
+            }
+
+            // 3. Logic Diskon Ongkir
+            // Syarat: Jarak > 2.5KM s/d 5 KM DAN Pesanan > 2 s/d 5 butir
+            let diskonOngkir = 0;
+            if (dist > 2.5 && dist <= 5 && qty > 2 && qty <= 5) {
+                diskonOngkir = ongkirMurni * 0.5; // Potongan 50%
+            }
+
+            // 4. Logic Diskon Barang (Kelipatan 5)
+            // >= 5 butir diskon 5000, 10 butir 10000, dst.
+            let diskonBarang = Math.floor(qty / 5) * 5000;
+
+            // 5. Kalkulasi Akhir
+            let hargaAwal = subtotalBarang + ongkirMurni;
+            let totalPotongan = diskonOngkir + diskonBarang;
+            let grandTotal = hargaAwal - totalPotongan;
+
+            // Simpan ke variabel global script untuk dikirim nanti
+            kalkulasiData = {
+                hargaAwal: hargaAwal,
+                ongkirMurni: ongkirMurni,
+                diskonOngkir: diskonOngkir,
+                diskonBarang: diskonBarang,
+                grandTotal: grandTotal
+            };
+
+            // Update Tampilan UI
+            ui.txtHargaAwal.innerText = `Rp ${hargaAwal.toLocaleString('id-ID')}`;
+            ui.totalFinal.innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+
+            // Tampilkan/Sembunyikan Baris Diskon
+            if (diskonOngkir > 0) {
+                ui.rowDiskonOngkir.style.display = "flex";
+                ui.txtDiskonOngkir.innerText = `-Rp ${diskonOngkir.toLocaleString('id-ID')}`;
+            } else {
+                ui.rowDiskonOngkir.style.display = "none";
+            }
+
+            if (diskonBarang > 0) {
+                ui.rowDiskonBarang.style.display = "flex";
+                ui.txtDiskonBarang.innerText = `-Rp ${diskonBarang.toLocaleString('id-ID')}`;
+            } else {
+                ui.rowDiskonBarang.style.display = "none";
+            }
         };
 
         const calculateDistance = async (lat, lng) => {
@@ -273,9 +362,8 @@
                     maxZoom: 20,
                     subdomains:['mt0','mt1','mt2','mt3']
                 }).addTo(map);
-                
                 marker = L.marker([config.store.lat, config.store.lng], {draggable: true}).addTo(map);
-
+                
                 marker.on('dragend', (e) => updatePopup(e.target));
                 map.on('click', (e) => {
                     marker.setLatLng(e.latlng);
@@ -334,20 +422,25 @@
             ui.btnSubmit.innerText = "⏳ Mengirim...";
 
             try {
+                // Pastikan kalkulasi terbaru
+                hitungTotal();
+
                 const data = {
                     nama: document.getElementById('nama').value,
                     alamat: document.getElementById('alamat').value,
                     jarak: ui.jarak.value,
                     jumlah: ui.jumlah.value,
                     metode: ui.pembayaran.value,
-                    total: ui.total.innerText,
-                    promo: ui.promo.innerText || "Tidak ada"
+                    // Kirim data finansial terpisah ke database
+                    harga_awal: kalkulasiData.hargaAwal,
+                    diskon_ongkir: kalkulasiData.diskonOngkir,
+                    diskon_barang: kalkulasiData.diskonBarang,
+                    total_akhir: kalkulasiData.grandTotal
                 };
 
                 let buktiUrl = "";
                 if (data.metode === 'QRIS') {
-                    const fileInput = document.getElementById('bukti_file');
-                    const file = fileInput.files[0];
+                    const file = document.getElementById('bukti_file').files[0];
                     if (!file) throw new Error("Mohon upload bukti transfer!");
                     const fName = `bukti-${Date.now()}.jpg`;
                     const { error } = await db.storage.from('bukti-transfer').upload(fName, file);
@@ -365,16 +458,22 @@
 
                 document.getElementById('successPopup').classList.add('active');
                 
-                const waMsg = `*PESANAN COCONUT BUMI JELLY*\n\n` +
+                // Format Pesan WA yang Detail
+                const waMsg = `*PESANAN COCONUT BUMI JELLY*\n` +
+                              `--------------------------------\n` +
                               `👤 Nama: ${data.nama}\n` +
                               `📍 Alamat: ${data.alamat}\n` +
                               `🛣️ Jarak: ${data.jarak} KM\n` +
                               `🥥 Jumlah: ${data.jumlah} Butir\n` +
-                              `💰 Total: *${data.total}*\n` +
+                              `--------------------------------\n` +
+                              `💰 Harga Awal: Rp ${kalkulasiData.hargaAwal.toLocaleString('id-ID')}\n` +
+                              (kalkulasiData.diskonOngkir > 0 ? `✂️ Potongan Ongkir: -Rp ${kalkulasiData.diskonOngkir.toLocaleString('id-ID')}\n` : '') +
+                              (kalkulasiData.diskonBarang > 0 ? `🎁 Diskon Barang: -Rp ${kalkulasiData.diskonBarang.toLocaleString('id-ID')}\n` : '') +
+                              `--------------------------------\n` +
+                              `*💵 TOTAL BAYAR: Rp ${kalkulasiData.grandTotal.toLocaleString('id-ID')}*\n` +
                               `💳 Metode: ${data.metode}\n` +
-                              `🎁 Promo: ${data.promo}\n` +
                               `📄 Bukti: ${buktiUrl || 'Bayar Tunai'}\n\n` +
-                              `Mohon segera diproses, terima kasih!`;
+                              `Mohon diproses, terima kasih!`;
 
                 setTimeout(() => {
                     window.open(`https://wa.me/${config.wa}?text=${encodeURIComponent(waMsg)}`, '_blank');
@@ -387,8 +486,12 @@
                 ui.btnSubmit.innerText = "KIRIM PESANAN SEKARANG";
             }
         };
+        
+        // Init Hitung Awal
+        hitungTotal();
     });
 })();
 </script>
 </body>
 </html>
+
