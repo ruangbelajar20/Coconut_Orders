@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Order Coconut Bumi Jelly D'Hasna</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,7 +11,7 @@
         :root {
             --primary-color: #2e7d32; /* Hijau Tua Segar */
             --accent-color: #81c784; /* Hijau Muda */
-            --bg-color: #f7f9fc; /* Latar belakang sangat terang */
+            --bg-color: #f7f9fc; 
             --card-bg: #ffffff;
             --text-dark: #333333;
             --text-muted: #777777;
@@ -20,6 +20,7 @@
             --radius-md: 12px;
         }
 
+        /* Pencegahan Seleksi Teks agar terasa seperti Aplikasi Native */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
@@ -30,6 +31,9 @@
             align-items: center;
             min-height: 100vh;
             color: var(--text-dark);
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
         }
 
         .container {
@@ -43,7 +47,6 @@
             overflow: hidden;
         }
 
-        /* --- Header & Animasi Jelly --- */
         header {
             text-align: center;
             margin-bottom: 30px;
@@ -57,17 +60,15 @@
             margin-bottom: 15px;
         }
 
-        /* Ilustrasi Kelapa Jelly dengan CSS */
         .coconut-jelly {
             width: 70px;
             height: 60px;
             background: linear-gradient(to bottom, #ffffff 40%, #e0e0e0 100%);
             border-radius: 50% 50% 40% 40% / 60% 60% 35% 35%;
-            border: 4px solid #6d4c41; /* Warna batok */
+            border: 4px solid #6d4c41;
             position: relative;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            /* Animasi Mengapung */
             animation: floatJelly 3s ease-in-out infinite;
         }
         
@@ -84,7 +85,7 @@
 
         @keyframes floatJelly {
             0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-8px) scale(1.02); } /* Sedikit naik dan mengembang */
+            50% { transform: translateY(-8px) scale(1.02); }
         }
 
         h2 {
@@ -99,7 +100,6 @@
             margin-top: 5px;
         }
 
-        /* --- Form Styling Minimalis --- */
         .form-group {
             margin-bottom: 20px;
         }
@@ -112,6 +112,7 @@
             margin-bottom: 8px;
         }
 
+        /* Ukuran font 16px mencegah zoom otomatis pada iPhone */
         input[type="text"],
         input[type="number"],
         textarea,
@@ -121,10 +122,11 @@
             border: 2px solid #eee;
             border-radius: var(--radius-md);
             font-family: 'Poppins', sans-serif;
-            font-size: 14px;
+            font-size: 16px; 
             transition: all 0.3s ease;
             box-sizing: border-box;
             background: #fafafa;
+            -webkit-appearance: none; /* Menghilangkan style default iOS */
         }
 
         input:focus, textarea:focus, select:focus {
@@ -140,7 +142,27 @@
             margin-top: 5px;
         }
 
-        /* --- Total & Tombol --- */
+        /* Style khusus tombol Maps */
+        .btn-maps {
+            background-color: #fff;
+            color: #1976d2;
+            border: 1px solid #1976d2;
+            padding: 8px 15px;
+            font-size: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .btn-maps:hover {
+            background-color: #e3f2fd;
+        }
+
         .total-box {
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: white;
@@ -173,6 +195,8 @@
             font-family: 'Poppins', sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
+            /* Pencegahan double tap zoom */
+            touch-action: manipulation; 
         }
 
         #btn-submit:hover {
@@ -187,7 +211,6 @@
             transform: none;
         }
 
-        /* --- Upload Area & Error --- */
         .hidden { display: none; }
         
         #area-upload {
@@ -199,9 +222,9 @@
         input[type="file"] {
             background: white;
             padding: 10px;
+            font-size: 14px;
         }
 
-        /* --- POPUP SUKSES BERDENYUT --- */
         .success-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -228,7 +251,7 @@
             text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             transform: scale(0.8);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efek pantul */
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .success-overlay.active .success-card {
@@ -246,20 +269,13 @@
             align-items: center;
             font-size: 40px;
             margin: 0 auto 20px;
-            /* Animasi Berdenyut */
             animation: pulseEffect 2s infinite;
         }
 
         @keyframes pulseEffect {
-            0% {
-                box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 20px rgba(46, 125, 50, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(46, 125, 50, 0);
-            }
+            0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(46, 125, 50, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
         }
 
         .success-card h3 {
@@ -296,7 +312,8 @@
 
         <div class="form-group">
             <label for="jarak">Jarak dari Toko (KM)</label>
-            <input type="number" id="jarak" step="0.1" min="0" placeholder="Cek di Google Maps, contoh: 5.5" required>
+            <button type="button" id="btn-maps" class="btn-maps">📍 Buka Google Maps (Cek Jarak Akurat)</button>
+            <input type="number" id="jarak" step="0.1" min="0" placeholder="Ketik hasil jarak dari Maps, cth: 5.5" required style="margin-top: 8px;">
             <div class="note">Gratis ongkir untuk 4 KM pertama.</div>
         </div>
 
@@ -336,164 +353,176 @@
     </div>
 </div>
 
-
 <script>
-    // =============================================
-    // 1. KONFIGURASI SUPABASE (WAJIB DIGANTI!)
-    // =============================================
-    // Masukkan URL dan ANON KEY dari Dashboard Supabase Anda di sini
-    const SUPABASE_URL = "https://iltvpnplysjeaxufiokg.supabase.co"; 
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU";
-    // =============================================
+    // Membungkus seluruh script dalam Event Listener DOMContentLoaded agar variabel lokal tidak terekspos ke window (Global Scope)
+    // Ini membuat struktur lebih aman dari inspeksi konsol sederhana.
+    document.addEventListener('DOMContentLoaded', () => {
 
-
-    // Inisialisasi Client Supabase
-    // Menggunakan nama variabel 'db' agar aman dari bentrok
-    let db; 
-    try {
-        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log("Koneksi Database Siap.");
-    } catch (err) {
-        console.error("Gagal inisialisasi database:", err);
-    }
-
-
-    // --- 2. LOGIKA FRONTEND (Tampilan & Hitungan) ---
-    const inputJarak = document.getElementById('jarak');
-    const inputJumlah = document.getElementById('jumlah');
-    const inputPembayaran = document.getElementById('pembayaran');
-    const displayTotal = document.getElementById('total-display');
-    const areaUpload = document.getElementById('area-upload');
-    const successPopup = document.getElementById('successPopup');
-
-    // Fungsi Hitung Total Harga Real-time
-    function hitungTotal() {
-        const jumlah = parseFloat(inputJumlah.value) || 0;
-        const jarak = parseFloat(inputJarak.value) || 0;
-        
-        const HARGA_PER_BUTIR = 15000;
-        const JARAK_DASAR = 4; 
-        const ONGKIR_PER_KM = 1000;
-
-        let total = jumlah * HARGA_PER_BUTIR;
-
-        if (jarak > JARAK_DASAR) {
-            // Pembulatan ke atas (Math.ceil) untuk kelebihan jarak
-            let kelebihan = Math.ceil(jarak - JARAK_DASAR); 
-            total += (kelebihan * ONGKIR_PER_KM);
+        // --- 0. KEAMANAN DASAR (ANTI INSPEKSI) ---
+        // Mencegah Klik Kanan
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        // Mencegah Tombol F12 dan Kombinasi Inspect Element
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) { return false; } // F12
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } // Ctrl+Shift+I
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; } // Ctrl+Shift+C
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } // Ctrl+Shift+J
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } // Ctrl+U
         }
 
-        displayTotal.innerText = "Rp " + total.toLocaleString('id-ID');
-        // Tambahkan animasi kecil saat harga berubah
-        displayTotal.style.transform = "scale(1.1)";
-        setTimeout(() => displayTotal.style.transform = "scale(1)", 200);
-    }
+        // --- 1. KONFIGURASI SUPABASE ---
+        const SUPABASE_URL = "https://iltvpnplysjeaxufiokg.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU";
 
-    // Fungsi Toggle Area Upload
-    function cekMetode() {
-        if (inputPembayaran.value === 'QRIS') {
-            areaUpload.classList.remove('hidden');
-            // Animasi fade in sederhana
-            areaUpload.style.opacity = 0;
-            setTimeout(() => areaUpload.style.opacity = 1, 50);
-        } else {
-            areaUpload.classList.add('hidden');
-        }
-    }
-
-    // Event Listeners (Agar otomatis berubah saat diketik/dipilih)
-    inputJarak.addEventListener('input', hitungTotal);
-    inputJumlah.addEventListener('input', hitungTotal);
-    inputPembayaran.addEventListener('change', cekMetode);
-
-
-    // --- 3. PROSES SUBMIT PESANAN (Kirim ke Vercel) ---
-    document.getElementById('orderForm').addEventListener('submit', async (e) => {
-        e.preventDefault(); // Mencegah refresh halaman
-        
-        const btn = document.getElementById('btn-submit');
-        const originalText = btn.innerText;
-        btn.innerText = "⏳ Sedang Memproses...";
-        btn.disabled = true;
-        btn.style.opacity = 0.7;
-
+        let db; 
         try {
-            // Ambil data dari form
-            const nama = document.getElementById('nama').value;
-            const alamat = document.getElementById('alamat').value;
-            const jarak = document.getElementById('jarak').value;
-            const jumlah = document.getElementById('jumlah').value;
-            const metode = document.getElementById('pembayaran').value;
-            const fileInput = document.getElementById('bukti_file');
-            
-            let buktiUrl = "";
-
-            // A. Proses Upload Gambar (Jika QRIS)
-            if (metode === 'QRIS') {
-                if (fileInput.files.length === 0) {
-                    throw new Error("Anda memilih QRIS, wajib upload bukti transfer.");
-                }
-                
-                const file = fileInput.files[0];
-                // Buat nama file unik agar tidak tertimpa
-                const fileName = `bukti-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-                
-                // Upload ke Supabase Storage (menggunakan variabel 'db')
-                const { data, error: uploadError } = await db.storage
-                    .from('bukti-transfer')
-                    .upload(fileName, file);
-
-                if (uploadError) throw uploadError;
-
-                // Dapatkan URL publik gambar
-                const { data: urlData } = db.storage
-                    .from('bukti-transfer')
-                    .getPublicUrl(fileName);
-                
-                buktiUrl = urlData.publicUrl;
-            }
-
-            // B. Kirim Data Lengkap ke Backend Vercel (api/submit.js)
-            const response = await fetch('/api/submit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nama, alamat, jarak, jumlah, metode, buktiUrl
-                })
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || "Terjadi kesalahan saat menyimpan data.");
-            }
-
-            // --- SUKSES! TAMPILKAN POPUP BERDENYUT ---
-            successPopup.classList.add('active');
-
-            // Format Pesan WhatsApp
-            const pesanWA = `Halo Admin Coconut Bumi Jelly,\nSaya baru saja memesan via website.\n\nNama: *${nama}*\nAlamat: ${alamat}\nJumlah: ${jumlah} butir\nTotal: *${displayTotal.innerText}*\nMetode: ${metode}\n\nLink Bukti Bayar: ${buktiUrl || '-'}`;
-            const linkWA = `https://wa.me/62895336907868?text=${encodeURIComponent(pesanWA)}`;
-
-            // Tunggu 2.5 detik agar user melihat animasi popup, lalu alihkan
-            setTimeout(() => {
-                window.open(linkWA, '_blank');
-                window.location.reload(); // Refresh halaman untuk pesanan baru
-            }, 2500);
-
+            db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("System Ready."); // Pesan disamarkan
         } catch (err) {
-            // Jika Error
-            console.error(err);
-            alert("❌ Gagal: " + err.message);
-            btn.innerText = originalText;
-            btn.disabled = false;
-            btn.style.opacity = 1;
+            console.error("Init Error");
         }
-    });
 
-    // Jalankan fungsi awal saat halaman dimuat
-    hitungTotal();
-    cekMetode();
+        // --- 2. LOGIKA GOOGLE MAPS ---
+        // GANTI KOORDINAT INI DENGAN TITIK TOKO ANDA YANG ASLI!
+        // Format: latitude,longitude (Tanpa Spasi)
+        // Contoh Toko: Monas (sebagai placeholder)
+        const STORE_LOCATION = "-6.369581,107.400325"; 
+
+        document.getElementById('btn-maps').addEventListener('click', function() {
+            // Membuka Google Maps Mode Rute (Directions)
+            // api=1 & destination = Lokasi Toko
+            // Google Maps otomatis mendeteksi lokasi user sebagai titik awal
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${STORE_LOCATION}&travelmode=driving`;
+            window.open(mapsUrl, '_blank');
+        });
+
+
+        // --- 3. LOGIKA FRONTEND ---
+        const inputJarak = document.getElementById('jarak');
+        const inputJumlah = document.getElementById('jumlah');
+        const inputPembayaran = document.getElementById('pembayaran');
+        const displayTotal = document.getElementById('total-display');
+        const areaUpload = document.getElementById('area-upload');
+        const successPopup = document.getElementById('successPopup');
+        const formOrder = document.getElementById('orderForm');
+
+        function hitungTotal() {
+            const jumlah = parseFloat(inputJumlah.value) || 0;
+            const jarak = parseFloat(inputJarak.value) || 0;
+            
+            const HARGA_PER_BUTIR = 15000;
+            const JARAK_DASAR = 4; 
+            const ONGKIR_PER_KM = 1000;
+
+            let total = jumlah * HARGA_PER_BUTIR;
+
+            if (jarak > JARAK_DASAR) {
+                let kelebihan = Math.ceil(jarak - JARAK_DASAR); 
+                total += (kelebihan * ONGKIR_PER_KM);
+            }
+
+            displayTotal.innerText = "Rp " + total.toLocaleString('id-ID');
+        }
+
+        function cekMetode() {
+            if (inputPembayaran.value === 'QRIS') {
+                areaUpload.classList.remove('hidden');
+                setTimeout(() => areaUpload.style.opacity = 1, 50);
+            } else {
+                areaUpload.classList.add('hidden');
+            }
+        }
+
+        inputJarak.addEventListener('input', hitungTotal);
+        inputJumlah.addEventListener('input', hitungTotal);
+        inputPembayaran.addEventListener('change', cekMetode);
+
+
+        // --- 4. PROSES SUBMIT ---
+        formOrder.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-submit');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Sedang Memproses...";
+            btn.disabled = true;
+            btn.style.opacity = 0.7;
+
+            try {
+                const nama = document.getElementById('nama').value;
+                const alamat = document.getElementById('alamat').value;
+                const jarak = document.getElementById('jarak').value;
+                const jumlah = document.getElementById('jumlah').value;
+                const metode = document.getElementById('pembayaran').value;
+                const fileInput = document.getElementById('bukti_file');
+                
+                let buktiUrl = "";
+
+                if (metode === 'QRIS') {
+                    if (fileInput.files.length === 0) {
+                        throw new Error("Anda memilih QRIS, wajib upload bukti transfer.");
+                    }
+                    
+                    const file = fileInput.files[0];
+                    const fileName = `bukti-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+                    
+                    const { data, error: uploadError } = await db.storage
+                        .from('bukti-transfer')
+                        .upload(fileName, file);
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: urlData } = db.storage
+                        .from('bukti-transfer')
+                        .getPublicUrl(fileName);
+                    
+                    buktiUrl = urlData.publicUrl;
+                }
+
+                const response = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nama, alamat, jarak, jumlah, metode, buktiUrl
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || "Terjadi kesalahan saat menyimpan data.");
+                }
+
+                // SUKSES
+                successPopup.classList.add('active');
+
+                // BERSIHKAN FORMULIR (Sesuai Permintaan)
+                formOrder.reset();
+                // Kembalikan tampilan upload ke hidden dan total ke harga dasar
+                cekMetode(); 
+                hitungTotal();
+
+                const pesanWA = `Halo Admin Coconut Bumi Jelly,\nSaya baru saja memesan via website.\n\nNama: *${nama}*\nAlamat: ${alamat}\nJumlah: ${jumlah} butir\nTotal: *${displayTotal.innerText}*\nMetode: ${metode}\n\nLink Bukti Bayar: ${buktiUrl || '-'}`;
+                const linkWA = `https://wa.me/62895336907868?text=${encodeURIComponent(pesanWA)}`;
+
+                setTimeout(() => {
+                    window.open(linkWA, '_blank');
+                    window.location.reload(); 
+                }, 2500);
+
+            } catch (err) {
+                console.error(err);
+                alert("❌ Gagal: " + err.message);
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.style.opacity = 1;
+            }
+        });
+
+        // Jalankan fungsi awal
+        hitungTotal();
+        cekMetode();
+    });
 </script>
 
 </body>
