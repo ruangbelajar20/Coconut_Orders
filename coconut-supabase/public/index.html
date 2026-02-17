@@ -1,3 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Coconut Bumi Jelly</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        /* Desain Sederhana & Rapi */
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { 
+            max-width: 500px; margin: 0 auto; background: white; 
+            padding: 25px; border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
+        h2 { text-align: center; color: #2e7d32; margin-top: 0; }
+        
+        label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
+        input, select, textarea { 
+            width: 100%; padding: 12px; margin-top: 5px; 
+            border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
+            font-size: 14px;
+        }
+        
+        .total-box {
+            background: #e8f5e9; padding: 15px; margin-top: 20px;
+            border-radius: 8px; border: 1px dashed #2e7d32;
+            text-align: right; font-size: 18px; font-weight: bold; color: #2e7d32;
+        }
+        
+        button { 
+            width: 100%; padding: 15px; margin-top: 20px; 
+            background: #2e7d32; color: white; font-weight: bold; border: none; 
+            border-radius: 8px; cursor: pointer; font-size: 16px; 
+            transition: 0.3s;
+        }
+        button:hover { background: #1b5e20; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+
+        .hidden { display: none; }
+        .error-msg { color: red; font-size: 12px; margin-top: 5px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Coconut Bumi Jelly</h2>
+    <p style="text-align: center; color: #666; font-size: 14px;">Segar, Alami, Tanpa Pengawet</p>
+    
+    <form id="orderForm">
+        <label>Nama Pemesan:</label>
+        <input type="text" id="nama" placeholder="Nama Anda" required>
+
+        <label>Alamat Lengkap:</label>
+        <textarea id="alamat" rows="3" placeholder="Jalan, Nomor Rumah, Patokan..." required></textarea>
+
+        <label>Jarak dari Toko (KM):</label>
+        <input type="number" id="jarak" step="0.1" placeholder="Contoh: 5.5" required>
+        <small style="color: #888;">*Cek jarak di Google Maps dari HP Anda</small>
+
+        <label>Jumlah Pesanan (Butir):</label>
+        <input type="number" id="jumlah" min="1" value="1" required>
+
+        <label>Metode Pembayaran:</label>
+        <select id="pembayaran">
+            <option value="Cash">Cash (Tunai)</option>
+            <option value="QRIS">QRIS / Transfer</option>
+        </select>
+
+        <div id="area-upload" class="hidden">
+            <label style="color: #d32f2f;">Upload Bukti Transfer:</label>
+            <input type="file" id="bukti_file" accept="image/*">
+            <div id="file-error" class="error-msg">Wajib upload bukti jika pilih QRIS!</div>
+        </div>
+
+        <div class="total-box">
+            Total: <span id="total-display">Rp 15.000</span>
+        </div>
+
+        <button type="submit" id="btn-submit">KIRIM PESANAN</button>
+    </form>
+</div>
 <script>
     // --- 1. SETTING SUPABASE ---
     const SUPABASE_URL = "https://iltvpnplysjeaxufiokg.supabase.co"; 
@@ -115,3 +198,4 @@
         }
     });
 </script>
+
