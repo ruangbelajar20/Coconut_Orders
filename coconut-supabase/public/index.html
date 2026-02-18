@@ -427,8 +427,16 @@
         #promoVideo {
             width: 100%;
             height: 100%;
-            transform: none; 
-            object-fit: cover;
+            
+            /* 1. KUNCI UTAMA: Hapus scale atau set ke 1 (Normal) */
+            transform: scale(1); 
+            
+            /* 2. Agar video menyesuaikan bingkai tanpa terpotong parah */
+            object-fit: cover; 
+            
+            /* 3. Posisi video fokus di tengah */
+            object-position: center center;
+            
             display: block;
             mix-blend-mode: multiply;
         }
@@ -1279,6 +1287,7 @@
 </script>
 </body>
 </html>
+
 
 
 
