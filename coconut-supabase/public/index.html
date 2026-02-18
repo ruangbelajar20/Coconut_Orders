@@ -298,7 +298,6 @@
         .modal-header h3 { margin: 0; color: var(--primary); font-size: 16px; }
         .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
         
-        /* Style List di dalam Modal */
         /* Style List di dalam Modal (Versi Rapi) */
         .promo-list { 
             list-style: none; 
@@ -337,7 +336,62 @@
             font-weight: 700; 
             margin: 0 4px; /* PENTING: Memberi spasi otomatis kiri-kanan pada teks tebal */
         }
+
+        /* --- CUSTOM ALERT (POP-UP) --- */
+        .custom-alert {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #fff;
+            padding: 15px 25px;
+            border-radius: 50px; /* Bentuk kapsul modern */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 9999;
+            border-left: 5px solid var(--danger); /* Aksen merah */
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Efek membal */
+            min-width: 300px;
+        }
         
+        /* State Aktif (Muncul) */
+        .custom-alert.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            /* Animasi Berdenyut */
+            animation: pulse-red 2s infinite;
+        }
+        
+        /* Animasi Denyut Merah */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+        
+        /* Konten Alert */
+        .alert-icon { font-size: 24px; animation: shake 0.5s ease-in-out; }
+        .alert-content h4 { margin: 0; font-size: 14px; color: var(--danger); font-weight: 700; }
+        .alert-content p { margin: 0; font-size: 12px; color: #555; }
+        
+        /* Efek Getar untuk Ikon & Input Kosong */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Input Error Style */
+        .input-error {
+            border-color: var(--danger) !important;
+            background-color: #fff5f5 !important;
+            animation: shake 0.4s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -737,63 +791,95 @@
             ui.btnSubmit.style.display = 'block';
         };
 
+        // --- UPDATE LOGIKA SUBMIT DENGAN VALIDASI & POP-UP MODERN ---
         ui.form.onsubmit = async e => {
             e.preventDefault();
+
+            // 1. VALIDASI INPUT (Cek sebelum proses dimulai)
+            const namaVal = document.getElementById('nama').value.trim();
+            const alamatVal = document.getElementById('alamat').value.trim();
+            const jarakVal = parseFloat(ui.jarak.value);
+
+            // Cek Nama
+            if (!namaVal) {
+                showCustomAlert("Mohon isi Nama Pemesan terlebih dahulu.", "nama");
+                return; // Berhenti di sini jika salah
+            }
+
+            // Cek Alamat
+            if (!alamatVal) {
+                showCustomAlert("Kolom Alamat Lengkap wajib diisi.", "alamat");
+                return;
+            }
+
+            // Cek Jarak
+            if (!jarakVal || isNaN(jarakVal) || jarakVal === 0) {
+                showCustomAlert("Silakan klik tombol 'Hitung Jarak' atau 'Pilih Lokasi'.", "jarak");
+                return;
+            }
+
+            // Cek Bukti Transfer (Khusus QRIS)
+            if (ui.pembayaran.value === 'QRIS') {
+                const fileInput = document.getElementById('bukti_file');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    showCustomAlert("Anda memilih QRIS. Wajib upload bukti transfer!", "bukti_file");
+                    return;
+                }
+            }
+
+            // 2. JIKA SEMUA AMAN, MULAI PROSES
             ui.btnSubmit.disabled = true;
             ui.btnSubmit.innerText = "⏳ Memproses...";
 
             try {
-                // 1. Hitung ulang agar data paling update
+                // Hitung ulang untuk keamanan data
                 hitungTotal(); 
                 
-                // 2. Siapkan data untuk dikirim ke Supabase
-                // Pastikan nama properti (kiri) SAMA PERSIS dengan nama kolom di Supabase Tahap 1
+                // Siapkan objek data (Sesuai kolom Supabase)
                 const orderData = {
-                    nama: document.getElementById('nama').value,
-                    alamat: document.getElementById('alamat').value,
-                    jarak_km: parseFloat(ui.jarak.value),
+                    nama: namaVal,
+                    alamat: alamatVal,
+                    jarak_km: jarakVal,
                     jumlah_butir: parseInt(ui.jumlah.value),
                     metode_bayar: ui.pembayaran.value,
                     
-                    // --- KOLOM KEUANGAN (YANG ANDA MINTA) ---
-                    harga_barang_awal: calculatedData.subtotal,    // Harga barang total
-                    ongkir_murni: calculatedData.ongkirMurni,      // Ongkir asli
-                    potongan_ongkir: calculatedData.discOngkir,    // Nilai diskon ongkir
-                    potongan_barang: calculatedData.discBarang,    // Nilai diskon barang
-                    total_bayar: calculatedData.totalBayar,        // Total akhir
+                    // Kolom Keuangan Rinci
+                    harga_barang_awal: calculatedData.subtotal,
+                    ongkir_murni: calculatedData.ongkirMurni,
+                    potongan_ongkir: calculatedData.discOngkir,
+                    potongan_barang: calculatedData.discBarang,
+                    total_bayar: calculatedData.totalBayar,
                     
-                    bukti_url: "" // Nanti diisi di bawah jika ada upload
+                    bukti_url: "" // Default kosong
                 };
 
-                if(!orderData.jarak_km) throw new Error("Mohon hitung jarak terlebih dahulu.");
-
-                // 3. Proses Upload Bukti (Jika QRIS)
+                // 3. Proses Upload ke Storage (Jika QRIS)
                 if (orderData.metode_bayar === 'QRIS') {
                     const file = document.getElementById('bukti_file').files[0];
-                    if (!file) throw new Error("Harap upload bukti transfer!");
+                    const fName = `bukti-${Date.now()}.jpg`; // Nama file unik
                     
-                    const fName = `bukti-${Date.now()}.jpg`;
                     const { error } = await db.storage.from('bukti-transfer').upload(fName, file);
-                    if (error) throw error;
+                    if (error) throw new Error("Gagal upload bukti: " + error.message);
                     
-                    // Ambil link gambar
-                    orderData.bukti_url = db.storage.from('bukti-transfer').getPublicUrl(fName).data.publicUrl;
+                    // Ambil link publik
+                    const urlData = db.storage.from('bukti-transfer').getPublicUrl(fName);
+                    orderData.bukti_url = urlData.data.publicUrl;
                 }
 
-                // 4. Masukkan Data ke Tabel 'orders'
+                // 4. Simpan ke Database
                 const { error: dbError } = await db.from('orders').insert([orderData]);
+                if (dbError) throw new Error("Gagal simpan database: " + dbError.message);
 
-                if (dbError) throw dbError;
-
-                // 5. Tampilkan Sukses & Kirim WA
+                // 5. Tampilkan Sukses
                 document.getElementById('successPopup').classList.add('active');
 
+                // 6. Format Pesan WhatsApp (Dengan perbaikan spasi alamat)
                 const waMsg = 
-                    `*PESANAN BARU - COCONUT BUMI JELLY D'HASNA*\n` +
+                    `*PESANAN BARU - COCONUT BUMI JELLY*\n` +
                     `----------------------------------\n` +
                     `👤 *${orderData.nama}*\n\n` +
-                    `📍 Alamat: ${orderData.alamat}\n\n` +
-                    `🛣️ Jarak: ${orderData.jarak_km}\n` +
+                    `📍 *Alamat Pengiriman:*\n${orderData.alamat}\n\n` +
+                    `🛣️ Jarak: ${orderData.jarak_km} KM\n` +
                     `🥥 Order: ${orderData.jumlah_butir} Butir\n` +
                     `----------------------------------\n` +
                     `💵 Subtotal: ${formatRupiah(orderData.harga_barang_awal)}\n` +
@@ -805,19 +891,23 @@
                     `💳 Via: ${orderData.metode_bayar}\n` +
                     `📄 Bukti: ${orderData.bukti_url || 'Cash'}`;
 
+                // Redirect ke WA setelah 2 detik
                 setTimeout(() => {
                     window.open(`https://wa.me/${config.wa}?text=${encodeURIComponent(waMsg)}`, '_blank');
                     location.reload();
                 }, 2000);
 
             } catch (err) {
-                alert("Gagal mengirim pesanan: " + err.message);
-                console.error(err); // Cek console browser jika error
+                // Tangkap error dan tampilkan di Pop-up Modern (Bukan alert biasa)
+                console.error(err);
+                showCustomAlert("Terjadi Kesalahan: " + err.message);
+                
+                // Kembalikan tombol agar bisa dicoba lagi
                 ui.btnSubmit.disabled = false;
                 ui.btnSubmit.innerText = "KIRIM PESANAN";
             }
         };
-
+        
         hitungTotal();
     });
 })();
@@ -902,8 +992,16 @@ window.closePromoModal = function() {
 // Jalankan animasi saat web dimuat
 initPromoAnimation();
 </script>
+<div id="custom-alert" class="custom-alert hidden">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-content">
+        <h4 id="alert-title">Perhatian</h4>
+        <p id="alert-message">Mohon lengkapi data.</p>
+    </div>
+</div>
 </body>
 </html>
+
 
 
 
