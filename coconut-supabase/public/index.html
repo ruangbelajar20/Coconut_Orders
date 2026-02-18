@@ -410,16 +410,18 @@
                     <ul class="promo-list">
                         <li>Beli <span class="promo-highlight">Kelipatan 5 Butir</span> langsung dapat potongan harga.</li>
                         <li>Diskon <span class="promo-highlight">Rp 5.000</span> untuk setiap 5 butir.</li>
-                        <li>Contoh: Beli 10 butir, diskon Rp 10.000.</li>
+                        <li>Contoh: Beli 10 butir, diskon Rp 10.000. Beli 15 butir, diskon Rp 15.000.</li>
                         <li>Berlaku kelipatan seterusnya!</li>
                     </ul>`;
             } else if (type === 'ongkir') {
                 title.innerHTML = "🚚 Promo Diskon Ongkir";
                 content = `
                     <ul class="promo-list">
-                        <li>Gratis Ongkir Full: Jarak < 2.5 KM (Tanpa Min. Order)</li>
-                        <li>Diskon Ongkir 50%: Jarak 2.5 - 5 KM (Min. Order 3 butir)</li>
-                        <li>Gratis Ongkir: Jarak 2.5 - 5 KM (Min. Order 6 butir)</li>
+                        <li><b>Gratis Ongkir Full:</b><br>Jarak < 2.5 KM (Tanpa Min. Order)</li>
+                        <li><b>Diskon Ongkir 50%:</b><br>Jarak 2.5 - 6.5 KM (Min. Order 3 butir)</li>
+                        <li><b>Gratis Ongkir Full:</b><br>Jarak 2.5 - 6.5 KM (Min. Order 6 butir)</li>
+                        <li><b>Diskon Ongkir 50%:</b><br>Jarak 5 - 12 KM (Min. Order 6 butir)</li>
+                        <li><b>Gratis Ongkir Full:</b><br>Jarak 5 - 12 KM (Min. Order 11 butir)</li>
                     </ul>`;
             }
             body.innerHTML = content;
@@ -450,13 +452,13 @@
             }
 
             let discOngkir = 0;
-            if (dist > 2.5 && dist <= 5) {
+            if (dist > 2.5 && dist <= 6.5) {
                 if (qty > 2 && qty <= 5) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 5) discOngkir = ongkirMurni; 
-            } else if (dist > 5 && dist <= 10) {
+            } else if (dist > 5 && dist <= 12) {
                 if (qty >= 6 && qty <= 10) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 10) discOngkir = ongkirMurni; 
-            } else if (dist > 10 && dist <= 15) {
+            } else if (dist > 10 && dist <= 20) {
                 if (qty > 10 && qty <= 15) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 15) discOngkir = ongkirMurni; 
             }
@@ -717,4 +719,5 @@
 </script>
 </body>
 </html>
+
 
