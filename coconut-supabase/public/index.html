@@ -242,11 +242,21 @@
             </select>
         </div>
 
+        <div class="form-group" style="margin-top: 20px;">
+            <label>Kode Voucher (Opsional)</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="voucher_code" placeholder="Masukkan kode promo..." style="text-transform: uppercase;">
+                <button type="button" id="btn-apply-voucher" class="btn-action btn-gps" style="margin:0; width: auto; white-space: nowrap;">Pakai</button>
+            </div>
+            <div id="voucher-msg" style="font-size: 11px; margin-top: 5px;"></div>
+        </div>
+        
         <div class="invoice-box">
             <div class="invoice-row highlight"><span>Subtotal Barang</span><span id="txt-subtotal">Rp 15.000</span></div>
             <div class="invoice-row"><span>Ongkos Kirim</span><span id="txt-ongkir">Rp 0</span></div>
             <div class="invoice-row discount hidden" id="row-disc-ongkir"><span>Potongan Ongkir</span><span id="txt-disc-ongkir">-Rp 0</span></div>
             <div class="invoice-row discount hidden" id="row-disc-barang"><span>Diskon Barang</span><span id="txt-disc-barang">-Rp 0</span></div>
+            <div class="invoice-row discount hidden" id="row-disc-voucher"><span>Potongan Voucher</span><span id="txt-disc-voucher">-Rp 0</span></div>
             <div class="invoice-divider"></div>
             <div class="invoice-total"><span>Total Bayar</span><span id="txt-total">Rp 15.000</span></div>
         </div>
@@ -328,6 +338,8 @@
 
         const db = window.supabase.createClient(config.url, config.anon);
         let map, marker, calculatedData = {};
+        let voucherValue = 0; 
+        let activeVoucherCode = "";
         let searchTimeout;
 
         const ui = {
@@ -464,7 +476,7 @@
             }
 
             let discBarang = Math.floor(qty / 5) * 5000;
-            const totalBayar = subtotal + ongkirMurni - discOngkir - discBarang;
+            const totalBayar = subtotal + ongkirMurni - discOngkir - discBarang - voucherValue;
 
             calculatedData = { subtotal, ongkirMurni, discOngkir, discBarang, totalBayar };
 
@@ -481,6 +493,14 @@
                 ui.rowDiscBarang.classList.remove('hidden');
                 ui.txtDiscBarang.innerText = '-' + formatRupiah(discBarang);
             } else { ui.rowDiscBarang.classList.add('hidden'); }
+
+            const rowVoucher = document.getElementById('row-disc-voucher');
+            if (voucherValue > 0) {
+                rowVoucher.classList.remove('hidden');
+                document.getElementById('txt-disc-voucher').innerText = '-' + formatRupiah(voucherValue);
+            } else {
+                rowVoucher.classList.add('hidden');
+            }
         };
 
         const fetchRouteOSRM = async (lat, lng) => {
@@ -632,6 +652,85 @@
             ui.btnSubmit.style.display = 'block';
         };
 
+        // --- LOGIKA VOUCHER ---
+        const cekVoucher = async () => {
+            const inputCode = document.getElementById('voucher_code').value.trim().toUpperCase();
+            const msgEl = document.getElementById('voucher-msg');
+            const qty = parseInt(ui.jumlah.value) || 0;
+            const subtotal = qty * 15000; // Harga satuan
+
+            // Reset dulu
+            voucherValue = 0;
+            activeVoucherCode = "";
+            msgEl.innerText = "Memeriksa...";
+            msgEl.style.color = "#666";
+
+            if (!inputCode) {
+                msgEl.innerText = "";
+                hitungTotal();
+                return;
+            }
+
+            // ATURAN 1: Kode Harus Benar (Misal: "HEMAT20")
+            if (inputCode !== "HEMAT20") {
+                msgEl.innerText = "❌ Kode voucher tidak dikenali.";
+                msgEl.style.color = "var(--danger)";
+                hitungTotal();
+                return;
+            }
+
+            // ATURAN 2: Minimal Beli 3 Butir
+            if (qty < 3) {
+                msgEl.innerText = "⚠️ Minimal pembelian 3 butir untuk voucher ini.";
+                msgEl.style.color = "#e67e22"; // Orange
+                hitungTotal();
+                return;
+            }
+
+            try {
+                // ATURAN 3: Cek Kuota (Maksimal 20 Orang) di Supabase
+                // Kita hitung berapa kali kode ini sudah muncul di tabel 'orders'
+                const { count, error } = await db
+                    .from('orders')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('kode_voucher', inputCode);
+
+                if (error) throw error;
+
+                if (count >= 20) {
+                    msgEl.innerText = "❌ Yah, kuota voucher ini sudah habis (Maks 20 orang).";
+                    msgEl.style.color = "var(--danger)";
+                    hitungTotal();
+                    return;
+                }
+
+                // ATURAN 4: Hitung Diskon (20% Max 15rb)
+                let diskon = subtotal * 0.20; // 20%
+                if (diskon > 15000) diskon = 15000; // Mentok 15rb
+
+                // Sukses
+                voucherValue = diskon;
+                activeVoucherCode = inputCode;
+                msgEl.innerText = `✅ Voucher dipakai! Hemat Rp ${diskon.toLocaleString()}`;
+                msgEl.style.color = "var(--success)";
+                
+                hitungTotal(); // Update total harga
+
+            } catch (err) {
+                console.error(err);
+                msgEl.innerText = "Gagal mengecek voucher (Koneksi error).";
+                msgEl.style.color = "var(--danger)";
+            }
+        };
+
+        // Event Listener Tombol Voucher
+        document.getElementById('btn-apply-voucher').onclick = cekVoucher;
+        // Reset voucher jika jumlah berubah (karena ada syarat min 3 butir)
+        ui.jumlah.addEventListener('input', () => {
+            if(activeVoucherCode) cekVoucher();
+            else hitungTotal();
+        });
+        
         // --- SUBMIT WITH VALIDATION ---
         ui.form.onsubmit = async e => {
             e.preventDefault();
@@ -666,6 +765,8 @@
                     ongkir_murni: calculatedData.ongkirMurni,
                     potongan_ongkir: calculatedData.discOngkir,
                     potongan_barang: calculatedData.discBarang,
+                    kode_voucher: activeVoucherCode || null, // Simpan kodenya
+                    nilai_voucher: voucherValue,
                     total_bayar: calculatedData.totalBayar,
                     bukti_url: ""
                 };
@@ -696,6 +797,7 @@
                     `🚚 Ongkir Asli: ${formatRupiah(orderData.ongkir_murni)}\n` +
                     (orderData.potongan_ongkir > 0 ? `✂️ Potongan Ongkir: -${formatRupiah(orderData.potongan_ongkir)}\n` : '') +
                     (orderData.potongan_barang > 0 ? `🎁 Diskon Barang: -${formatRupiah(orderData.potongan_barang)}\n` : '') +
+                    (orderData.nilai_voucher > 0 ? `🎟️ Voucher (${orderData.kode_voucher}): -${formatRupiah(orderData.nilai_voucher)}\n` : '') +
                     `----------------------------------\n` +
                     `*TOTAL BAYAR: ${formatRupiah(orderData.total_bayar)}*\n` +
                     `💳 Via: ${orderData.metode_bayar}\n` +
@@ -719,5 +821,6 @@
 </script>
 </body>
 </html>
+
 
 
