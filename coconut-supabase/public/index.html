@@ -197,50 +197,39 @@
             display: inline-block;
             white-space: nowrap;
             /* Animasi Kompleks: Durasi 18 detik, Linear, Selamanya */
-            animation: master-sequence 18s linear infinite; 
+            animation: master-sequence 35s linear infinite; 
         }
         
         /* --- RUMUS ANIMASI KOMPLEKS --- */
         @keyframes master-sequence {
-            /* FASE 1: BERJALAN DARI KANAN KE KIRI (0% - 40%) */
+            /* FASE 1: BERJALAN (Lebih Panjang Waktunya: 0% - 50%) */
             0% {
-                transform: translateX(100vw); /* Mulai dari luar kanan */
+                transform: translateX(100vw); /* Mulai dari kanan layar */
                 opacity: 1;
             }
-            40% {
-                transform: translateX(-100%); /* Jalan sampai hilang ke kiri */
+            50% {
+                transform: translateX(-100%); /* Jalan pelan sampai ujung kiri */
                 opacity: 1;
             }
         
-            /* FASE 2: TELEPORT KE TENGAH & BERKEDIP (40.1% - 60%) */
-            40.1% { 
-                transform: translateX(0); /* Pindah instan ke tengah */
-                opacity: 0; /* Sembunyi dulu */
-            }
-            42% { opacity: 1; } /* Muncul */
-            44% { opacity: 0; } /* Hilang (Kedip) */
-            46% { opacity: 1; } /* Muncul */
-            48% { opacity: 0; } /* Hilang (Kedip) */
-            50% { opacity: 1; } /* Muncul Standby */
-            60% { 
-                transform: translateX(0); 
-                opacity: 1; 
-            }
+            /* FASE 2: TELEPORT KE TENGAH & KEDIP (Cepat: 50% - 70%) */
+            50.1% { transform: translateX(0); opacity: 0; } /* Pindah tengah */
+            52% { opacity: 1; }
+            54% { opacity: 0; }
+            56% { opacity: 1; }
+            58% { opacity: 0; }
+            60% { opacity: 1; transform: translateX(0); } /* Diam di tengah */
         
-            /* FASE 3: GOYANG KANAN KIRI (60% - 90%) */
-            65% { transform: translateX(-30px); } /* Geser Kiri */
-            70% { transform: translateX(30px); }  /* Geser Kanan */
-            75% { transform: translateX(-30px); } /* Geser Kiri */
-            80% { transform: translateX(30px); }  /* Geser Kanan */
-            85% { transform: translateX(0); }     /* Kembali Tengah */
+            /* FASE 3: GOYANG KANAN KIRI (70% - 90%) */
+            75% { transform: translateX(-20px); }
+            80% { transform: translateX(20px); }
+            85% { transform: translateX(-20px); }
+            90% { transform: translateX(0); }
         
-            /* FASE 4: ISTIRAHAT SEBELUM ULANG (90% - 100%) */
-            90% { opacity: 1; }
-            99% { opacity: 0; } /* Hilang pelan-pelan */
-            100% { 
-                transform: translateX(100vw); /* Reset ke posisi awal kanan */
-                opacity: 0; 
-            }
+            /* FASE 4: SELESAI (90% - 100%) */
+            95% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(0); }
+        }
         }
     </style>
 </head>
@@ -907,6 +896,7 @@
 </script>
 </body>
 </html>
+
 
 
 
