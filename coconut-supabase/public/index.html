@@ -168,15 +168,104 @@
         .success-overlay.active { opacity: 1; visibility: visible; }
         .check-icon { width: 80px; height: 80px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 40px; margin-bottom: 20px; animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(15, 122, 99, 0.3); }
         @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+        /* --- CSS BARU UNTUK PROMO HEADER --- */
+        
+        /* 1. Tata Letak Sejajar (Flexbox) */
+        .header-content {
+            display: flex;
+            justify-content: space-between; /* Jarak merata kiri-tengah-kanan */
+            align-items: center;
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        /* 2. Mengatur Ukuran Logo agar Pas di Tengah */
+        .logo-container {
+            width: 110px; /* Sedikit diperkecil agar muat di HP */
+            height: 110px;
+            flex-shrink: 0; /* Logo tidak boleh gepeng */
+            margin: 0 10px; /* Jarak aman dari teks */
+            z-index: 2; /* Logo di atas */
+        }
+        
+        /* 3. Desain Kotak Promo (Modern Glass Effect) */
+        .promo-badge {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px); /* Efek kaca buram */
+            border: 1px solid rgba(15, 122, 99, 0.1);
+            border-radius: 12px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 90px; /* Lebar tetap agar rapi */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            animation: floatBadge 3s ease-in-out infinite;
+        }
+        
+        /* Animasi Melayang Halus */
+        @keyframes floatBadge {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        /* Delay animasi agar tidak barengan dengan logo */
+        .promo-badge.right { animation-delay: 1.5s; } 
+        
+        /* 4. Tipografi Teks Promo */
+        .promo-badge .emoji { font-size: 20px; margin-bottom: 2px; }
+        .promo-badge .text small { 
+            display: block; 
+            font-size: 9px; 
+            color: var(--text-light); 
+            line-height: 1.2;
+        }
+        .promo-badge .text strong { 
+            display: block; 
+            font-size: 11px; 
+            color: var(--primary); 
+            font-weight: 700;
+        }
+        
+        /* 5. Responsif untuk Layar Sangat Kecil (HP Sempit) */
+        @media (max-width: 360px) {
+            .promo-badge { width: 75px; padding: 5px; }
+            .logo-container { width: 90px; height: 90px; }
+            .promo-badge .emoji { font-size: 16px; }
+            .promo-badge .text strong { font-size: 10px; }
+        }
+        
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <div class="logo-container">
-            <img src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/logos/Logo_D_Hasna-rb.png" alt="Logo Bumi Jelly" class="logo-img">
+        <div class="header-content">
+            <div class="promo-badge left">
+                <span class="emoji">🎁</span>
+                <div class="text">
+                    <small>Diskon Barang</small>
+                    <strong>s/d 15rb</strong>
+                </div>
+            </div>
+    
+            <div class="logo-container">
+                <img src="LINK_GAMBAR_LOGO_ANDA_DISINI" alt="Logo Bumi Jelly" class="logo-img">
+            </div>
+    
+            <div class="promo-badge right">
+                <span class="emoji">🚚</span>
+                <div class="text">
+                    <small>Diskon Ongkir</small>
+                    <strong>50% - 100%</strong>
+                </div>
+            </div>
         </div>
+        
         <div class="subtitle">Nikmati Kesegaran Alami Kelapa Muda</div>
     </header>
 
@@ -607,4 +696,5 @@
 </script>
 </body>
 </html>
+
 
