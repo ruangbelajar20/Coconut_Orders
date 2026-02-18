@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Penjual - Bumi Jelly D'Hasna</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script> <style>
+        :root {
+            --primary: #0f7a63;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-light: #6b7280;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text-main); }
+        
+        /* LAYOUT GRID */
+        .dashboard-container {
+            max-width: 1200px; margin: 0 auto; padding: 20px;
+            display: grid; grid-template-columns: 1fr; gap: 20px;
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--primary); color: white; padding: 20px; border-radius: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 20px rgba(15, 122, 99, 0.2);
+        }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 800; }
+        .refresh-btn {
+            background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; gap: 8px; align-items: center;
+            transition: 0.3s;
+        }
+        .refresh-btn:hover { background: rgba(255,255,255,0.4); }
+
+        /* CARDS */
+        .card { background: var(--card-bg); border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .card-title { font-size: 16px; font-weight: 600; color: var(--text-light); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        
+        /* SUMMARY STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-value { font-size: 28px; font-weight: 800; color: var(--text-main); margin-top: 5px; }
+        .stat-label { font-size: 13px; color: var(--text-light); }
+
+        /* CHARTS SECTION */
+        .charts-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+
+        /* ORDER TABLE & GROUPING */
+        .grouping-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-btn {
+            background: white; border: 1px solid #e5e7eb; padding: 8px 16px; border-radius: 50px;
+            cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s;
+        }
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .order-group { margin-bottom: 20px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+        .group-header {
+            background: #f9fafb; padding: 15px 20px; border-bottom: 1px solid #e5e7eb;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .group-title { font-weight: 700; color: var(--primary); font-size: 14px; }
+        .group-badge { background: #d1fae5; color: #065f46; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+
+        .order-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .order-table th { text-align: left; padding: 12px 20px; color: var(--text-light); font-weight: 600; border-bottom: 1px solid #eee; }
+        .order-table td { padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #333; }
+        .order-table tr:last-child td { border-bottom: none; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .badge-qris { background: #dbeafe; color: #1e40af; }
+        .badge-cash { background: #d1fae5; color: #065f46; }
+
+        /* LOADING */
+        #loading { text-align: center; padding: 50px; color: var(--text-light); }
+        
+        @media (max-width: 768px) {
+            .charts-wrapper { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="header">
+        <div>
+            <h1>Dashboard Penjual</h1>
+            <div style="font-size:13px; opacity:0.9;">Analisis & Pengelompokan Pesanan</div>
+        </div>
+        <button class="refresh-btn" onclick="fetchData()"><i data-lucide="refresh-cw"></i> Refresh Data</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="card">
+            <div class="card-title"><i data-lucide="dollar-sign"></i> Total Pendapatan</div>
+            <div class="stat-value" id="stat-revenue">Rp 0</div>
+            <div class="stat-label">Semua pesanan masuk</div>
+        </div>
+        <div class="card">
+            <div class="card-title"><i data-lucide="shopping-bag"></i> Total Pesanan</div>
+            <div class="stat-value" id="stat-count">0</div>
+            <div class="stat-label">Transaksi berhasil</div>
+        </div>
+        <div class="card">
+            <div class="card-title"><i data-lucide="ticket"></i> Voucher Dipakai</div>
+            <div class="stat-value" id="stat-voucher">0%</div>
+            <div class="stat-label">Persentase penggunaan</div>
+        </div>
+    </div>
+
+    <div class="charts-wrapper">
+        <div class="card">
+            <div class="card-title">🏆 Top Pelanggan (Loyalitas)</div>
+            <div class="chart-container"><canvas id="chartCustomer"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-title">📍 Sebaran Wilayah (Radius)</div>
+            <div class="chart-container"><canvas id="chartArea"></canvas></div>
+        </div>
+    </div>
+    
+    <div class="charts-wrapper">
+         <div class="card">
+            <div class="card-title">💰 Tren Metode Pembayaran</div>
+            <div class="chart-container"><canvas id="chartPayment"></canvas></div>
+        </div>
+        <div class="card">
+             <div class="card-title">📉 Efektivitas Diskon & Voucher</div>
+            <div class="chart-container"><canvas id="chartDiscount"></canvas></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><i data-lucide="truck"></i> Pengelompokan Pengiriman (Smart Routing)</div>
+        
+        <div class="grouping-controls">
+            <button class="filter-btn active" onclick="setGrouping('route')">Rute Satu Arah (Cluster Jarak)</button>
+            <button class="filter-btn" onclick="setGrouping('latest')">Pesanan Terbaru</button>
+            <button class="filter-btn" onclick="setGrouping('area')">Radius Dekat (< 2.5KM)</button>
+        </div>
+
+        <div id="orders-container">
+            <div id="loading">Mengambil data dari Supabase...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 1. KONFIGURASI SUPABASE (SAMA DENGAN FILE ORDER) ---
+    const config = {
+        url: "https://iltvpnplysjeaxufiokg.supabase.co",
+        anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU"
+    };
+    const db = window.supabase.createClient(config.url, config.anon);
+    
+    // Inisialisasi Icon
+    lucide.createIcons();
+
+    let allOrders = [];
+    let charts = {};
+
+    // --- 2. FUNGSI UTAMA FETCH DATA ---
+    async function fetchData() {
+        document.getElementById('orders-container').innerHTML = '<div id="loading">Sedang memuat data terbaru...</div>';
+        
+        try {
+            const { data, error } = await db
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            
+            allOrders = data;
+            calculateStats();
+            renderCharts();
+            setGrouping('route'); // Default view
+            
+        } catch (err) {
+            console.error(err);
+            alert("Gagal mengambil data: " + err.message);
+        }
+    }
+
+    // --- 3. LOGIKA STATISTIK & FORMAT ---
+    const formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');
+
+    function calculateStats() {
+        const totalRev = allOrders.reduce((sum, o) => sum + (o.total_bayar || 0), 0);
+        const totalOrder = allOrders.length;
+        const voucherCount = allOrders.filter(o => o.nilai_voucher > 0).length;
+        const voucherPercent = totalOrder > 0 ? ((voucherCount / totalOrder) * 100).toFixed(1) : 0;
+
+        document.getElementById('stat-revenue').innerText = formatRupiah(totalRev);
+        document.getElementById('stat-count').innerText = totalOrder;
+        document.getElementById('stat-voucher').innerText = voucherPercent + '%';
+    }
+
+    // --- 4. LOGIKA GRAFIK (CHART.JS) ---
+    function renderCharts() {
+        // A. Grafik Pelanggan Terbanyak
+        const customerCounts = {};
+        allOrders.forEach(o => { customerCounts[o.nama] = (customerCounts[o.nama] || 0) + 1; });
+        const sortedCust = Object.entries(customerCounts).sort((a,b) => b[1] - a[1]).slice(0, 5); // Top 5
+
+        createChart('chartCustomer', 'bar', {
+            labels: sortedCust.map(i => i[0]),
+            datasets: [{
+                label: 'Jumlah Pembelian',
+                data: sortedCust.map(i => i[1]),
+                backgroundColor: '#0f7a63',
+                borderRadius: 5
+            }]
+        });
+
+        // B. Grafik Area (Radius)
+        const radiusGroups = { '< 2.5 KM': 0, '2.5 - 5 KM': 0, '> 5 KM': 0 };
+        allOrders.forEach(o => {
+            const dist = parseFloat(o.jarak_km);
+            if(dist <= 2.5) radiusGroups['< 2.5 KM']++;
+            else if(dist <= 5) radiusGroups['2.5 - 5 KM']++;
+            else radiusGroups['> 5 KM']++;
+        });
+
+        createChart('chartArea', 'doughnut', {
+            labels: Object.keys(radiusGroups),
+            datasets: [{
+                data: Object.values(radiusGroups),
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+            }]
+        });
+
+        // C. Metode Pembayaran
+        const payMethods = {};
+        allOrders.forEach(o => { payMethods[o.metode_bayar] = (payMethods[o.metode_bayar] || 0) + 1; });
+        
+        createChart('chartPayment', 'pie', {
+            labels: Object.keys(payMethods),
+            datasets: [{
+                data: Object.values(payMethods),
+                backgroundColor: ['#3b82f6', '#10b981']
+            }]
+        });
+
+        // D. Grafik Diskon Voucher
+        const voucherUsed = allOrders.filter(o => o.nilai_voucher > 0).length;
+        const noVoucher = allOrders.length - voucherUsed;
+        
+        createChart('chartDiscount', 'bar', {
+            labels: ['Pakai Voucher', 'Tanpa Voucher'],
+            datasets: [{
+                label: 'Jumlah Transaksi',
+                data: [voucherUsed, noVoucher],
+                backgroundColor: ['#8b5cf6', '#9ca3af'],
+                borderRadius: 5
+            }]
+        });
+    }
+
+    function createChart(id, type, data) {
+        if(charts[id]) charts[id].destroy(); // Hapus chart lama biar gak numpuk
+        const ctx = document.getElementById(id).getContext('2d');
+        charts[id] = new Chart(ctx, {
+            type: type,
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    // --- 5. LOGIKA PENGELOMPOKAN (CLUSTERING) ---
+    function setGrouping(mode) {
+        // Update Button UI
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+
+        const container = document.getElementById('orders-container');
+        container.innerHTML = "";
+
+        let groups = {};
+
+        if (mode === 'latest') {
+            // Mode Biasa (Tanpa Grup)
+            renderGroup("Semua Pesanan (Terbaru)", allOrders, container);
+            return;
+        }
+
+        if (mode === 'route') {
+            // LOGIKA CLUSTERING CERDAS: Kelompokkan berdasarkan Jarak yang mirip (+- 0.5km)
+            // Karena kita tidak punya Lat/Lng, kita asumsikan jarak yg sama = satu arah cincin wilayah
+            
+            // Sort dulu berdasarkan jarak
+            const sortedByDist = [...allOrders].sort((a,b) => parseFloat(a.jarak_km) - parseFloat(b.jarak_km));
+            
+            let currentCluster = [];
+            let lastDist = -1;
+
+            sortedByDist.forEach((order) => {
+                const dist = parseFloat(order.jarak_km);
+                // Jika ini data pertama atau jaraknya berdekatan (selisih < 0.5km)
+                if (lastDist === -1 || Math.abs(dist - lastDist) <= 0.5) {
+                    currentCluster.push(order);
+                } else {
+                    // Buat grup baru
+                    const groupName = `Zona Jarak ${lastDist.toFixed(1)} KM - ${(lastDist+0.5).toFixed(1)} KM`;
+                    renderGroup(groupName, currentCluster, container);
+                    currentCluster = [order];
+                }
+                lastDist = dist;
+            });
+            // Render sisa
+            if (currentCluster.length > 0) {
+                 renderGroup(`Zona Jarak > ${lastDist.toFixed(1)} KM`, currentCluster, container);
+            }
+        }
+
+        if (mode === 'area') {
+            // Filter Khusus Radius Dekat
+            const closeOrders = allOrders.filter(o => parseFloat(o.jarak_km) <= 2.5);
+            renderGroup("Radius Prioritas (0 - 2.5 KM)", closeOrders, container);
+        }
+    }
+
+    function renderGroup(title, orders, container) {
+        if (orders.length === 0) return;
+
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'order-group';
+        
+        let rows = '';
+        orders.forEach(o => {
+            const date = new Date(o.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+            const badgeClass = o.metode_bayar === 'QRIS' ? 'badge-qris' : 'badge-cash';
+            
+            rows += `
+                <tr>
+                    <td>
+                        <strong>${o.nama}</strong><br>
+                        <small style="color:#666">${o.alamat}</small>
+                    </td>
+                    <td>${o.jarak_km} KM</td>
+                    <td>${o.jumlah_butir} Btr</td>
+                    <td>${formatRupiah(o.total_bayar)}</td>
+                    <td><span class="status-badge ${badgeClass}">${o.metode_bayar}</span></td>
+                    <td style="font-size:11px; color:#888;">${date}</td>
+                </tr>
+            `;
+        });
+
+        groupDiv.innerHTML = `
+            <div class="group-header">
+                <div class="group-title">${title}</div>
+                <div class="group-badge">${orders.length} Pesanan</div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>Pelanggan & Alamat</th>
+                            <th>Jarak</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                            <th>Metode</th>
+                            <th>Waktu</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        `;
+        container.appendChild(groupDiv);
+    }
+
+    // Load Data Awal
+    document.addEventListener('DOMContentLoaded', fetchData);
+
+</script>
+
+</body>
+</html>
