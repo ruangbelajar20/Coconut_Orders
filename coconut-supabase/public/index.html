@@ -512,39 +512,11 @@
 </div>
 
 <script>
-const appConfig = Object.freeze({
-    server: "https://iltvpnplysjeaxufiokg.supabase.co",
-    merchant: "Bumi Jelly D'Hasna",
-    // Masukkan kode Base64 QRIS di sini
-    secureKey: "aHR0cHM6Ly9pbHR2cG5wbHlzamVheHVmaW9rZy5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvYXNzZXRzL1FSSVMuanBlZw=="
-});
-    
-const _0x1a2b = "aHR0cHM6Ly9pbHR2cG5wbHlzamVheHVmaW9rZy5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvYXNzZXRzL1FSSVMuanBlZw==";
-
-// Fungsi Pembuka Sandi
-const getSecureImage = () => {
-    return atob(_0x1a2b); // atob adalah fungsi pembuka Base64
-};
-
-// Pasang Link saat Tombol Bayar di Klik (Bukan saat loading awal)
-ui.btnPay.onclick = () => {
-    // ... (Validasi nama & jarak tetap ada) ...
-
-    // INJEKSI LINK RAHASIA
-    const qrisImg = document.getElementById('secret-qris');
-    if (qrisImg) {
-        qrisImg.src = getSecureImage(); // Link baru muncul detik ini
-    }
-
-    // ... (Lanjut buka modal) ...
-    const modal = document.getElementById('qrisModal');
-    modal.classList.remove('hidden');
-    // ...
-};
 (() => {
     "use strict";
 
     document.addEventListener('DOMContentLoaded', () => {
+        
         // --- 1. KEAMANAN ---
         document.addEventListener('contextmenu', event => event.preventDefault()); // Anti Klik Kanan
         document.onkeydown = function(e) {
@@ -561,6 +533,20 @@ ui.btnPay.onclick = () => {
                 return false;
             }
         }
+        
+        const appConfig = Object.freeze({
+            server: "https://iltvpnplysjeaxufiokg.supabase.co",
+            merchant: "Bumi Jelly D'Hasna",
+            // Masukkan kode Base64 QRIS di sini
+            secureKey: "aHR0cHM6Ly9pbHR2cG5wbHlzamVheHVmaW9rZy5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvYXNzZXRzL1FSSVMuanBlZw=="
+        });
+            
+        const _0x1a2b = "aHR0cHM6Ly9pbHR2cG5wbHlzamVheHVmaW9rZy5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvYXNzZXRzL1FSSVMuanBlZw==";
+        
+        // Fungsi Pembuka Sandi
+        const getSecureImage = () => {
+            return atob(_0x1a2b); // atob adalah fungsi pembuka Base64
+        };
 
         const config = {
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
@@ -900,6 +886,11 @@ ui.btnPay.onclick = () => {
             // Set Total Harga ke dalam Modal agar user tahu berapa yang harus dibayar
             document.getElementById('qris-total-amount').innerText = ui.txtTotal.innerText;
 
+            const qrisImg = document.getElementById('secret-qris');
+            if (qrisImg) {
+                qrisImg.src = getSecureImage(); // Link baru muncul detik ini
+            }
+            
             // Tampilkan Modal dengan Animasi
             const modal = document.getElementById('qrisModal');
             modal.classList.remove('hidden');
@@ -1151,6 +1142,7 @@ ui.btnPay.onclick = () => {
 </script>
 </body>
 </html>
+
 
 
 
