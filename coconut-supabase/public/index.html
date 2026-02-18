@@ -424,20 +424,20 @@
             100% { filter: brightness(1); }
         }
 
-        /* --- ROTASI VIDEO LANDSCAPE --- */
-        /* --- VIDEO DI DALAM KOTAK --- */
         #promoVideo {
             width: 100%;
             height: 100%;
             
-            /* Agar video mengisi seluruh kotak dengan rapi */
-            object-fit: cover; 
+            /* Tetap gunakan cover agar memenuhi bingkai */
+            object-fit: cover;
             object-position: center;
             
-            /* Pastikan tidak ada rotasi/zoom aneh */
-            transform: none; 
+            /* UBAH INI: Kecilkan angka di bawah 1 (misal 0.8 atau 0.9) */
+            /* 0.9 artinya ukuran 90% (Zoom out 10%) */
+            transform: scale(0.9); 
             
-            display: block;
+            /* Agar transisi halus */
+            transition: transform 0.3s ease;
         }
     </style>
 </head>
@@ -1286,6 +1286,7 @@
 </script>
 </body>
 </html>
+
 
 
 
