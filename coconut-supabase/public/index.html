@@ -345,6 +345,89 @@
             font-size: 14px;
             margin-top: 0;
         }
+
+        /* --- WADAH UTAMA VIDEO --- */
+        .fresh-video-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0 30px; /* Jarak atas bawah */
+            position: relative;
+        }
+        
+        /* --- BINGKAI AIR (ORGANIC SHAPE) --- */
+        .water-drops-frame {
+            position: relative;
+            width: 100%;
+            max-width: 320px; /* Lebar video */
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; /* Bentuk tidak beraturan seperti air */
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 20px rgba(255, 255, 255, 0.5), /* Kilauan dalam */
+                0 10px 20px rgba(15, 122, 99, 0.2); /* Bayangan hijau segar */
+            animation: water-morph 8s ease-in-out infinite; /* Animasi bentuk berubah-ubah */
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            background: #fff;
+        }
+        
+        /* Animasi Bentuk Air (Morphing) */
+        @keyframes water-morph {
+            0% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            50% { border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%; } /* Berubah bentuk */
+            100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+        }
+        
+        /* --- VIDEO DI DALAM --- */
+        .video-content {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Agar video memenuhi bentuk air */
+            display: block;
+            mix-blend-mode: multiply; /* Menyatu dengan background putih jika video terang */
+        }
+        
+        /* --- EFEK TETESAN AIR JATUH (HIASAN) --- */
+        .drop {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .drop-1 { width: 10px; height: 10px; top: -10px; left: 20%; animation: drop-fall 3s infinite linear; }
+        .drop-2 { width: 15px; height: 15px; top: -20px; left: 50%; animation: drop-fall 4s infinite linear 1s; }
+        .drop-3 { width: 8px; height: 8px; top: -15px; right: 20%; animation: drop-fall 2.5s infinite linear 0.5s; }
+        .drop-4 { width: 6px; height: 6px; top: -5px; right: 40%; animation: drop-fall 5s infinite linear 2s; }
+        
+        @keyframes drop-fall {
+            0% { transform: translateY(0); opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(200px); opacity: 0; } /* Jatuh ke bawah */
+        }
+        
+        /* --- EFEK FLASH SAAT LOOPING (JAVASCRIPT TRIGGER) --- */
+        .video-fade-effect {
+            animation: flash-white 1s ease;
+        }
+        
+        @keyframes flash-white {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(2) blur(2px); } /* Efek kilau terang */
+            100% { filter: brightness(1); }
+        }
+
+        /* --- ROTASI VIDEO LANDSCAPE --- */
+        #promoVideo {
+            /* 1. Putar 90 Derajat */
+            transform: rotate(90deg) scale(1.6); 
+            
+            /* 2. Pastikan titik putarnya di tengah */
+            transform-origin: center center;
+            
+            /* 3. Agar transisi putar (jika ada) terlihat halus */
+            transition: transform 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -380,6 +463,20 @@
             </div>
         </div>
         <div class="subtitle">Nikmati Kesegaran Alami Kelapa Muda</div>
+
+        <div class="fresh-video-container">
+            <div class="water-drops-frame">
+                <div class="drop drop-1"></div>
+                <div class="drop drop-2"></div>
+                <div class="drop drop-3"></div>
+                <div class="drop drop-4"></div>
+                
+                <video id="promoVideo" class="video-content" autoplay muted loop playsinline>
+                    <source src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/assets/Vidio.mp4">
+                    Browser Anda tidak mendukung video.
+                </video>
+            </div>
+        </div>
     </header>
 
     <form id="orderForm" autocomplete="off">
@@ -1156,10 +1253,29 @@
 
         hitungTotal();
     });
+    // --- LOGIKA VIDEO LOOP EFFECT ---
+        const promoVideo = document.getElementById('promoVideo');
+        
+        if (promoVideo) {
+            // Saat video selesai dan mau ulang
+            promoVideo.addEventListener('timeupdate', () => {
+                // Jika sisa waktu kurang dari 0.5 detik (mendekati akhir)
+                if (promoVideo.duration - promoVideo.currentTime < 0.5) {
+                    // Tambahkan kelas efek kilatan
+                    promoVideo.classList.add('video-fade-effect');
+                    
+                    // Hapus kelas setelah 1 detik agar bisa dipakai lagi nanti
+                    setTimeout(() => {
+                        promoVideo.classList.remove('video-fade-effect');
+                    }, 1000);
+                }
+            });
+        }
 })();
 </script>
 </body>
 </html>
+
 
 
 
