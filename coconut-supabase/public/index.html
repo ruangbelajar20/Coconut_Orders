@@ -284,6 +284,51 @@
         .btn-upload-trigger:hover { background: var(--primary); color: #fff; }
         #bukti_file_modal { display: none; }
         .file-status { font-size: 12px; margin-top: 8px; color: #333; font-weight: 500; }
+
+        .security-warning {
+            background-color: #fff3cd; /* Warna Kuning Lembut */
+            border: 1px solid #ffeeba;
+            color: #856404; /* Warna Teks Coklat Gelap */
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            text-align: left;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .sec-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .sec-text strong {
+            color: #b7791f;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        
+        .verified-name {
+            background: #fff;
+            border: 1px dashed #b7791f;
+            color: #000;
+            font-weight: 900;
+            font-size: 13px;
+            text-align: center;
+            padding: 6px;
+            border-radius: 6px;
+            margin: 6px 0;
+            letter-spacing: 0.5px;
+        }
+        
+        .sec-text small {
+            color: #e74c3c; /* Merah untuk peringatan bahaya */
+            font-weight: 600;
+        }        
     </style>
 </head>
 <body>
@@ -388,12 +433,21 @@
                 
                 <div class="qris-body">
                     <div class="qris-image-container">
-                        <img src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/assets/QRIS.jpeg" 
-                             alt="Scan QRIS" class="qris-img-big">
+                        <img id="secret-qris" alt="Scan QRIS" class="qris-img-big">
                     </div>
         
                     <p class="qris-helper">Total yang harus dibayar:</p>
                     <h2 id="qris-total-amount" class="qris-amount">Rp 0</h2>
+
+                    <div class="security-warning">
+                        <div class="sec-icon">🛡️</div>
+                        <div class="sec-text">
+                            <strong>PENTING: CEK NAMA PENERIMA!</strong><br>
+                            Saat scan, pastikan nama yang muncul di HP Anda adalah:<br>
+                            <div class="verified-name">COCONUT BUMI JELLY DHASNA</div>
+                            <small><i>Jika nama lain yang muncul, JANGAN BAYAR!</i></small>
+                        </div>
+                    </div>
                     
                     <div class="upload-box-compact">
                         <label for="bukti_file_modal" class="btn-upload-trigger">
@@ -458,15 +512,55 @@
 </div>
 
 <script>
+const appConfig = Object.freeze({
+    server: "https://iltvpnplysjeaxufiokg.supabase.co",
+    merchant: "Bumi Jelly D'Hasna",
+    // Masukkan kode Base64 QRIS di sini
+    secureKey: "aHR0cHM6Ly9pbHR2cG5wbHlzamVheHVmaW9rZy5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvYXNzZXRzL1FSSVMuanBlZw=="
+});
+    
+const _0x1a2b = "aHR0cHM6Ly9pbHR2cG5wbHlzamVheHVmaW9rZy5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvYXNzZXRzL1FSSVMuanBlZw==";
+
+// Fungsi Pembuka Sandi
+const getSecureImage = () => {
+    return atob(_0x1a2b); // atob adalah fungsi pembuka Base64
+};
+
+// Pasang Link saat Tombol Bayar di Klik (Bukan saat loading awal)
+ui.btnPay.onclick = () => {
+    // ... (Validasi nama & jarak tetap ada) ...
+
+    // INJEKSI LINK RAHASIA
+    const qrisImg = document.getElementById('secret-qris');
+    if (qrisImg) {
+        qrisImg.src = getSecureImage(); // Link baru muncul detik ini
+    }
+
+    // ... (Lanjut buka modal) ...
+    const modal = document.getElementById('qrisModal');
+    modal.classList.remove('hidden');
+    // ...
+};
 (() => {
     "use strict";
 
     document.addEventListener('DOMContentLoaded', () => {
         // --- 1. KEAMANAN ---
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = e => {
-            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && e.keyCode === 73)) { return false; }
-        };
+        document.addEventListener('contextmenu', event => event.preventDefault()); // Anti Klik Kanan
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) { // F12
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { // Ctrl+Shift+I
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { // Ctrl+Shift+J
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { // Ctrl+U (View Source)
+                return false;
+            }
+        }
 
         const config = {
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
@@ -1057,6 +1151,7 @@
 </script>
 </body>
 </html>
+
 
 
 
