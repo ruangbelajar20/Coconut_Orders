@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin - Debug Mode</title>
+    <title>Login Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -13,20 +13,13 @@
         input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #0f7a63; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
         button:disabled { background: #ccc; }
-        
-        /* Error Box yang Lebih Jelas */
-        #debug-error {
-            display: none;
-            background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c;
-            padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; text-align: left;
-        }
+        #debug-error { display: none; background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; text-align: left; }
     </style>
 </head>
 <body>
 
     <div class="login-card">
         <h2>Admin Login</h2>
-        
         <div id="debug-error"></div>
 
         <form id="loginForm">
@@ -42,7 +35,9 @@
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
             anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU"
         };
-        const supabase = window.supabase.createClient(config.url, config.anon);
+        
+        // PERBAIKAN DI SINI: Gunakan nama 'db' bukan 'supabase'
+        const db = window.supabase.createClient(config.url, config.anon);
 
         // 2. LOGIKA LOGIN
         const loginForm = document.getElementById('loginForm');
@@ -51,60 +46,47 @@
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Reset UI
             errorBox.style.display = 'none';
             btnSubmit.innerText = "Mencoba Login...";
             btnSubmit.disabled = true;
 
-            const email = document.getElementById('email').value.trim(); // Trim spasi
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
 
-            console.log("Mencoba login dengan:", email); // Cek Console F12
-
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                // Gunakan 'db' untuk memanggil fungsi auth
+                const { data, error } = await db.auth.signInWithPassword({
                     email: email,
                     password: password,
                 });
 
-                if (error) {
-                    throw error; // Lempar ke catch di bawah
-                }
+                if (error) throw error;
 
-                // JIKA SUKSES
-                console.log("Login Berhasil!", data);
+                console.log("Login Berhasil!");
                 btnSubmit.innerText = "Sukses! Mengalihkan...";
                 btnSubmit.style.background = "green";
                 
-                // Cek apakah file admin.html ada
                 setTimeout(() => {
                     window.location.href = 'admin.html';
                 }, 1000);
 
             } catch (err) {
-                // JIKA GAGAL (Tampilkan Pesan Asli)
                 console.error("Login Error:", err);
-                
                 let pesan = err.message;
-                
-                // Terjemahan Error Umum
                 if (pesan.includes("Invalid login credentials")) pesan = "Email atau Password Salah.";
-                if (pesan.includes("Email not confirmed")) pesan = "Email belum dikonfirmasi. Cek dashboard Supabase -> Authentication -> Users -> Klik titik 3 -> Confirm User.";
+                if (pesan.includes("Email not confirmed")) pesan = "Email belum dikonfirmasi. Cek Dashboard Supabase.";
                 
                 errorBox.innerHTML = `<strong>Error:</strong> ${pesan}`;
                 errorBox.style.display = 'block';
-                
                 btnSubmit.innerText = "Masuk";
                 btnSubmit.disabled = false;
             }
         });
 
-        // Cek Sesi (Auto Login)
         async function checkSession() {
-            const { data } = await supabase.auth.getSession();
+            // Gunakan 'db' di sini juga
+            const { data } = await db.auth.getSession();
             if (data.session) {
-                console.log("Sesi ditemukan, redirecting...");
                 window.location.href = 'admin.html';
             }
         }
