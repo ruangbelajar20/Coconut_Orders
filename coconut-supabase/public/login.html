@@ -3,58 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin</title>
+    <title>Login Admin - Bumi Jelly D'Hasna</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f3f4f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #0f7a63; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        button:disabled { background: #ccc; }
-        #debug-error { display: none; background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; text-align: left; }
+        :root {
+            --primary: #0f7a63;
+            --primary-dark: #0b5e4b;
+            --danger: #ef4444; 
+            --bg: #f3f4f6;
+            --white: #ffffff;
+            --text: #1f2937;
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .login-card {
+            background: var(--white);
+            padding: 40px;
+            width: 100%;
+            max-width: 380px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(15, 122, 99, 0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            background: #e6f7f2;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 15px;
+            color: var(--primary);
+        }
+
+        h2 { margin: 0 0 5px; color: var(--primary); font-weight: 800; font-size: 22px; }
+        p { margin: 0 0 25px; color: #6b7280; font-size: 13px; }
+
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+        
+        input {
+            width: 100%; padding: 12px 15px;
+            border: 1px solid #e5e7eb; border-radius: 10px;
+            font-size: 14px; outline: none; transition: 0.3s;
+            box-sizing: border-box; background: #f9fafb;
+        }
+        input:focus { 
+            border-color: var(--primary); 
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(15, 122, 99, 0.1); 
+        }
+
+        /* --- TOMBOL LOGIN --- */
+        .btn-login {
+            width: 100%; padding: 12px;
+            background: var(--primary); color: white;
+            border: none; border-radius: 10px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            transition: 0.3s; margin-top: 10px;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-login:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-login:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
+
+        /* --- STYLE ERROR BERDENYUT (DESAIN MODERN) --- */
+        .error-alert {
+            display: none; /* Sembunyi default */
+            background-color: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fee2e2;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: left;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Animasi Denyut (Pulse) */
+        .pulse-active {
+            display: flex; 
+            animation: errorPulse 1.5s infinite;
+        }
+
+        @keyframes errorPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); transform: scale(1); }
+            50% { transform: scale(1.02); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
 
     <div class="login-card">
-        <h2>Admin Login</h2>
-        <div id="debug-error"></div>
+        <div class="logo">
+            <i data-lucide="shield-check" size="32"></i>
+        </div>
+        <h2>Admin Portal</h2>
+        <p>Silakan masuk untuk mengelola pesanan</p>
+
+        <div id="error-box" class="error-alert">
+            <i data-lucide="alert-circle" size="18"></i>
+            <span id="error-text">Email atau password salah!</span>
+        </div>
 
         <form id="loginForm">
-            <input type="email" id="email" placeholder="Email Admin" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit" id="btn-submit">Masuk</button>
+            <div class="form-group">
+                <label>Email Admin</label>
+                <input type="email" id="email" placeholder="admin@contoh.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" id="btn-submit" class="btn-login">
+                Masuk Dashboard <i data-lucide="arrow-right" size="16"></i>
+            </button>
         </form>
+
+        <div style="margin-top:20px; font-size:11px; color:#999;">
+            &copy; 2024 Bumi Jelly D'Hasna
+        </div>
     </div>
 
     <script>
-        // 1. SETUP SUPABASE
+        lucide.createIcons();
+
+        // 1. SETUP SUPABASE (GUNAKAN NAMA 'db')
         const config = {
             url: "https://iltvpnplysjeaxufiokg.supabase.co",
             anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU"
         };
         
-        // PERBAIKAN DI SINI: Gunakan nama 'db' bukan 'supabase'
+        // KOREKSI UTAMA: Menggunakan 'db' agar tidak bentrok dengan library
         const db = window.supabase.createClient(config.url, config.anon);
 
         // 2. LOGIKA LOGIN
         const loginForm = document.getElementById('loginForm');
-        const errorBox = document.getElementById('debug-error');
+        const errorBox = document.getElementById('error-box');
+        const errorText = document.getElementById('error-text');
         const btnSubmit = document.getElementById('btn-submit');
+        const inputs = document.querySelectorAll('input');
+
+        // Reset error saat mengetik
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                errorBox.classList.remove('pulse-active');
+                errorBox.style.display = 'none';
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = 'Masuk Dashboard <i data-lucide="arrow-right" size="16"></i>';
+                lucide.createIcons();
+            });
+        });
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            errorBox.style.display = 'none';
-            btnSubmit.innerText = "Mencoba Login...";
+            
+            // UI Loading
+            btnSubmit.innerHTML = "⏳ Memeriksa...";
             btnSubmit.disabled = true;
+            errorBox.classList.remove('pulse-active');
+            errorBox.style.display = 'none';
 
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
 
             try {
-                // Gunakan 'db' untuk memanggil fungsi auth
+                // Gunakan variabel 'db'
                 const { data, error } = await db.auth.signInWithPassword({
                     email: email,
                     password: password,
@@ -62,29 +194,42 @@
 
                 if (error) throw error;
 
-                console.log("Login Berhasil!");
-                btnSubmit.innerText = "Sukses! Mengalihkan...";
-                btnSubmit.style.background = "green";
+                // SUKSES
+                btnSubmit.innerHTML = "✅ Berhasil!";
+                btnSubmit.style.background = "#10b981"; // Hijau Sukses
                 
                 setTimeout(() => {
                     window.location.href = 'admin.html';
-                }, 1000);
+                }, 800);
 
             } catch (err) {
+                // GAGAL
                 console.error("Login Error:", err);
-                let pesan = err.message;
-                if (pesan.includes("Invalid login credentials")) pesan = "Email atau Password Salah.";
-                if (pesan.includes("Email not confirmed")) pesan = "Email belum dikonfirmasi. Cek Dashboard Supabase.";
                 
-                errorBox.innerHTML = `<strong>Error:</strong> ${pesan}`;
-                errorBox.style.display = 'block';
-                btnSubmit.innerText = "Masuk";
+                let pesan = "Login Gagal! Email atau Password salah.";
+                if (err.message.includes("Email not confirmed")) {
+                    pesan = "Email belum dikonfirmasi. Cek Dashboard Supabase.";
+                } else if (err.message.includes("Invalid login credentials")) {
+                    pesan = "Email atau Password salah.";
+                } else if (err.message.includes("Network")) {
+                    pesan = "Gagal koneksi. Cek internet Anda.";
+                }
+
+                errorText.innerText = pesan;
+                errorBox.style.display = 'flex';
+                
+                // Trigger ulang animasi
+                void errorBox.offsetWidth; 
+                errorBox.classList.add('pulse-active');
+                
+                btnSubmit.innerHTML = 'Coba Lagi <i data-lucide="refresh-cw" size="16"></i>';
                 btnSubmit.disabled = false;
+                lucide.createIcons();
             }
         });
 
+        // Cek Sesi Otomatis
         async function checkSession() {
-            // Gunakan 'db' di sini juga
             const { data } = await db.auth.getSession();
             if (data.session) {
                 window.location.href = 'admin.html';
