@@ -231,104 +231,112 @@
             100% { opacity: 0; transform: translateX(0); }
         }
         }
-
-        /* --- STYLE MODAL QRIS SPESIFIK (UPDATE RESPONSIF) --- */
+        
+        /* --- STYLE MODAL QRIS SPESIFIK (VERSI COMPACT) --- */
         .qris-modal-content {
-            width: 90%; /* Lebar responsif */
-            max-width: 380px !important;
-            max-height: 90vh; /* PENTING: Agar tidak kepotong di layar pendek */
-            overflow-y: auto; /* PENTING: Agar bisa discroll jika ketutup keyboard */
+            width: 90%;
+            max-width: 350px !important; /* Lebar sedikit diperkecil agar proporsional */
+            max-height: 90vh;
+            overflow-y: auto;
             padding: 0 !important;
-            border-radius: 20px;
+            border-radius: 16px; /* Radius sedikit dikurangi */
             background: #fff;
             text-align: center;
-            position: relative; /* Agar tombol close diam di tempat */
+            position: relative;
         }
         
         .qris-body { 
-            padding: 25px 20px; 
+            padding: 15px 20px; /* Padding dikurangi (sebelumnya 25px) */
         }
         
-        /* Gambar QRIS Lebih Besar & Jelas */
+        /* Header Modal (Judul & Close) */
+        .modal-header {
+            padding: 12px 20px 0; /* Padding atas saja */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Gambar QRIS */
+        .qris-image-container {
+            margin-top: 10px; /* Jarak ke judul */
+        }
+        
         .qris-img-big {
             width: 100%;
-            max-width: 260px; /* Diperbesar agar mudah discan */
+            max-width: 240px; /* Ukuran gambar pas (tidak terlalu raksasa) */
             height: auto;
-            aspect-ratio: 1/1; /* Menjaga tetap kotak */
+            aspect-ratio: 1/1;
             object-fit: contain;
             border: 1px solid #f0f0f0;
-            border-radius: 12px;
-            margin-bottom: 10px;
+            border-radius: 10px;
             display: block;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto 5px; /* Margin bawah cuma 5px */
         }
         
-        /* Teks Helper (Harga) */
-        .qris-helper { margin: 10px 0 0; font-size: 12px; color: #666; font-weight: 500; }
-        .qris-amount { margin: 5px 0 20px; color: var(--primary); font-size: 26px; font-weight: 800; }
+        /* Teks Helper (Total Tagihan) */
+        .qris-helper { 
+            margin: 5px 0 0; 
+            font-size: 11px; 
+            color: #666; 
+            font-weight: 500; 
+            line-height: 1.2;
+        }
+        
+        /* Nominal Harga */
+        .qris-amount { 
+            margin: 2px 0 12px; /* Jarak sangat rapat */
+            color: var(--primary); 
+            font-size: 22px; /* Font sedikit diperkecil agar tidak makan tempat */
+            font-weight: 800; 
+        }
+        
+        /* Peringatan Keamanan (Kuning) */
+        .security-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 8px 10px; /* Padding compact */
+            border-radius: 8px;
+            margin-bottom: 12px; /* Jarak ke upload */
+            display: flex;
+            align-items: start;
+            gap: 8px;
+            text-align: left;
+            font-size: 10px; /* Font kecil tapi terbaca */
+            line-height: 1.3;
+        }
+        .verified-name {
+            padding: 2px 4px;
+            margin: 2px 0;
+            font-size: 11px;
+        }
         
         /* Tombol Upload Compact */
         .upload-box-compact {
             background: #f4fbf9; 
-            padding: 15px; 
-            border-radius: 12px; 
-            margin-bottom: 15px; 
+            padding: 10px; /* Lebih tipis */
+            border-radius: 10px; 
+            margin-bottom: 10px; 
             border: 1px dashed var(--primary);
         }
+        
         .btn-upload-trigger {
-            display: inline-block; padding: 10px 25px; background: #fff; border: 1px solid var(--primary);
-            color: var(--primary); border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; 
-            transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .btn-upload-trigger:hover { background: var(--primary); color: #fff; }
-        #bukti_file_modal { display: none; }
-        .file-status { font-size: 12px; margin-top: 8px; color: #333; font-weight: 500; }
-
-        .security-warning {
-            background-color: #fff3cd; /* Warna Kuning Lembut */
-            border: 1px solid #ffeeba;
-            color: #856404; /* Warna Teks Coklat Gelap */
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            text-align: left;
-            font-size: 11px;
-            line-height: 1.4;
+            padding: 8px 20px; /* Tombol lebih ramping */
+            font-size: 12px;
         }
         
-        .sec-icon {
-            font-size: 20px;
-            flex-shrink: 0;
-            margin-top: 2px;
+        .file-status { 
+            font-size: 10px; 
+            margin-top: 5px; 
         }
         
-        .sec-text strong {
-            color: #b7791f;
-            font-weight: 800;
-            text-transform: uppercase;
+        /* Tombol Kirim */
+        .btn-main {
+            padding: 12px; /* Sedikit lebih tipis */
+            font-size: 14px;
+            margin-top: 0;
         }
-        
-        .verified-name {
-            background: #fff;
-            border: 1px dashed #b7791f;
-            color: #000;
-            font-weight: 900;
-            font-size: 13px;
-            text-align: center;
-            padding: 6px;
-            border-radius: 6px;
-            margin: 6px 0;
-            letter-spacing: 0.5px;
-        }
-        
-        .sec-text small {
-            color: #e74c3c; /* Merah untuk peringatan bahaya */
-            font-weight: 600;
-        }        
     </style>
 </head>
 <body>
@@ -426,9 +434,10 @@
 
         <div id="qrisModal" class="modal-overlay hidden">
             <div class="modal-content qris-modal-content">
-                <div class="modal-header" style="border-bottom:none; padding-bottom:0;">
-                    <h3 style="margin:0; font-size:16px; color:#333;">Scan Pembayaran</h3>
-                    <button onclick="closeQrisModal()" style="background:none;border:none;font-size:24px;cursor:pointer; color:#999;">✕</button>
+                
+                <div class="modal-header" style="border:none;">
+                    <h3 style="margin:0; font-size:15px; color:#333; font-weight:700;">Scan QRIS Pembayaran</h3>
+                    <button onclick="closeQrisModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:0;">✕</button>
                 </div>
                 
                 <div class="qris-body">
@@ -436,19 +445,18 @@
                         <img id="secret-qris" alt="Scan QRIS" class="qris-img-big">
                     </div>
         
-                    <p class="qris-helper">Total yang harus dibayar:</p>
+                    <p class="qris-helper">Total Tagihan:</p>
                     <h2 id="qris-total-amount" class="qris-amount">Rp 0</h2>
-
+                    
                     <div class="security-warning">
-                        <div class="sec-icon">🛡️</div>
+                        <div class="sec-icon" style="font-size:16px;">🛡️</div>
                         <div class="sec-text">
-                            <strong>PENTING: CEK NAMA PENERIMA!</strong><br>
-                            Saat scan, pastikan nama yang muncul di HP Anda adalah:<br>
-                            <div class="verified-name">COCONUT BUMI JELLY DHASNA</div>
-                            <small><i>Jika nama lain yang muncul, JANGAN BAYAR!</i></small>
+                            <strong>CEK NAMA MERCHANT:</strong><br>
+                            Pastikan nama di HP Anda:<br>
+                            <div class="verified-name">BUMI JELLY D'HASNA</div>
                         </div>
                     </div>
-                    
+        
                     <div class="upload-box-compact">
                         <label for="bukti_file_modal" class="btn-upload-trigger">
                             📤 Upload Bukti Transfer
@@ -457,8 +465,7 @@
                         <div id="file-name-preview" class="file-status">Belum ada file</div>
                     </div>
         
-                    <button onclick="confirmPayment()" class="btn-action btn-main" style="margin-top:0;">✅ Konfirmasi & Kirim</button>
-                    <div style="font-size:10px; color:#999; margin-top:10px;">Otomatis terkirim ke WhatsApp Admin</div>
+                    <button onclick="confirmPayment()" class="btn-action btn-main">✅ Konfirmasi & Kirim</button>
                 </div>
             </div>
         </div>
@@ -1142,6 +1149,7 @@
 </script>
 </body>
 </html>
+
 
 
 
