@@ -38,6 +38,7 @@
             margin: 0 auto 10px;
             position: relative;
             animation: pulseLogo 3s ease-in-out infinite;
+            will-change: transform;
         }
         .logo-img {
             width: 100%;
@@ -45,10 +46,10 @@
             object-fit: contain;
             filter: drop-shadow(0 5px 15px rgba(0,0,0,0.15));
         }
-        
+
         @keyframes pulseLogo { 
             0% { transform: scale(1); } 
-            50% { transform: scale(1.05); } 
+            50% { transform: scale(1.08); } /* Sedikit diperbesar tapi tidak berlebihan */
             100% { transform: scale(1); } 
         }
 
@@ -174,7 +175,7 @@
 <div class="container">
     <header>
         <div class="logo-container">
-            <img src="https://i.ibb.co.com/FbnR4Xw/Gemini-Generated-Image-u1i57ou1i57ou1i5.jpg" alt="Logo Bumi Jelly" class="logo-img">
+            <img src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/logos/Logo_D_Hasna-rb.png" alt="Logo Bumi Jelly" class="logo-img">
         </div>
         <div class="subtitle">Nikmati Kesegaran Alami Kelapa Muda</div>
     </header>
@@ -606,3 +607,4 @@
 </script>
 </body>
 </html>
+
