@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - Bumi Jelly D'Hasna</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #0f7a63;
+            --bg: #f3f4f6;
+            --white: #ffffff;
+            --text: #1f2937;
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .login-card {
+            background: var(--white);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(15, 122, 99, 0.15);
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: #e6f7f2;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            color: var(--primary);
+        }
+
+        h2 { margin: 0 0 5px; color: var(--primary); font-weight: 800; }
+        p { margin: 0 0 30px; color: #6b7280; font-size: 14px; }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        
+        input {
+            width: 100%; padding: 12px 15px;
+            border: 1px solid #e5e7eb; border-radius: 10px;
+            font-size: 14px; outline: none; transition: 0.3s;
+            box-sizing: border-box; /* Agar padding tidak merusak lebar */
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 122, 99, 0.1); }
+
+        .btn-login {
+            width: 100%; padding: 14px;
+            background: var(--primary); color: white;
+            border: none; border-radius: 10px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: 0.3s; margin-top: 10px;
+        }
+        .btn-login:hover { background: #0b5e4b; transform: translateY(-2px); }
+        .btn-login:disabled { background: #ccc; cursor: not-allowed; }
+
+        .error-msg {
+            background: #fee2e2; color: #b91c1c; font-size: 13px;
+            padding: 10px; border-radius: 8px; margin-bottom: 20px;
+            display: none; border: 1px solid #fecaca;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo">
+            <i data-lucide="shield-check" size="40"></i>
+        </div>
+        <h2>Admin Portal</h2>
+        <p>Silakan masuk untuk mengelola pesanan</p>
+
+        <div id="error-alert" class="error-msg"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email Admin</label>
+                <input type="email" id="email" placeholder="admin@contoh.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" id="btn-submit" class="btn-login">Masuk Dashboard</button>
+        </form>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // KONFIGURASI SUPABASE (Sama seperti file lain)
+        const config = {
+            url: "https://iltvpnplysjeaxufiokg.supabase.co",
+            anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdHZwbnBseXNqZWF4dWZpb2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODAyMDQsImV4cCI6MjA4Njg1NjIwNH0.O3LvaTPu-avo8Ctrq6fX0xQlZilO26JCKaYE5Y9SqUU"
+        };
+        const supabase = window.supabase.createClient(config.url, config.anon);
+
+        // LOGIKA LOGIN
+        const loginForm = document.getElementById('loginForm');
+        const errorAlert = document.getElementById('error-alert');
+        const btnSubmit = document.getElementById('btn-submit');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // UI Loading
+            btnSubmit.innerText = "Memeriksa...";
+            btnSubmit.disabled = true;
+            errorAlert.style.display = 'none';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Cek ke Supabase Auth
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                // Jika Gagal
+                errorAlert.innerText = "Login Gagal: Email atau Password salah.";
+                errorAlert.style.display = 'block';
+                btnSubmit.innerText = "Masuk Dashboard";
+                btnSubmit.disabled = false;
+            } else {
+                // Jika Sukses -> Simpan Token otomatis & Pindah Halaman
+                window.location.href = 'admin.html'; // Ganti ke admin
+            }
+        });
+
+        // Cek jika sudah login, langsung lempar ke admin
+        async function checkSession() {
+            const { data } = await supabase.auth.getSession();
+            if (data.session) {
+                window.location.href = 'admin.html';
+            }
+        }
+        checkSession();
+    </script>
+</body>
+</html>
