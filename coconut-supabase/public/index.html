@@ -797,7 +797,9 @@
             // Reset Tampilan (Sembunyikan QRIS & Upload jika ganti metode)
             // Kita gunakan classList agar tidak merusak desain Flexbox (tengah)
             ui.qrisArea.classList.add('hidden'); 
+            ui.qrisArea.style.display = 'none';
             ui.uploadArea.classList.add('hidden');
+            ui.uploadArea.style.display = 'none';
         };
 
         // LOGIKA KLIK TOMBOL "BAYAR SEKARANG"
@@ -806,7 +808,11 @@
             
             // Munculkan QRIS & Upload dengan animasi CSS
             ui.qrisArea.classList.remove('hidden'); 
+            ui.qrisArea.style.display = 'flex';
+            
+            // 2. Munculkan Upload
             ui.uploadArea.classList.remove('hidden');
+            ui.uploadArea.style.display = 'block';
             
             ui.btnSubmit.style.display = 'block'; // Munculkan tombol kirim pesanan
         };
@@ -990,6 +996,7 @@
 </script>
 </body>
 </html>
+
 
 
 
