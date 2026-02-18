@@ -14,10 +14,9 @@
     
     <style>
         :root {
-            /* Warna disesuaikan dengan Logo Baru */
-            --primary: #0f7a63; /* Hijau Tua Logo */
-            --accent: #8dc63f;  /* Hijau Muda Logo */
-            --bg: #f0f7f4;      /* Background soft green */
+            --primary: #0f7a63; 
+            --accent: #8dc63f;  
+            --bg: #f0f7f4;      
             --white: #ffffff;
             --text-main: #2c3e50;
             --text-light: #7f8c8d;
@@ -30,41 +29,61 @@
         body { font-family: 'Poppins', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text-main); -webkit-user-select: none; user-select: none; }
         .container { background: var(--white); width: 100%; max-width: 480px; padding: 35px 30px; border-radius: 24px; box-shadow: var(--shadow); position: relative; overflow: hidden; border: 1px solid #e0e0e0; }
         
-        /* Header Logo Baru */
+        /* --- HEADER & PROMO --- */
         header { text-align: center; margin-bottom: 30px; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; position: relative; margin-bottom: 15px; }
+        
         .logo-container {
-            width: 140px; 
-            height: 140px;
-            margin: 0 auto 10px;
-            position: relative;
-            animation: pulseLogo 3s ease-in-out infinite;
-            will-change: transform;
+            width: 110px; height: 110px; flex-shrink: 0; margin: 0 10px; z-index: 2; position: relative;
+            animation: pulseLogo 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; will-change: transform;
         }
-        .logo-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.15));
-        }
+        .logo-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.15)); }
+        
+        @keyframes pulseLogo { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
 
-        @keyframes pulseLogo { 
-            0% { transform: scale(1); } 
-            50% { transform: scale(1.08); } /* Sedikit diperbesar tapi tidak berlebihan */
-            100% { transform: scale(1); } 
+        .promo-badge {
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);
+            border: 1px solid rgba(15, 122, 99, 0.1); border-radius: 12px; padding: 8px 5px;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            width: 90px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer;
+            position: relative; overflow: hidden; transition: transform 0.2s;
         }
+        .promo-badge:active { transform: scale(0.95); }
+        .promo-badge .emoji { font-size: 20px; margin-bottom: 2px; }
+        .promo-badge .text small { display: block; font-size: 9px; color: var(--text-light); line-height: 1.2; }
+        .promo-badge .text strong { display: block; font-size: 10px; color: var(--primary); font-weight: 700; }
+        
+        .shine {
+            position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg); animation: shineAnim 4s infinite; pointer-events: none;
+        }
+        @keyframes shineAnim { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+        
+        .pulse-fast { animation: pulseText 0.8s infinite alternate !important; color: var(--danger) !important; }
+        @keyframes pulseText { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 
-        h2 { color: var(--primary); font-weight: 700; margin: 5px 0 0; font-size: 22px; letter-spacing: -0.5px; }
-        .subtitle { color: var(--text-light); font-size: 13px; font-weight: 500; }
+        .subtitle { color: var(--text-light); font-size: 13px; font-weight: 500; margin-top: 5px; }
 
         /* Form */
         .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 8px; color: var(--text-main); letter-spacing: 0.3px; }
+        label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 8px; color: var(--text-main); }
         input, textarea, select { 
             width: 100%; padding: 14px 16px; border: 2px solid #eaeff2; border-radius: var(--radius); 
             font-family: inherit; font-size: 14px; transition: 0.3s; background: #fafafa; color: #333;
         }
         input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 4px 15px rgba(141, 198, 63, 0.15); }
         input[readonly] { background-color: #f8f9fa; color: #7f8c8d; cursor: not-allowed; border-color: #eee; }
+        
+        /* VALIDATION ERROR STYLE */
+        .input-error {
+            border-color: var(--danger) !important;
+            background-color: #fff5f5 !important;
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); }
+        }
 
         /* Buttons */
         .btn-action { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border-radius: var(--radius); border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 8px; }
@@ -78,12 +97,9 @@
         .note { font-size: 11px; color: var(--text-light); margin-top: 6px; font-style: italic; }
         .gps-status { font-size: 12px; text-align: center; margin: -5px 0 15px; font-weight: 500; }
 
-        /* Invoice & Payment */
+        /* Invoice */
         .invoice-box { background: #fff; border: 1px solid #eaeff2; border-radius: var(--radius); padding: 25px; margin-top: 30px; position: relative; }
-        .invoice-box::before {
-            content: ''; position: absolute; top: 0; left: 25px; right: 25px; height: 3px; 
-            background: repeating-linear-gradient(90deg, var(--primary) 0, var(--primary) 10px, transparent 10px, transparent 15px);
-        }
+        .invoice-box::before { content: ''; position: absolute; top: 0; left: 25px; right: 25px; height: 3px; background: repeating-linear-gradient(90deg, var(--primary) 0, var(--primary) 10px, transparent 10px, transparent 15px); }
         .invoice-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 10px; color: var(--text-light); }
         .invoice-row.highlight { color: var(--text-main); font-weight: 600; font-size: 14px; }
         .invoice-row.discount { color: var(--success); }
@@ -95,303 +111,66 @@
         #qris-image { width: 200px; border-radius: 16px; border: 1px solid #eee; padding: 10px; background: #fff; }
         #area-upload { background: #fffbf0; padding: 20px; border-radius: var(--radius); border: 1px dashed #f1c40f; margin-top: 20px; }
 
-        /* --- MODAL PETA BARU (ShopeeFood Style) --- */
-        #map-modal { 
-            position: fixed; inset: 0; background: #fff; z-index: 2000; 
-            display: none; flex-direction: column; 
+        /* --- POP-UP MODERN (ALERT) --- */
+        .custom-alert {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150%);
+            background: #fff; padding: 15px 25px; border-radius: 50px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 15px;
+            z-index: 99999 !important; /* Z-Index Tertinggi */
+            border-left: 5px solid var(--danger); 
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            min-width: 320px; max-width: 90%;
         }
-        
-        /* Area Pencarian di Atas (Fixed) */
-        .search-container {
-            padding: 15px 20px; background: #fff; border-bottom: 1px solid #f0f0f0;
-            z-index: 2002; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        .custom-alert.active { transform: translateX(-50%) translateY(0); animation: pulse-alert 2s infinite; }
+        @keyframes pulse-alert {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
         }
-        
-        .search-header {
-            display: flex; align-items: center; gap: 15px; margin-bottom: 10px;
+        .alert-icon { font-size: 24px; animation: shake 0.5s ease-in-out; }
+        .alert-content h4 { margin: 0; font-size: 14px; color: var(--danger); font-weight: 700; }
+        .alert-content p { margin: 0; font-size: 12px; color: #555; }
+
+        /* MODAL PROMO */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 5000;
+            display: flex; justify-content: center; align-items: center; backdrop-filter: blur(3px);
+            opacity: 0; visibility: hidden; transition: 0.3s;
         }
-        
-        #close-map { 
-            background: none; border: none; font-size: 24px; cursor: pointer; color: #333; padding: 0; 
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: white; width: 90%; max-width: 350px; padding: 25px; border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: scale(0.8); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        
-        .search-input-wrapper {
-            position: relative; width: 100%;
-        }
-        
+        .modal-overlay.show .modal-content { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .promo-list { list-style: none; padding: 0; margin: 0; text-align: left; }
+        .promo-list li { padding: 15px 0; border-bottom: 1px dashed #e0e0e0; font-size: 14px; display: flex; align-items: flex-start; line-height: 1.6; color: #444; }
+        .promo-list li:before { content: '✅'; margin-right: 15px; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+        .promo-highlight { color: var(--primary); font-weight: 700; margin: 0 4px; }
+
+        /* MAP MODAL */
+        #map-modal { position: fixed; inset: 0; background: #fff; z-index: 2000; display: none; flex-direction: column; }
+        .search-container { padding: 15px 20px; background: #fff; border-bottom: 1px solid #f0f0f0; z-index: 2002; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .search-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        #close-map { background: none; border: none; font-size: 24px; cursor: pointer; color: #333; padding: 0; }
+        .search-input-wrapper { position: relative; width: 100%; }
         #custom-map-search {
-            width: 100%;
-            padding: 12px 15px 12px 45px;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
+            width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid #e0e0e0;
             background: #f8f9fa url('https://img.icons8.com/ios-glyphs/30/7f8c8d/search--v1.png') no-repeat 15px center;
-            background-size: 18px;
-            font-size: 14px;
-            font-family: 'Poppins', sans-serif;
-            color: #333;
-            transition: all 0.3s;
+            background-size: 18px; font-size: 14px; font-family: 'Poppins', sans-serif; color: #333; transition: all 0.3s;
         }
-        #custom-map-search:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-
-        /* Hasil Pencarian (Dropdown) */
-        #search-results {
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: #fff; border: 1px solid #eee;
-            border-top: none; border-radius: 0 0 12px 12px;
-            max-height: 300px; overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            display: none; z-index: 2005;
-        }
-        
-        .search-item {
-            padding: 14px 15px; border-bottom: 1px solid #f9f9f9; cursor: pointer;
-            display: flex; align-items: flex-start; gap: 12px; transition: background 0.2s;
-        }
-        .search-item:last-child { border-bottom: none; }
+        #search-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #eee; border-top: none; border-radius: 0 0 12px 12px; max-height: 300px; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.1); display: none; z-index: 2005; }
+        .search-item { padding: 14px 15px; border-bottom: 1px solid #f9f9f9; cursor: pointer; display: flex; align-items: flex-start; gap: 12px; transition: background 0.2s; }
         .search-item:hover { background: #f4fdf9; }
-        
-        .si-icon { font-size: 18px; margin-top: 2px; color: var(--primary); }
-        .si-text { display: flex; flex-direction: column; }
-        .si-title { font-weight: 600; font-size: 13px; color: #333; margin-bottom: 2px; }
-        .si-desc { font-size: 11px; color: #95a5a6; line-height: 1.4; }
-
-        /* Peta di Tengah */
         #map { flex: 1; width: 100%; z-index: 1000; }
+        .map-footer { padding: 20px; background: #fff; border-top: 1px solid #eee; z-index: 2002; }
 
-        /* Tombol Konfirmasi di Bawah (Floating) */
-        .map-footer { 
-            padding: 20px; background: #fff; border-top: 1px solid #eee; z-index: 2002; 
-        }
-
-        /* Popup */
+        /* SUCCESS POPUP */
         .success-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.98); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.4s; }
         .success-overlay.active { opacity: 1; visibility: visible; }
         .check-icon { width: 80px; height: 80px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 40px; margin-bottom: 20px; animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(15, 122, 99, 0.3); }
         @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-
-        /* --- CSS BARU UNTUK PROMO HEADER --- */
-        
-        /* 1. Tata Letak Sejajar (Flexbox) */
-        .header-content {
-            display: flex;
-            justify-content: space-between; /* Jarak merata kiri-tengah-kanan */
-            align-items: center;
-            position: relative;
-            margin-bottom: 15px;
-        }
-        
-        /* 2. Mengatur Ukuran Logo agar Pas di Tengah */
-        .logo-container {
-            width: 110px; /* Sedikit diperkecil agar muat di HP */
-            height: 110px;
-            flex-shrink: 0; /* Logo tidak boleh gepeng */
-            margin: 0 10px; /* Jarak aman dari teks */
-            z-index: 2; /* Logo di atas */
-        }
-        
-        /* 3. Desain Kotak Promo (Modern Glass Effect) */
-        .promo-badge {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px); /* Efek kaca buram */
-            border: 1px solid rgba(15, 122, 99, 0.1);
-            border-radius: 12px;
-            padding: 8px 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            width: 90px; /* Lebar tetap agar rapi */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
-            animation: floatBadge 3s ease-in-out infinite;
-        }
-        
-        /* Animasi Melayang Halus */
-        @keyframes floatBadge {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-        }
-        
-        /* Delay animasi agar tidak barengan dengan logo */
-        .promo-badge.right { animation-delay: 1.5s; } 
-        
-        /* 4. Tipografi Teks Promo */
-        .promo-badge .emoji { font-size: 20px; margin-bottom: 2px; }
-        .promo-badge .text small { 
-            display: block; 
-            font-size: 9px; 
-            color: var(--text-light); 
-            line-height: 1.2;
-        }
-        .promo-badge .text strong { 
-            display: block; 
-            font-size: 11px; 
-            color: var(--primary); 
-            font-weight: 700;
-        }
-        
-        /* 5. Responsif untuk Layar Sangat Kecil (HP Sempit) */
-        @media (max-width: 360px) {
-            .promo-badge { width: 75px; padding: 5px; }
-            .logo-container { width: 90px; height: 90px; }
-            .promo-badge .emoji { font-size: 16px; }
-            .promo-badge .text strong { font-size: 10px; }
-        }
-        /* --- TAMBAHAN CSS PROMO INTERAKTIF --- */
-
-        /* 1. Efek Kilatan Cahaya (Shine Effect) */
-        .promo-badge {
-            position: relative;
-            overflow: hidden; /* Agar kilatan tidak keluar kotak */
-            cursor: pointer;  /* Menandakan bisa diklik */
-            transition: transform 0.2s;
-        }
-        .promo-badge:active { transform: scale(0.95); } /* Efek tekan */
-        
-        .shine {
-            position: absolute;
-            top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg);
-            animation: shineAnim 4s infinite; /* Kilatan setiap 4 detik */
-            pointer-events: none;
-        }
-        
-        @keyframes shineAnim {
-            0% { left: -100%; }
-            20% { left: 200%; } /* Gerak cepat lewat */
-            100% { left: 200%; }
-        }
-        
-        /* 2. Animasi Denyut Cepat (Untuk "Lihat Diskon") */
-        .pulse-fast {
-            animation: pulseText 0.8s infinite alternate !important;
-            color: var(--danger) !important; /* Warna merah agar menarik perhatian */
-        }
-        
-        @keyframes pulseText {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
-        }
-        
-        /* 3. Style Modal (Pop-up Detail) */
-        .modal-overlay {
-            position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.6); 
-            z-index: 5000;
-            display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(3px);
-            opacity: 0; visibility: hidden; transition: 0.3s;
-        }
-        .modal-overlay.show { opacity: 1; visibility: visible; }
-        
-        .modal-content {
-            background: white; width: 90%; max-width: 350px;
-            padding: 20px; border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-            transform: scale(0.8); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .modal-overlay.show .modal-content { transform: scale(1); }
-        
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .modal-header h3 { margin: 0; color: var(--primary); font-size: 16px; }
-        .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
-        
-        /* Style List di dalam Modal (Versi Rapi) */
-        .promo-list { 
-            list-style: none; 
-            padding: 0; 
-            margin: 0; 
-            text-align: left; 
-        }
-        
-        .promo-list li { 
-            padding: 15px 0; /* Memberi jarak atas-bawah lebih lega */
-            border-bottom: 1px dashed #e0e0e0; 
-            font-size: 14px; /* Ukuran font sedikit diperbesar agar jelas */
-            display: flex; 
-            align-items: flex-start; /* Ikon tetap di atas jika teks panjang */
-            line-height: 1.6; /* Jarak antar baris kalimat (agar tidak dempet) */
-            color: #444;
-        }
-        
-        /* Mengatur Ikon Centang */
-        .promo-list li:before { 
-            content: '✅'; 
-            margin-right: 15px; /* Jarak spasi antara ikon dan teks */
-            font-size: 14px; 
-            flex-shrink: 0; /* Agar ikon tidak gepeng saat layar kecil */
-            margin-top: 1px; /* Men sejajarkan ikon dengan baris pertama teks */
-        }
-        
-        /* Menghilangkan garis di item terakhir agar rapi */
-        .promo-list li:last-child {
-            border-bottom: none;
-        }
-        
-        /* Warna Teks Highlight (Hijau) */
-        .promo-highlight { 
-            color: var(--primary); 
-            font-weight: 700; 
-            margin: 0 4px; /* PENTING: Memberi spasi otomatis kiri-kanan pada teks tebal */
-        }
-
-        /* --- CUSTOM ALERT (POP-UP) --- */
-        .custom-alert {
-            position: fixed;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-20px);
-            background: #fff;
-            padding: 15px 25px;
-            border-radius: 50px; /* Bentuk kapsul modern */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            z-index: 9999;
-            border-left: 5px solid var(--danger); /* Aksen merah */
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Efek membal */
-            min-width: 300px;
-        }
-        
-        /* State Aktif (Muncul) */
-        .custom-alert.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-            /* Animasi Berdenyut */
-            animation: pulse-red 2s infinite;
-        }
-        
-        /* Animasi Denyut Merah */
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
-        }
-        
-        /* Konten Alert */
-        .alert-icon { font-size: 24px; animation: shake 0.5s ease-in-out; }
-        .alert-content h4 { margin: 0; font-size: 14px; color: var(--danger); font-weight: 700; }
-        .alert-content p { margin: 0; font-size: 12px; color: #555; }
-        
-        /* Efek Getar untuk Ikon & Input Kosong */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        
-        /* Input Error Style */
-        .input-error {
-            border-color: var(--danger) !important;
-            background-color: #fff5f5 !important;
-            animation: shake 0.4s ease-in-out;
-        }
     </style>
 </head>
 <body>
@@ -401,41 +180,28 @@
         <div class="header-content">
             <div class="promo-badge left" onclick="openPromoModal('barang')">
                 <span class="emoji">🎁</span>
-                <div class="text" id="badge-text-barang">
+                <div class="text">
                     <small>Diskon Barang</small>
                     <strong class="dynamic-text" data-default="s/d 15rb">s/d 15rb</strong>
                 </div>
                 <div class="shine"></div>
             </div>
-    
+
             <div class="logo-container">
-                <img src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/logos/Logo_D_Hasna-rb.png" alt="Logo Bumi Jelly" class="logo-img">
+                <img src="https://i.ibb.co.com/FbnR4Xw/Gemini-Generated-Image-u1i57ou1i57ou1i5.jpg" alt="Logo Bumi Jelly" class="logo-img">
             </div>
-    
+
             <div class="promo-badge right" onclick="openPromoModal('ongkir')">
                 <span class="emoji">🚚</span>
-                <div class="text" id="badge-text-ongkir">
+                <div class="text">
                     <small>Diskon Ongkir</small>
                     <strong class="dynamic-text" data-default="50% - Free">50% - Free</strong>
                 </div>
                 <div class="shine"></div>
             </div>
         </div>
-        
         <div class="subtitle">Nikmati Kesegaran Alami Kelapa Muda</div>
     </header>
-    
-    <div id="promoModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Detail Promo</h3>
-                <button onclick="closePromoModal()" class="close-btn">✕</button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                </div>
-            <button onclick="closePromoModal()" class="btn-action btn-main" style="margin-top:15px; padding:10px;">Mengerti</button>
-        </div>
-    </div>
 
     <form id="orderForm" autocomplete="off">
         <div class="form-group">
@@ -500,6 +266,14 @@
     </form>
 </div>
 
+<div id="custom-alert" class="custom-alert">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-content">
+        <h4 id="alert-title">Perhatian</h4>
+        <p id="alert-message">Mohon lengkapi data.</p>
+    </div>
+</div>
+
 <div id="map-modal">
     <div class="search-container">
         <div class="search-header">
@@ -511,11 +285,20 @@
         </div>
         <div style="font-size:11px; color:#666; margin-left:35px;">*Ketik nama tempat lalu pilih dari daftar. Geser pin untuk presisi.</div>
     </div>
-
     <div id="map"></div>
-
     <div class="map-footer">
         <button id="confirm-map" class="btn-action btn-main" style="margin:0;">✅ Gunakan Lokasi Ini</button>
+    </div>
+</div>
+
+<div id="promoModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Detail Promo</h3>
+            <button onclick="closePromoModal()" style="background:none;border:none;font-size:20px;">✕</button>
+        </div>
+        <div id="modalBody"></div>
+        <button onclick="closePromoModal()" class="btn-action btn-main" style="margin-top:15px; padding:10px;">Mengerti</button>
     </div>
 </div>
 
@@ -530,13 +313,10 @@
     "use strict";
 
     document.addEventListener('DOMContentLoaded', () => {
-        // --- 1. KEAMANAN (DIPERBAIKI: Huruf 'i' bisa diketik) ---
+        // --- 1. KEAMANAN ---
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = e => {
-            // Hanya blokir jika kombinasi Ctrl+Shift+I (Inspect) atau F12 (123)
-            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && e.keyCode === 73)) {
-                return false;
-            }
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && e.keyCode === 73)) { return false; }
         };
 
         const config = {
@@ -571,6 +351,88 @@
             searchResults: document.getElementById('search-results')
         };
 
+        // --- PROMO ANIMATION ---
+        function initPromoAnimation() {
+            const badges = document.querySelectorAll('.promo-badge');
+            setInterval(() => {
+                badges.forEach(badge => {
+                    const strongTag = badge.querySelector('strong');
+                    const defaultText = strongTag.getAttribute('data-default');
+                    if (strongTag.innerText === defaultText) {
+                        strongTag.innerText = "Lihat Detail ➤";
+                        strongTag.classList.add('pulse-fast');
+                    } else {
+                        strongTag.innerText = defaultText;
+                        strongTag.classList.remove('pulse-fast');
+                    }
+                });
+            }, 4000);
+        }
+        initPromoAnimation();
+
+        // --- CUSTOM ALERT LOGIC (PERBAIKAN UTAMA) ---
+        const showCustomAlert = (message, fieldId = null) => {
+            const alertBox = document.getElementById('custom-alert');
+            const alertMsg = document.getElementById('alert-message');
+            
+            // Set pesan
+            alertMsg.innerText = message;
+            
+            // Munculkan
+            alertBox.classList.add('active');
+
+            // Highlight Field
+            if (fieldId) {
+                const inputField = document.getElementById(fieldId);
+                if(inputField) {
+                    inputField.classList.add('input-error');
+                    inputField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    inputField.focus();
+                    inputField.addEventListener('input', () => {
+                        inputField.classList.remove('input-error');
+                    }, { once: true });
+                }
+            }
+
+            // Hilangkan otomatis
+            setTimeout(() => { alertBox.classList.remove('active'); }, 3000);
+        };
+
+        window.openPromoModal = function(type) {
+            const modal = document.getElementById('promoModal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            
+            let content = "";
+            if (type === 'barang') {
+                title.innerHTML = "🎁 Promo Diskon Barang";
+                content = `
+                    <ul class="promo-list">
+                        <li>Beli <span class="promo-highlight">Kelipatan 5 Butir</span> langsung dapat potongan harga.</li>
+                        <li>Diskon <span class="promo-highlight">Rp 5.000</span> untuk setiap 5 butir.</li>
+                        <li>Contoh: Beli 10 butir, diskon Rp 10.000.</li>
+                        <li>Berlaku kelipatan seterusnya!</li>
+                    </ul>`;
+            } else if (type === 'ongkir') {
+                title.innerHTML = "🚚 Promo Diskon Ongkir";
+                content = `
+                    <ul class="promo-list">
+                        <li>Gratis Ongkir Full: Jarak < 2.5 KM (Tanpa Min. Order)</li>
+                        <li>Diskon Ongkir 50%: Jarak 2.5 - 5 KM (Min. Order 3 butir)</li>
+                        <li>Gratis Ongkir: Jarak 2.5 - 5 KM (Min. Order 6 butir)</li>
+                    </ul>`;
+            }
+            body.innerHTML = content;
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('show'), 10);
+        };
+
+        window.closePromoModal = function() {
+            const modal = document.getElementById('promoModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
         const formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');
 
         const hitungTotal = () => {
@@ -588,21 +450,21 @@
             }
 
             let discOngkir = 0;
-            if (dist > 2.5 && dist <= 6.5) {
+            if (dist > 2.5 && dist <= 5) {
                 if (qty > 2 && qty <= 5) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 5) discOngkir = ongkirMurni; 
-            } else if (dist > 5 && dist <= 12) {
+            } else if (dist > 5 && dist <= 10) {
                 if (qty >= 6 && qty <= 10) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 10) discOngkir = ongkirMurni; 
-            } else if (dist > 10 && dist <= 20) {
+            } else if (dist > 10 && dist <= 15) {
                 if (qty > 10 && qty <= 15) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 15) discOngkir = ongkirMurni; 
             }
 
             let discBarang = Math.floor(qty / 5) * 5000;
             const totalBayar = subtotal + ongkirMurni - discOngkir - discBarang;
-            
-            calculatedData = { subtotal: subtotal, ongkirMurni: ongkirMurni, discOngkir: discOngkir, discBarang: discBarang, totalBayar: totalBayar };
+
+            calculatedData = { subtotal, ongkirMurni, discOngkir, discBarang, totalBayar };
 
             ui.txtSubtotal.innerText = formatRupiah(subtotal);
             ui.txtOngkir.innerText = formatRupiah(ongkirMurni);
@@ -672,7 +534,6 @@
             });
         };
 
-        // --- PETA & PENCARIAN CUSTOM (Shopee Style) ---
         const mapModal = document.getElementById('map-modal');
         
         document.getElementById('btn-maps').onclick = () => {
@@ -693,24 +554,18 @@
             setTimeout(() => map.invalidateSize(), 200);
         };
 
-        // --- LOGIKA PENCARIAN (Updated: Bias to Indonesia/Store) ---
         const performSearch = async (query) => {
             if (!query || query.length < 3) return;
-            
             ui.searchResults.style.display = "block";
             ui.searchResults.innerHTML = '<div style="padding:10px;font-size:12px;color:#888;">Mencari...</div>';
 
             try {
-                // Bias hasil pencarian ke koordinat toko (Prioritas area sekitar toko/Indonesia)
-                const lat = config.store.lat;
-                const lon = config.store.lng;
+                const lat = config.store.lat; const lon = config.store.lng;
                 const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=15&lat=${lat}&lon=${lon}`;
-
                 const res = await fetch(url);
                 const data = await res.json();
                 
                 ui.searchResults.innerHTML = ""; 
-
                 if (data.features.length === 0) {
                     ui.searchResults.innerHTML = '<div style="padding:10px;font-size:12px;">Tidak ditemukan.</div>';
                     return;
@@ -719,7 +574,6 @@
                 data.features.forEach(f => {
                     const props = f.properties;
                     const name = props.name || props.street || "Lokasi Tanpa Nama";
-                    
                     let details = [];
                     if (props.street && props.street !== name) details.push(props.street);
                     if (props.city) details.push(props.city);
@@ -730,31 +584,18 @@
                     item.className = "search-item";
                     item.innerHTML = `
                         <div class="si-icon">📍</div>
-                        <div class="si-text">
-                            <div class="si-title">${name}</div>
-                            <div class="si-desc">${desc}</div>
-                        </div>
-                    `;
+                        <div class="si-text"><div class="si-title">${name}</div><div class="si-desc">${desc}</div></div>`;
                     
                     item.onclick = () => {
-                        const lat = f.geometry.coordinates[1];
-                        const lng = f.geometry.coordinates[0];
+                        const lat = f.geometry.coordinates[1]; const lng = f.geometry.coordinates[0];
                         const newLatLng = [lat, lng];
-                        
-                        map.setView(newLatLng, 17);
-                        marker.setLatLng(newLatLng);
-                        
+                        map.setView(newLatLng, 17); marker.setLatLng(newLatLng);
                         marker.bindPopup(`<div style="font-size:13px;"><b>${name}</b><br><span style="font-size:11px;">${desc}</span></div>`).openPopup();
-                        
-                        ui.searchResults.style.display = "none";
-                        ui.searchInput.value = name;
+                        ui.searchResults.style.display = "none"; ui.searchInput.value = name;
                     };
                     ui.searchResults.appendChild(item);
                 });
-
-            } catch (e) {
-                ui.searchResults.innerHTML = '<div style="padding:10px;color:red;">Gagal memuat.</div>';
-            }
+            } catch (e) { ui.searchResults.innerHTML = '<div style="padding:10px;color:red;">Gagal memuat.</div>'; }
         };
 
         ui.searchInput.addEventListener('input', (e) => {
@@ -763,9 +604,7 @@
         });
 
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-container')) {
-                ui.searchResults.style.display = "none";
-            }
+            if (!e.target.closest('.search-container')) { ui.searchResults.style.display = "none"; }
         });
 
         document.getElementById('confirm-map').onclick = async () => {
@@ -791,89 +630,58 @@
             ui.btnSubmit.style.display = 'block';
         };
 
-        // --- UPDATE LOGIKA SUBMIT DENGAN VALIDASI & POP-UP MODERN ---
+        // --- SUBMIT WITH VALIDATION ---
         ui.form.onsubmit = async e => {
             e.preventDefault();
 
-            // 1. VALIDASI INPUT (Cek sebelum proses dimulai)
+            // 1. VALIDASI MANUAL DI AWAL
             const namaVal = document.getElementById('nama').value.trim();
             const alamatVal = document.getElementById('alamat').value.trim();
             const jarakVal = parseFloat(ui.jarak.value);
 
-            // Cek Nama
-            if (!namaVal) {
-                showCustomAlert("Mohon isi Nama Pemesan terlebih dahulu.", "nama");
-                return; // Berhenti di sini jika salah
-            }
-
-            // Cek Alamat
-            if (!alamatVal) {
-                showCustomAlert("Kolom Alamat Lengkap wajib diisi.", "alamat");
-                return;
-            }
-
-            // Cek Jarak
-            if (!jarakVal || isNaN(jarakVal) || jarakVal === 0) {
-                showCustomAlert("Silakan klik tombol 'Hitung Jarak' atau 'Pilih Lokasi'.", "jarak");
-                return;
-            }
-
-            // Cek Bukti Transfer (Khusus QRIS)
+            if (!namaVal) { showCustomAlert("Mohon isi Nama Pemesan.", "nama"); return; }
+            if (!alamatVal) { showCustomAlert("Kolom Alamat wajib diisi.", "alamat"); return; }
+            if (!jarakVal || isNaN(jarakVal) || jarakVal === 0) { showCustomAlert("Silakan hitung jarak pengiriman.", "jarak"); return; }
+            
             if (ui.pembayaran.value === 'QRIS') {
                 const fileInput = document.getElementById('bukti_file');
                 if (!fileInput.files || fileInput.files.length === 0) {
-                    showCustomAlert("Anda memilih QRIS. Wajib upload bukti transfer!", "bukti_file");
+                    showCustomAlert("Wajib upload bukti transfer!", "bukti_file");
                     return;
                 }
             }
 
-            // 2. JIKA SEMUA AMAN, MULAI PROSES
+            // 2. JIKA VALID, LANJUT PROSES
             ui.btnSubmit.disabled = true;
             ui.btnSubmit.innerText = "⏳ Memproses...";
 
             try {
-                // Hitung ulang untuk keamanan data
-                hitungTotal(); 
-                
-                // Siapkan objek data (Sesuai kolom Supabase)
+                hitungTotal();
                 const orderData = {
-                    nama: namaVal,
-                    alamat: alamatVal,
-                    jarak_km: jarakVal,
-                    jumlah_butir: parseInt(ui.jumlah.value),
-                    metode_bayar: ui.pembayaran.value,
-                    
-                    // Kolom Keuangan Rinci
+                    nama: namaVal, alamat: alamatVal, jarak_km: jarakVal,
+                    jumlah_butir: parseInt(ui.jumlah.value), metode_bayar: ui.pembayaran.value,
                     harga_barang_awal: calculatedData.subtotal,
                     ongkir_murni: calculatedData.ongkirMurni,
                     potongan_ongkir: calculatedData.discOngkir,
                     potongan_barang: calculatedData.discBarang,
                     total_bayar: calculatedData.totalBayar,
-                    
-                    bukti_url: "" // Default kosong
+                    bukti_url: ""
                 };
 
-                // 3. Proses Upload ke Storage (Jika QRIS)
                 if (orderData.metode_bayar === 'QRIS') {
                     const file = document.getElementById('bukti_file').files[0];
-                    const fName = `bukti-${Date.now()}.jpg`; // Nama file unik
-                    
+                    const fName = `bukti-${Date.now()}.jpg`;
                     const { error } = await db.storage.from('bukti-transfer').upload(fName, file);
-                    if (error) throw new Error("Gagal upload bukti: " + error.message);
-                    
-                    // Ambil link publik
-                    const urlData = db.storage.from('bukti-transfer').getPublicUrl(fName);
-                    orderData.bukti_url = urlData.data.publicUrl;
+                    if (error) throw error;
+                    orderData.bukti_url = db.storage.from('bukti-transfer').getPublicUrl(fName).data.publicUrl;
                 }
 
-                // 4. Simpan ke Database
                 const { error: dbError } = await db.from('orders').insert([orderData]);
-                if (dbError) throw new Error("Gagal simpan database: " + dbError.message);
+                if (dbError) throw dbError;
 
-                // 5. Tampilkan Sukses
                 document.getElementById('successPopup').classList.add('active');
-
-                // 6. Format Pesan WhatsApp (Dengan perbaikan spasi alamat)
+                
+                // Format Pesan WA dengan Enter
                 const waMsg = 
                     `*PESANAN BARU - COCONUT BUMI JELLY*\n` +
                     `----------------------------------\n` +
@@ -891,128 +699,21 @@
                     `💳 Via: ${orderData.metode_bayar}\n` +
                     `📄 Bukti: ${orderData.bukti_url || 'Cash'}`;
 
-                // Redirect ke WA setelah 2 detik
                 setTimeout(() => {
                     window.open(`https://wa.me/${config.wa}?text=${encodeURIComponent(waMsg)}`, '_blank');
                     location.reload();
                 }, 2000);
 
             } catch (err) {
-                // Tangkap error dan tampilkan di Pop-up Modern (Bukan alert biasa)
-                console.error(err);
-                showCustomAlert("Terjadi Kesalahan: " + err.message);
-                
-                // Kembalikan tombol agar bisa dicoba lagi
+                showCustomAlert("Gagal: " + err.message);
                 ui.btnSubmit.disabled = false;
                 ui.btnSubmit.innerText = "KIRIM PESANAN";
             }
         };
-        
+
         hitungTotal();
     });
 })();
-/* --- LOGIKA PROMO INTERAKTIF --- */
-
-// 1. Fungsi Animasi Teks Berganti
-function initPromoAnimation() {
-    const badges = document.querySelectorAll('.promo-badge');
-    
-    setInterval(() => {
-        badges.forEach(badge => {
-            const strongTag = badge.querySelector('strong');
-            const defaultText = strongTag.getAttribute('data-default');
-            
-            // Cek apakah sedang menampilkan teks default atau "Lihat Diskon"
-            if (strongTag.innerText === defaultText) {
-                // Ganti ke mode "Lihat Diskon"
-                strongTag.innerText = "Lihat Detail ➤";
-                strongTag.classList.add('pulse-fast'); // Tambah denyutan cepat
-            } else {
-                // Kembali ke teks asli
-                strongTag.innerText = defaultText;
-                strongTag.classList.remove('pulse-fast'); // Hapus denyutan cepat
-            }
-        });
-    }, 4000); // Berganti setiap 4 detik
-}
-
-// 2. Fungsi Buka Modal Detail
-window.openPromoModal = function(type) {
-    const modal = document.getElementById('promoModal');
-    const title = document.getElementById('modalTitle');
-    const body = document.getElementById('modalBody');
-    
-    let content = "";
-
-    if (type === 'barang') {
-        title.innerHTML = "🎁 Promo Diskon Barang";
-        content = `
-            <ul class="promo-list">
-                <li>
-                    Beli <span class="promo-highlight">Kelipatan 5 Butir</span> langsung dapat potongan harga.
-                </li>
-                <li>
-                    Diskon <span class="promo-highlight">Rp 5.000</span> untuk setiap 5 butir.
-                </li>
-                <li>
-                    Contoh: Beli 10 butir, diskon Rp 10.000. Beli 15 butir, diskon Rp 15.000.
-                </li>
-                <li>
-                    Berlaku kelipatan seterusnya!
-                </li>
-            </ul>
-        `;
-        
-    } else if (type === 'ongkir') {
-        title.innerHTML = "🚚 Promo Diskon Ongkir";
-        content = `
-            <ul class="promo-list">
-                <li><b>Gratis Ongkir Full:</b><br>Jarak < 2.5 KM (Tanpa Min. Order)</li>
-                <li><b>Diskon Ongkir 50%:</b><br>Jarak 2.5 - 6.5 KM (Min. Order 3 butir)</li>
-                <li><b>Gratis Ongkir Full:</b><br>Jarak 2.5 - 6.5 KM (Min. Order 6 butir)</li>
-                <li><b>Diskon Ongkir 50%:</b><br>Jarak 5 - 12 KM (Min. Order 6 butir)</li>
-                <li><b>Gratis Ongkir Full:</b><br>Jarak 5 - 12 KM (Min. Order 11 butir)</li>
-            </ul>
-        `;
-    }
-
-    body.innerHTML = content;
-    modal.classList.remove('hidden');
-    // Sedikit delay agar animasi CSS jalan
-    setTimeout(() => modal.classList.add('show'), 10);
-};
-
-// 3. Fungsi Tutup Modal
-window.closePromoModal = function() {
-    const modal = document.getElementById('promoModal');
-    modal.classList.remove('show');
-    setTimeout(() => modal.classList.add('hidden'), 300);
-};
-
-// Jalankan animasi saat web dimuat
-initPromoAnimation();
 </script>
-<div id="custom-alert" class="custom-alert hidden">
-    <div class="alert-icon">⚠️</div>
-    <div class="alert-content">
-        <h4 id="alert-title">Perhatian</h4>
-        <p id="alert-message">Mohon lengkapi data.</p>
-    </div>
-</div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
