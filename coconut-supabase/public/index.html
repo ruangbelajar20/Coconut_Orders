@@ -232,77 +232,38 @@
         }
         }
 
-        /* --- STYLE QRIS MODERN COMPACT --- */
-        .qris-wrapper {
-            margin-top: 15px;
-            display: flex;
-            justify-content: center;
-            animation: fadeIn 0.5s ease;
+       /* --- STYLE MODAL QRIS SPESIFIK --- */
+        .qris-modal-content {
+            max-width: 380px !important; padding: 0 !important;
+            border-radius: 20px; overflow: hidden; text-align: center;
+        }
+        .qris-body { padding: 25px; }
+        .qris-logo-row {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px dashed #eee; padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .qris-brand { font-weight: 900; font-size: 18px; color: #333; letter-spacing: 1px; }
+        .qris-merchant-name { font-size: 12px; font-weight: 600; color: #555; }
+        
+        .qris-img-big {
+            width: 220px; height: 220px; object-fit: contain;
+            border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 10px;
         }
         
-        .qris-card {
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 16px;
-            padding: 20px;
-            width: 100%;
-            max-width: 280px; /* Membatasi lebar agar Compact */
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            position: relative;
-        }
+        .qris-helper { margin: 5px 0 0; font-size: 11px; color: #888; }
+        .qris-amount { margin: 0 0 15px; color: var(--primary); font-size: 24px; font-weight: 800; }
+        .qris-note { font-size: 10px; color: #aaa; margin-bottom: 20px; }
         
-        /* Garis hiasan atas ala QRIS */
-        .qris-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 6px;
-            background: linear-gradient(90deg, #ed1c24 0%, #ed1c24 33%, #fff 33%, #fff 66%, #000 66%, #000 100%); /* Warna khas logo QRIS */
-            border-radius: 16px 16px 0 0;
+        .upload-box-compact {
+            background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed #ccc;
         }
-        
-        .qris-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px dashed #eee;
-            padding-bottom: 10px;
+        .btn-upload-trigger {
+            display: inline-block; padding: 8px 20px; background: #fff; border: 1px solid var(--primary);
+            color: var(--primary); border-radius: 50px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
         }
-        
-        .qris-logo {
-            font-weight: 800;
-            font-size: 16px;
-            color: #333;
-            letter-spacing: 1px;
-        }
-        
-        .qris-merchant {
-            font-size: 11px;
-            color: #666;
-            font-weight: 500;
-        }
-        
-        .qris-img-file {
-            width: 180px; /* Ukuran pas, tidak raksasa */
-            height: 180px;
-            object-fit: contain;
-            border-radius: 8px;
-            border: 1px solid #f0f0f0;
-            margin-bottom: 10px;
-        }
-        
-        .qris-hint {
-            font-size: 10px;
-            color: #888;
-            line-height: 1.4;
-            margin: 0;
-        }
-        
-        /* Animasi Muncul Halus */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .btn-upload-trigger:hover { background: var(--primary); color: #fff; }
+        #bukti_file_modal { display: none; }
+        .file-status { font-size: 11px; margin-top: 8px; color: #666; font-style: italic; }
     </style>
 </head>
 <body>
@@ -398,26 +359,42 @@
             <div class="invoice-total"><span>Total Bayar</span><span id="txt-total">Rp 15.000</span></div>
         </div>
 
-        <div id="qris-container" class="qris-wrapper hidden">
-            <div class="qris-card">
-                <div class="qris-header">
-                    <span class="qris-logo">QRIS</span>
-                    <span class="qris-merchant">Bumi Jelly D'Hasna</span>
+        <div id="qrisModal" class="modal-overlay hidden">
+            <div class="modal-content qris-modal-content">
+                <div class="modal-header">
+                    <h3>Scan QRIS</h3>
+                    <button onclick="closeQrisModal()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
                 </div>
                 
-                <img id="qris-image" 
-                     src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/assets/QRIS.jpeg" 
-                     alt="Scan QRIS" 
-                     class="qris-img-file">
-                     
-                <p class="qris-hint">Scan menggunakan GoPay, OVO, Dana, ShopeePay, atau BCA Mobile</p>
+                <div class="qris-body">
+                    <div class="qris-logo-row">
+                        <span class="qris-brand">QRIS</span>
+                        <span class="qris-merchant-name">Bumi Jelly D'Hasna</span>
+                    </div>
+        
+                    <div class="qris-image-container">
+                        <img src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/assets/QRIS.jpeg" 
+                             alt="Scan QRIS" class="qris-img-big">
+                    </div>
+        
+                    <p class="qris-helper">Total Tagihan:</p>
+                    <h2 id="qris-total-amount" class="qris-amount">Rp 0</h2>
+                    
+                    <p class="qris-note">Scan via GoPay, OVO, Dana, ShopeePay, BCA, dll.</p>
+        
+                    <div class="upload-box-compact">
+                        <label for="bukti_file_modal" class="btn-upload-trigger">
+                            📄 Upload Bukti Transfer
+                        </label>
+                        <input type="file" id="bukti_file_modal" accept="image/*" onchange="previewFile()">
+                        <div id="file-name-preview" class="file-status">Belum ada file</div>
+                    </div>
+        
+                    <button onclick="confirmPayment()" class="btn-action btn-main">Kirim Pesanan Sekarang</button>
+                </div>
             </div>
         </div>
-
-        <div id="area-upload" class="hidden">
-            <label style="color: #e65100;">Wajib Upload Bukti Transfer:</label>
-            <input type="file" id="bukti_file" accept="image/*">
-        </div>
+   
 
         <button type="button" id="btn-pay-qris" class="btn-action btn-pay">BAYAR SEKARANG</button>
         <button type="submit" id="btn-submit" class="btn-action btn-main">KIRIM PESANAN</button>
@@ -786,35 +763,191 @@
         document.getElementById('close-map').onclick = () => mapModal.style.display = "none";
 
         ui.jumlah.oninput = hitungTotal;
-        // LOGIKA GANTI METODE PEMBAYARAN
+
+        // 1. LOGIKA INTERAKSI TOMBOL & PEMBAYARAN
+
+        // Handle Perubahan Dropdown Pembayaran
         ui.pembayaran.onchange = () => {
             const isQris = ui.pembayaran.value === 'QRIS';
-            
-            // Atur Tombol Utama
-            ui.btnSubmit.style.display = isQris ? 'none' : 'block';
+            // Tampilkan tombol yang sesuai: Cash -> KIRIM, QRIS -> BAYAR SEKARANG
             ui.btnPay.style.display = isQris ? 'block' : 'none';
-            
-            // Reset Tampilan (Sembunyikan QRIS & Upload jika ganti metode)
-            // Kita gunakan classList agar tidak merusak desain Flexbox (tengah)
-            ui.qrisArea.classList.add('hidden'); 
-            ui.qrisArea.style.display = 'none';
-            ui.uploadArea.classList.add('hidden');
-            ui.uploadArea.style.display = 'none';
+            ui.btnSubmit.style.display = isQris ? 'none' : 'block';
         };
 
-        // LOGIKA KLIK TOMBOL "BAYAR SEKARANG"
+        // Handle Klik Tombol "BAYAR SEKARANG" (Buka Modal QRIS)
         ui.btnPay.onclick = () => {
-            ui.btnPay.style.display = 'none'; // Sembunyikan tombol bayar
+            // Validasi data dasar dulu sebelum membuka modal
+            const namaVal = document.getElementById('nama').value.trim();
+            const jarakVal = parseFloat(ui.jarak.value);
             
-            // Munculkan QRIS & Upload dengan animasi CSS
-            ui.qrisArea.classList.remove('hidden'); 
-            ui.qrisArea.style.display = 'flex';
+            if (!namaVal) { 
+                showCustomAlert("Mohon isi Nama Pemesan terlebih dahulu.", "nama"); 
+                return; 
+            }
+            if (!jarakVal || isNaN(jarakVal) || jarakVal === 0) { 
+                showCustomAlert("Silakan hitung jarak pengiriman.", "jarak"); 
+                return; 
+            }
+
+            // Set Total Harga ke dalam Modal agar user tahu berapa yang harus dibayar
+            document.getElementById('qris-total-amount').innerText = ui.txtTotal.innerText;
+
+            // Tampilkan Modal dengan Animasi
+            const modal = document.getElementById('qrisModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('show'), 10);
+        };
+
+        // 2. FUNGSI PENDUKUNG MODAL & FILE
+
+        // Fungsi Menutup Modal QRIS
+        window.closeQrisModal = function() {
+            const modal = document.getElementById('qrisModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
+        // Fungsi Preview Nama File saat User Memilih Gambar di Modal
+        window.previewFile = function() {
+            const input = document.getElementById('bukti_file_modal');
+            const status = document.getElementById('file-name-preview');
+            if(input.files && input.files[0]) {
+                status.innerText = "✅ File siap: " + input.files[0].name;
+                status.style.color = "var(--success)"; // Hijau
+                status.style.fontWeight = "600";
+            } else {
+                status.innerText = "Belum ada file dipilih";
+                status.style.color = "#666";
+            }
+        };
+
+        // Fungsi Konfirmasi Pembayaran dari Dalam Modal (Triggered by Button)
+        window.confirmPayment = function() {
+            const fileInput = document.getElementById('bukti_file_modal');
+            // Validasi Wajib Upload Bukti
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Mohon upload bukti transfer terlebih dahulu pada kotak yang tersedia!");
+                return;
+            }
+            // Lanjut ke proses utama dengan membawa file bukti
+            processOrder(fileInput.files[0]);
+        };
+
+        // 3. CORE: FUNGSI UTAMA PEMROSESAN PESANAN
+
+        // Fungsi ini menangani logika Cash (tanpa file) dan QRIS (dengan file) sekaligus
+        const processOrder = async (fileBukti = null) => {
+            // UI Feedback: Kunci tombol agar tidak spam klik
+            ui.btnSubmit.disabled = true;
+            ui.btnSubmit.innerText = "⏳ Memproses...";
+            const btnModal = document.querySelector('.qris-body .btn-main'); // Tombol di dalam modal
+            if(btnModal) btnModal.innerText = "⏳ Mengirim...";
+
+            try {
+                // Hitung ulang total untuk memastikan akurasi data
+                hitungTotal();
+                
+                // Ambil Nilai dari Form
+                const namaVal = document.getElementById('nama').value.trim();
+                const alamatVal = document.getElementById('alamat').value.trim();
+                
+                // Susun Object Data untuk Database Supabase
+                const orderData = {
+                    nama: namaVal,
+                    alamat: alamatVal,
+                    jarak_km: parseFloat(ui.jarak.value),
+                    jumlah_butir: parseInt(ui.jumlah.value),
+                    metode_bayar: ui.pembayaran.value,
+                    
+                    // Rincian Keuangan (Dari variabel global calculatedData)
+                    harga_barang_awal: calculatedData.subtotal,
+                    ongkir_murni: calculatedData.ongkirMurni,
+                    potongan_ongkir: calculatedData.discOngkir,
+                    potongan_barang: calculatedData.discBarang,
+                    kode_voucher: activeVoucherCode || null,
+                    nilai_voucher: voucherValue,
+                    total_bayar: calculatedData.totalBayar,
+                    
+                    bukti_url: "" // Default kosong, diisi jika ada upload
+                };
+
+                // --- TAHAP UPLOAD FILE (Hanya jika ada fileBukti) ---
+                if (fileBukti) {
+                    const fName = `bukti-${Date.now()}-${Math.floor(Math.random() * 1000)}.jpg`;
+                    const { error: uploadError } = await db.storage.from('bukti-transfer').upload(fName, fileBukti);
+                    
+                    if (uploadError) throw new Error("Gagal upload bukti: " + uploadError.message);
+                    
+                    // Ambil Public URL setelah sukses upload
+                    const urlData = db.storage.from('bukti-transfer').getPublicUrl(fName);
+                    orderData.bukti_url = urlData.data.publicUrl;
+                }
+
+                // --- TAHAP SIMPAN KE DATABASE ---
+                const { error: dbError } = await db.from('orders').insert([orderData]);
+                if (dbError) throw new Error("Gagal menyimpan pesanan: " + dbError.message);
+
+                // --- TAHAP SUKSES ---
+                window.closeQrisModal(); // Tutup modal jika terbuka
+                document.getElementById('successPopup').classList.add('active'); // Tampilkan pop-up sukses
+                
+                // Catat penggunaan voucher di LocalStorage agar tidak bisa dipakai lagi di HP ini
+                if (orderData.kode_voucher) {
+                    localStorage.setItem('voucher_used_' + orderData.kode_voucher, 'true');
+                }
+
+                // Format Pesan WhatsApp
+                const waMsg = 
+                    `*PESANAN BARU - COCONUT BUMI JELLY D'HASNA*\n` +
+                    `----------------------------------\n` +
+                    `👤 *${orderData.nama}*\n\n` +
+                    `📍 *Alamat Pengiriman:*\n${orderData.alamat}\n\n` +
+                    `🛣️ Jarak: ${orderData.jarak_km} KM\n` +
+                    `🥥 Order: ${orderData.jumlah_butir} Butir\n` +
+                    `----------------------------------\n` +
+                    `💵 Subtotal: ${formatRupiah(orderData.harga_barang_awal)}\n` +
+                    `🚚 Ongkir Asli: ${formatRupiah(orderData.ongkir_murni)}\n` +
+                    (orderData.potongan_ongkir > 0 ? `✂️ Potongan Ongkir: -${formatRupiah(orderData.potongan_ongkir)}\n` : '') +
+                    (orderData.potongan_barang > 0 ? `🎁 Diskon Barang: -${formatRupiah(orderData.potongan_barang)}\n` : '') +
+                    (orderData.nilai_voucher > 0 ? `🎟️ Voucher (${orderData.kode_voucher}): -${formatRupiah(orderData.nilai_voucher)}\n` : '') +
+                    `----------------------------------\n` +
+                    `*TOTAL BAYAR: ${formatRupiah(orderData.total_bayar)}*\n` +
+                    `💳 Via: ${orderData.metode_bayar}\n` +
+                    `📄 Bukti: ${orderData.bukti_url || 'Cash'}`;
+
+                // Redirect ke WhatsApp setelah jeda 2 detik
+                setTimeout(() => {
+                    window.open(`https://wa.me/${config.wa}?text=${encodeURIComponent(waMsg)}`, '_blank');
+                    location.reload(); // Refresh halaman agar siap untuk order baru
+                }, 2000);
+
+            } catch (err) {
+                console.error(err);
+                // Tampilkan Error di Alert Modern
+                showCustomAlert("Terjadi Kesalahan: " + err.message);
+                
+                // Kembalikan status tombol agar bisa dicoba lagi
+                ui.btnSubmit.disabled = false;
+                ui.btnSubmit.innerText = "KIRIM PESANAN";
+                if(btnModal) btnModal.innerText = "Kirim Pesanan Sekarang";
+            }
+        };
+    
+        // 4. HANDLE SUBMIT FORM UTAMA (KHUSUS CASH)
+        ui.form.onsubmit = (e) => {
+            e.preventDefault();
             
-            // 2. Munculkan Upload
-            ui.uploadArea.classList.remove('hidden');
-            ui.uploadArea.style.display = 'block';
-            
-            ui.btnSubmit.style.display = 'block'; // Munculkan tombol kirim pesanan
+            // Validasi Manual Lagi (Backup safety)
+            const namaVal = document.getElementById('nama').value.trim();
+            const jarakVal = parseFloat(ui.jarak.value);
+
+            if (!namaVal) { showCustomAlert("Mohon isi Nama Pemesan.", "nama"); return; }
+            if (!jarakVal || jarakVal === 0) { showCustomAlert("Mohon hitung jarak pengiriman.", "jarak"); return; }
+
+            // Jika Cash, langsung proses tanpa file (null)
+            if (ui.pembayaran.value === 'Cash') {
+                processOrder(null); 
+            }
         };
 
         // --- LOGIKA VOUCHER ---
@@ -903,92 +1036,6 @@
             else hitungTotal();
         });
         
-        // --- SUBMIT WITH VALIDATION ---
-        ui.form.onsubmit = async e => {
-            e.preventDefault();
-
-            // 1. VALIDASI MANUAL DI AWAL
-            const namaVal = document.getElementById('nama').value.trim();
-            const alamatVal = document.getElementById('alamat').value.trim();
-            const jarakVal = parseFloat(ui.jarak.value);
-
-            if (!namaVal) { showCustomAlert("Mohon isi Nama Pemesan.", "nama"); return; }
-            if (!alamatVal) { showCustomAlert("Kolom Alamat wajib diisi.", "alamat"); return; }
-            if (!jarakVal || isNaN(jarakVal) || jarakVal === 0) { showCustomAlert("Silakan hitung jarak pengiriman.", "jarak"); return; }
-            
-            if (ui.pembayaran.value === 'QRIS') {
-                const fileInput = document.getElementById('bukti_file');
-                if (!fileInput.files || fileInput.files.length === 0) {
-                    showCustomAlert("Wajib upload bukti transfer!", "bukti_file");
-                    return;
-                }
-            }
-
-            // 2. JIKA VALID, LANJUT PROSES
-            ui.btnSubmit.disabled = true;
-            ui.btnSubmit.innerText = "⏳ Memproses...";
-
-            try {
-                hitungTotal();
-                const orderData = {
-                    nama: namaVal, alamat: alamatVal, jarak_km: jarakVal,
-                    jumlah_butir: parseInt(ui.jumlah.value), metode_bayar: ui.pembayaran.value,
-                    harga_barang_awal: calculatedData.subtotal,
-                    ongkir_murni: calculatedData.ongkirMurni,
-                    potongan_ongkir: calculatedData.discOngkir,
-                    potongan_barang: calculatedData.discBarang,
-                    kode_voucher: activeVoucherCode || null, // Simpan kodenya
-                    nilai_voucher: voucherValue,
-                    total_bayar: calculatedData.totalBayar,
-                    bukti_url: ""
-                };
-
-                if (orderData.metode_bayar === 'QRIS') {
-                    const file = document.getElementById('bukti_file').files[0];
-                    const fName = `bukti-${Date.now()}.jpg`;
-                    const { error } = await db.storage.from('bukti-transfer').upload(fName, file);
-                    if (error) throw error;
-                    orderData.bukti_url = db.storage.from('bukti-transfer').getPublicUrl(fName).data.publicUrl;
-                }
-
-                const { error: dbError } = await db.from('orders').insert([orderData]);
-                if (dbError) throw dbError;
-
-                document.getElementById('successPopup').classList.add('active');
-
-                if (orderData.kode_voucher) {
-                    localStorage.setItem('voucher_used_' + orderData.kode_voucher, 'true');
-                }
-                // Format Pesan WA dengan Enter
-                const waMsg = 
-                    `*PESANAN BARU - COCONUT BUMI JELLY D'HASNA*\n` +
-                    `----------------------------------\n` +
-                    `👤 *${orderData.nama}*\n\n` +
-                    `📍 *Alamat Pengiriman:*\n${orderData.alamat}\n\n` +
-                    `🛣️ Jarak: ${orderData.jarak_km} KM\n` +
-                    `🥥 Order: ${orderData.jumlah_butir} Butir\n` +
-                    `----------------------------------\n` +
-                    `💵 Subtotal: ${formatRupiah(orderData.harga_barang_awal)}\n` +
-                    `🚚 Ongkir Asli: ${formatRupiah(orderData.ongkir_murni)}\n` +
-                    (orderData.potongan_ongkir > 0 ? `✂️ Potongan Ongkir: -${formatRupiah(orderData.potongan_ongkir)}\n` : '') +
-                    (orderData.potongan_barang > 0 ? `🎁 Diskon Barang: -${formatRupiah(orderData.potongan_barang)}\n` : '') +
-                    (orderData.nilai_voucher > 0 ? `🎟️ Voucher (${orderData.kode_voucher}): -${formatRupiah(orderData.nilai_voucher)}\n` : '') +
-                    `----------------------------------\n` +
-                    `*TOTAL BAYAR: ${formatRupiah(orderData.total_bayar)}*\n` +
-                    `💳 Via: ${orderData.metode_bayar}\n` +
-                    `📄 Bukti: ${orderData.bukti_url || 'Cash'}`;
-
-                setTimeout(() => {
-                    window.open(`https://wa.me/${config.wa}?text=${encodeURIComponent(waMsg)}`, '_blank');
-                    location.reload();
-                }, 2000);
-
-            } catch (err) {
-                showCustomAlert("Gagal: " + err.message);
-                ui.btnSubmit.disabled = false;
-                ui.btnSubmit.innerText = "KIRIM PESANAN";
-            }
-        };
 
         hitungTotal();
     });
@@ -996,6 +1043,7 @@
 </script>
 </body>
 </html>
+
 
 
 
