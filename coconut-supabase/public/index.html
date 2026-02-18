@@ -231,6 +231,78 @@
             100% { opacity: 0; transform: translateX(0); }
         }
         }
+
+        /* --- STYLE QRIS MODERN COMPACT --- */
+        .qris-wrapper {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .qris-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 280px; /* Membatasi lebar agar Compact */
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: relative;
+        }
+        
+        /* Garis hiasan atas ala QRIS */
+        .qris-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 6px;
+            background: linear-gradient(90deg, #ed1c24 0%, #ed1c24 33%, #fff 33%, #fff 66%, #000 66%, #000 100%); /* Warna khas logo QRIS */
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .qris-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 10px;
+        }
+        
+        .qris-logo {
+            font-weight: 800;
+            font-size: 16px;
+            color: #333;
+            letter-spacing: 1px;
+        }
+        
+        .qris-merchant {
+            font-size: 11px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .qris-img-file {
+            width: 180px; /* Ukuran pas, tidak raksasa */
+            height: 180px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+            margin-bottom: 10px;
+        }
+        
+        .qris-hint {
+            font-size: 10px;
+            color: #888;
+            line-height: 1.4;
+            margin: 0;
+        }
+        
+        /* Animasi Muncul Halus */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -326,9 +398,20 @@
             <div class="invoice-total"><span>Total Bayar</span><span id="txt-total">Rp 15.000</span></div>
         </div>
 
-        <div id="qris-container">
-            <p style="font-size:12px; margin-bottom:5px;">Scan QRIS di bawah ini:</p>
-            <img id="qris-image" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=BUMI-JELLY-DHASNA" alt="QRIS">
+        <div id="qris-container" class="qris-wrapper hidden">
+            <div class="qris-card">
+                <div class="qris-header">
+                    <span class="qris-logo">QRIS</span>
+                    <span class="qris-merchant">Bumi Jelly D'Hasna</span>
+                </div>
+                
+                <img id="qris-image" 
+                     src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202026-02-18%20at%2016.41.14.jpeg" 
+                     alt="Scan QRIS" 
+                     class="qris-img-file">
+                     
+                <p class="qris-hint">Scan menggunakan GoPay, OVO, Dana, ShopeePay, atau BCA Mobile</p>
+            </div>
         </div>
 
         <div id="area-upload" class="hidden">
@@ -703,18 +786,29 @@
         document.getElementById('close-map').onclick = () => mapModal.style.display = "none";
 
         ui.jumlah.oninput = hitungTotal;
+        // LOGIKA GANTI METODE PEMBAYARAN
         ui.pembayaran.onchange = () => {
             const isQris = ui.pembayaran.value === 'QRIS';
+            
+            // Atur Tombol Utama
             ui.btnSubmit.style.display = isQris ? 'none' : 'block';
             ui.btnPay.style.display = isQris ? 'block' : 'none';
-            ui.qrisArea.style.display = 'none';
+            
+            // Reset Tampilan (Sembunyikan QRIS & Upload jika ganti metode)
+            // Kita gunakan classList agar tidak merusak desain Flexbox (tengah)
+            ui.qrisArea.classList.add('hidden'); 
             ui.uploadArea.classList.add('hidden');
         };
+
+        // LOGIKA KLIK TOMBOL "BAYAR SEKARANG"
         ui.btnPay.onclick = () => {
-            ui.btnPay.style.display = 'none';
-            ui.qrisArea.style.display = 'block';
+            ui.btnPay.style.display = 'none'; // Sembunyikan tombol bayar
+            
+            // Munculkan QRIS & Upload dengan animasi CSS
+            ui.qrisArea.classList.remove('hidden'); 
             ui.uploadArea.classList.remove('hidden');
-            ui.btnSubmit.style.display = 'block';
+            
+            ui.btnSubmit.style.display = 'block'; // Munculkan tombol kirim pesanan
         };
 
         // --- LOGIKA VOUCHER ---
@@ -896,6 +990,7 @@
 </script>
 </body>
 </html>
+
 
 
 
