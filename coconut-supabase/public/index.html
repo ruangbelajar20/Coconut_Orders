@@ -424,20 +424,19 @@
             100% { filter: brightness(1); }
         }
 
+        /* --- VIDEO DI DALAM KOTAK --- */
         #promoVideo {
             width: 100%;
             height: 100%;
             
-            /* Tetap gunakan cover agar memenuhi bingkai */
-            object-fit: cover;
+            /* Agar video mengisi seluruh kotak dengan rapi */
+            object-fit: cover; 
             object-position: center;
             
-            /* UBAH INI: Kecilkan angka di bawah 1 (misal 0.8 atau 0.9) */
-            /* 0.9 artinya ukuran 90% (Zoom out 10%) */
-            transform: scale(0.7); 
+            /* Pastikan tidak ada rotasi/zoom aneh */
+            transform: none; 
             
-            /* Agar transisi halus */
-            transition: transform 0.3s ease;
+            display: block;
         }
     </style>
 </head>
@@ -1286,6 +1285,7 @@
 </script>
 </body>
 </html>
+
 
 
 
