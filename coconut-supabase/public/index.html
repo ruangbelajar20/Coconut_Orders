@@ -490,6 +490,9 @@
     </header>
 
     <form id="orderForm" autocomplete="off">
+        <input type="hidden" id="lat_coordinate">
+        <input type="hidden" id="lng_coordinate">
+
         <div class="form-group">
             <label>Nama Pemesan</label>
             <input type="text" id="nama" placeholder="Masukkan nama..." required>
@@ -685,6 +688,8 @@
         let voucherValue = 0; 
         let activeVoucherCode = "";
         let searchTimeout;
+        let selectedLat = null;
+        let selectedLng = null;
 
         const ui = {
             form: document.getElementById('orderForm'),
@@ -853,7 +858,11 @@
                 const res = await fetch(url);
                 const data = await res.json();
                 if (data.code === "Ok") {
+                    selectedLat = lat;
+                    selectedLng = lng;
                     ui.jarak.value = (data.routes[0].distance / 1000).toFixed(1);
+                    document.getElementById('lat_coordinate').value = lat;
+                    document.getElementById('lng_coordinate').value = lng;
                     hitungTotal();
                     return true;
                 }
@@ -1061,6 +1070,14 @@
 
         // Fungsi ini menangani logika Cash (tanpa file) dan QRIS (dengan file) sekaligus
         const processOrder = async (fileBukti = null) => {
+            const latVal = document.getElementById('lat_coordinate').value;
+            const lngVal = document.getElementById('lng_coordinate').value;
+
+            // Jika kosong, berarti user belum klik tombol GPS atau Peta
+            if (!latVal || !lngVal) { 
+                showCustomAlert("Lokasi belum terdeteksi! Harap klik tombol 'Hitung Jarak GPS' atau pilih lokasi di Peta.", "jarak"); 
+                return; // STOP TOTAL DISINI. Jangan lanjut proses.
+            }
             // UI Feedback: Kunci tombol agar tidak spam klik
             ui.btnSubmit.disabled = true;
             ui.btnSubmit.innerText = "⏳ Memproses...";
@@ -1080,6 +1097,8 @@
                     nama: namaVal,
                     alamat: alamatVal,
                     jarak_km: parseFloat(ui.jarak.value),
+                    lat: parseFloat(latVal),
+                    lng: parseFloat(lngVal),
                     jumlah_butir: parseInt(ui.jumlah.value),
                     metode_bayar: ui.pembayaran.value,
                     
@@ -1285,42 +1304,4 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
