@@ -534,13 +534,13 @@
             }
 
             let discOngkir = 0;
-            if (dist > 2.5 && dist <= 5) {
+            if (dist > 2.5 && dist <= 6.5) {
                 if (qty > 2 && qty <= 5) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 5) discOngkir = ongkirMurni; 
-            } else if (dist > 5 && dist <= 10) {
+            } else if (dist > 5 && dist <= 12) {
                 if (qty >= 6 && qty <= 10) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 10) discOngkir = ongkirMurni; 
-            } else if (dist > 10 && dist <= 15) {
+            } else if (dist > 10 && dist <= 20) {
                 if (qty > 10 && qty <= 15) discOngkir = ongkirMurni * 0.5;
                 else if (qty > 15) discOngkir = ongkirMurni; 
             }
@@ -864,10 +864,10 @@ window.openPromoModal = function(type) {
         content = `
             <ul class="promo-list">
                 <li><b>Gratis Ongkir Full:</b><br>Jarak < 2.5 KM (Tanpa Min. Order)</li>
-                <li><b>Diskon Ongkir 50%:</b><br>Jarak 2.5 - 5 KM (Min. Order 3 butir)</li>
-                <li><b>Gratis Ongkir:</b><br>Jarak 2.5 - 5 KM (Min. Order 6 butir)</li>
-                <li><b>Diskon Ongkir 50%:</b><br>Jarak 5 - 10 KM (Min. Order 6 butir)</li>
-                <li><b>Gratis Ongkir:</b><br>Jarak 5 - 10 KM (Min. Order 11 butir)</li>
+                <li><b>Diskon Ongkir 50%:</b><br>Jarak 2.5 - 6.5 KM (Min. Order 3 butir)</li>
+                <li><b>Gratis Ongkir Full:</b><br>Jarak 2.5 - 6.5 KM (Min. Order 6 butir)</li>
+                <li><b>Diskon Ongkir 50%:</b><br>Jarak 5 - 12 KM (Min. Order 6 butir)</li>
+                <li><b>Gratis Ongkir Full:</b><br>Jarak 5 - 12 KM (Min. Order 11 butir)</li>
             </ul>
         `;
     }
@@ -890,6 +890,7 @@ initPromoAnimation();
 </script>
 </body>
 </html>
+
 
 
 
