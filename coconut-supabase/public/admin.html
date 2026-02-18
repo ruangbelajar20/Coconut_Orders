@@ -95,7 +95,10 @@
             <h1>Dashboard Penjual</h1>
             <div style="font-size:13px; opacity:0.9;">Analisis & Pengelompokan Pesanan</div>
         </div>
-        <button class="refresh-btn" onclick="fetchData()"><i data-lucide="refresh-cw"></i> Refresh Data</button>
+        <div style="display:flex; gap:10px;">
+            <button class="refresh-btn" onclick="fetchData()"><i data-lucide="refresh-cw"></i> Refresh</button>
+            <button class="refresh-btn" onclick="logout()" style="background:#ef4444;"><i data-lucide="log-out"></i> Keluar</button>
+        </div>
     </div>
 
     <div class="stats-grid">
@@ -167,6 +170,24 @@
     let allOrders = [];
     let charts = {};
 
+    // --- CEK SESI LOGIN (KEAMANAN) ---
+    async function checkAuth() {
+        const { data: { session } } = await db.auth.getSession();
+        
+        // Jika tidak ada sesi login, tendang ke login.html
+        if (!session) {
+            window.location.href = 'login.html'; 
+        }
+    }
+    checkAuth(); // Jalankan pengecekan saat halaman dibuka
+
+    // Fungsi Logout
+    async function logout() {
+        const { error } = await db.auth.signOut();
+        if (!error) {
+            window.location.href = 'login.html';
+        }
+    }
     // --- 2. FUNGSI UTAMA FETCH DATA ---
     async function fetchData() {
         document.getElementById('orders-container').innerHTML = '<div id="loading">Sedang memuat data terbaru...</div>';
