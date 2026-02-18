@@ -358,15 +358,21 @@
         .water-drops-frame {
             position: relative;
             width: 100%;
-            max-width: 150px; /* Lebar video */
-            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; /* Bentuk tidak beraturan seperti air */
+            
+            /* 1. UBAH INI: Agar lebih lebar ke samping */
+            max-width: 480px; 
+            
+            /* 2. TAMBAHKAN INI: Memaksa bentuk Landscape (Mendatar) */
+            aspect-ratio: 16 / 9; 
+            
+            /* Style Hiasan (Biarkan sama atau sesuaikan sedikit) */
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; /* Bentuk air lebih santai */
             overflow: hidden;
-            box-shadow: 
-                inset 0 0 20px rgba(255, 255, 255, 0.5), /* Kilauan dalam */
-                0 10px 20px rgba(15, 122, 99, 0.2); /* Bayangan hijau segar */
-            animation: water-morph 8s ease-in-out infinite; /* Animasi bentuk berubah-ubah */
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 10px 20px rgba(15, 122, 99, 0.2);
+            animation: water-morph 8s ease-in-out infinite;
             border: 4px solid rgba(255, 255, 255, 0.8);
             background: #fff;
+            margin: 0 auto; /* Tengah */
         }
         
         /* Animasi Bentuk Air (Morphing) */
@@ -419,14 +425,12 @@
 
         /* --- ROTASI VIDEO LANDSCAPE --- */
         #promoVideo {
-            /* 1. Putar 90 Derajat */
-            transform: rotate(0deg) scale(1.4); 
-            
-            /* 2. Pastikan titik putarnya di tengah */
-            transform-origin: center center;
-            
-            /* 3. Agar transisi putar (jika ada) terlihat halus */
-            transition: transform 0.3s ease;
+            width: 100%;
+            height: 100%;
+            transform: none; 
+            object-fit: cover;
+            display: block;
+            mix-blend-mode: multiply;
         }
     </style>
 </head>
@@ -1275,6 +1279,7 @@
 </script>
 </body>
 </html>
+
 
 
 
