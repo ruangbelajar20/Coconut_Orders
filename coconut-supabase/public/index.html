@@ -232,38 +232,58 @@
         }
         }
 
-       /* --- STYLE MODAL QRIS SPESIFIK --- */
+        /* --- STYLE MODAL QRIS SPESIFIK (UPDATE RESPONSIF) --- */
         .qris-modal-content {
-            max-width: 380px !important; padding: 0 !important;
-            border-radius: 20px; overflow: hidden; text-align: center;
+            width: 90%; /* Lebar responsif */
+            max-width: 380px !important;
+            max-height: 90vh; /* PENTING: Agar tidak kepotong di layar pendek */
+            overflow-y: auto; /* PENTING: Agar bisa discroll jika ketutup keyboard */
+            padding: 0 !important;
+            border-radius: 20px;
+            background: #fff;
+            text-align: center;
+            position: relative; /* Agar tombol close diam di tempat */
         }
-        .qris-body { padding: 25px; }
-        .qris-logo-row {
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 2px dashed #eee; padding-bottom: 15px; margin-bottom: 20px;
-        }
-        .qris-brand { font-weight: 900; font-size: 18px; color: #333; letter-spacing: 1px; }
-        .qris-merchant-name { font-size: 12px; font-weight: 600; color: #555; }
         
+        .qris-body { 
+            padding: 25px 20px; 
+        }
+        
+        /* Gambar QRIS Lebih Besar & Jelas */
         .qris-img-big {
-            width: 220px; height: 220px; object-fit: contain;
-            border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 10px;
+            width: 100%;
+            max-width: 260px; /* Diperbesar agar mudah discan */
+            height: auto;
+            aspect-ratio: 1/1; /* Menjaga tetap kotak */
+            object-fit: contain;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        .qris-helper { margin: 5px 0 0; font-size: 11px; color: #888; }
-        .qris-amount { margin: 0 0 15px; color: var(--primary); font-size: 24px; font-weight: 800; }
-        .qris-note { font-size: 10px; color: #aaa; margin-bottom: 20px; }
+        /* Teks Helper (Harga) */
+        .qris-helper { margin: 10px 0 0; font-size: 12px; color: #666; font-weight: 500; }
+        .qris-amount { margin: 5px 0 20px; color: var(--primary); font-size: 26px; font-weight: 800; }
         
+        /* Tombol Upload Compact */
         .upload-box-compact {
-            background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed #ccc;
+            background: #f4fbf9; 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            border: 1px dashed var(--primary);
         }
         .btn-upload-trigger {
-            display: inline-block; padding: 8px 20px; background: #fff; border: 1px solid var(--primary);
-            color: var(--primary); border-radius: 50px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
+            display: inline-block; padding: 10px 25px; background: #fff; border: 1px solid var(--primary);
+            color: var(--primary); border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; 
+            transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .btn-upload-trigger:hover { background: var(--primary); color: #fff; }
         #bukti_file_modal { display: none; }
-        .file-status { font-size: 11px; margin-top: 8px; color: #666; font-style: italic; }
+        .file-status { font-size: 12px; margin-top: 8px; color: #333; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -361,36 +381,30 @@
 
         <div id="qrisModal" class="modal-overlay hidden">
             <div class="modal-content qris-modal-content">
-                <div class="modal-header">
-                    <h3>Scan QRIS</h3>
-                    <button onclick="closeQrisModal()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
+                <div class="modal-header" style="border-bottom:none; padding-bottom:0;">
+                    <h3 style="margin:0; font-size:16px; color:#333;">Scan Pembayaran</h3>
+                    <button onclick="closeQrisModal()" style="background:none;border:none;font-size:24px;cursor:pointer; color:#999;">✕</button>
                 </div>
                 
                 <div class="qris-body">
-                    <div class="qris-logo-row">
-                        <span class="qris-brand">QRIS</span>
-                        <span class="qris-merchant-name">Bumi Jelly D'Hasna</span>
-                    </div>
-        
                     <div class="qris-image-container">
-                        <img src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/assets/QRIS.jpeg" 
+                        <img src="https://iltvpnplysjeaxufiokg.supabase.co/storage/v1/object/public/assets/qris.jpg" 
                              alt="Scan QRIS" class="qris-img-big">
                     </div>
         
-                    <p class="qris-helper">Total Tagihan:</p>
+                    <p class="qris-helper">Total yang harus dibayar:</p>
                     <h2 id="qris-total-amount" class="qris-amount">Rp 0</h2>
                     
-                    <p class="qris-note">Scan via GoPay, OVO, Dana, ShopeePay, BCA, dll.</p>
-        
                     <div class="upload-box-compact">
                         <label for="bukti_file_modal" class="btn-upload-trigger">
-                            📄 Upload Bukti Transfer
+                            📤 Upload Bukti Transfer
                         </label>
                         <input type="file" id="bukti_file_modal" accept="image/*" onchange="previewFile()">
                         <div id="file-name-preview" class="file-status">Belum ada file</div>
                     </div>
         
-                    <button onclick="confirmPayment()" class="btn-action btn-main">Kirim Pesanan Sekarang</button>
+                    <button onclick="confirmPayment()" class="btn-action btn-main" style="margin-top:0;">✅ Konfirmasi & Kirim</button>
+                    <div style="font-size:10px; color:#999; margin-top:10px;">Otomatis terkirim ke WhatsApp Admin</div>
                 </div>
             </div>
         </div>
@@ -1043,6 +1057,7 @@
 </script>
 </body>
 </html>
+
 
 
 
