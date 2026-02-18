@@ -547,8 +547,8 @@
 
             let discBarang = Math.floor(qty / 5) * 5000;
             const totalBayar = subtotal + ongkirMurni - discOngkir - discBarang;
-
-            calculatedData = { subtotal, ongkirMurni, discOngkir, discBarang, totalBayar };
+            
+            calculatedData = { subtotal: subtotal, ongkirMurni: ongkirMurni, discOngkir: discOngkir, discBarang: discBarang, totalBayar: totalBayar };
 
             ui.txtSubtotal.innerText = formatRupiah(subtotal);
             ui.txtOngkir.innerText = formatRupiah(ongkirMurni);
@@ -743,54 +743,66 @@
             ui.btnSubmit.innerText = "⏳ Memproses...";
 
             try {
-                hitungTotal();
-                const data = {
+                // 1. Hitung ulang agar data paling update
+                hitungTotal(); 
+                
+                // 2. Siapkan data untuk dikirim ke Supabase
+                // Pastikan nama properti (kiri) SAMA PERSIS dengan nama kolom di Supabase Tahap 1
+                const orderData = {
                     nama: document.getElementById('nama').value,
                     alamat: document.getElementById('alamat').value,
-                    jarak: parseFloat(ui.jarak.value),
-                    jumlah: parseInt(ui.jumlah.value),
-                    metode: ui.pembayaran.value,
-                    ...calculatedData
+                    jarak_km: parseFloat(ui.jarak.value),
+                    jumlah_butir: parseInt(ui.jumlah.value),
+                    metode_bayar: ui.pembayaran.value,
+                    
+                    // --- KOLOM KEUANGAN (YANG ANDA MINTA) ---
+                    harga_barang_awal: calculatedData.subtotal,    // Harga barang total
+                    ongkir_murni: calculatedData.ongkirMurni,      // Ongkir asli
+                    potongan_ongkir: calculatedData.discOngkir,    // Nilai diskon ongkir
+                    potongan_barang: calculatedData.discBarang,    // Nilai diskon barang
+                    total_bayar: calculatedData.totalBayar,        // Total akhir
+                    
+                    bukti_url: "" // Nanti diisi di bawah jika ada upload
                 };
 
-                if(!data.jarak) throw new Error("Mohon hitung jarak terlebih dahulu.");
+                if(!orderData.jarak_km) throw new Error("Mohon hitung jarak terlebih dahulu.");
 
-                let buktiUrl = "";
-                if (data.metode === 'QRIS') {
+                // 3. Proses Upload Bukti (Jika QRIS)
+                if (orderData.metode_bayar === 'QRIS') {
                     const file = document.getElementById('bukti_file').files[0];
                     if (!file) throw new Error("Harap upload bukti transfer!");
+                    
                     const fName = `bukti-${Date.now()}.jpg`;
                     const { error } = await db.storage.from('bukti-transfer').upload(fName, file);
                     if (error) throw error;
-                    buktiUrl = db.storage.from('bukti-transfer').getPublicUrl(fName).data.publicUrl;
+                    
+                    // Ambil link gambar
+                    orderData.bukti_url = db.storage.from('bukti-transfer').getPublicUrl(fName).data.publicUrl;
                 }
 
-                const { error: dbError } = await db.from('orders').insert([{
-                    nama: data.nama, alamat: data.alamat, jarak_km: data.jarak,
-                    jumlah_butir: data.jumlah, metode_bayar: data.metode,
-                    bukti_url: buktiUrl, harga_awal: data.subtotal, ongkir: data.ongkirMurni,
-                    potongan_ongkir: data.discOngkir, diskon_barang: data.discBarang,
-                    total_bayar: data.totalBayar
-                }]);
+                // 4. Masukkan Data ke Tabel 'orders'
+                const { error: dbError } = await db.from('orders').insert([orderData]);
 
                 if (dbError) throw dbError;
 
+                // 5. Tampilkan Sukses & Kirim WA
                 document.getElementById('successPopup').classList.add('active');
+
                 const waMsg = 
                     `*PESANAN BARU - COCONUT BUMI JELLY*\n` +
                     `----------------------------------\n` +
-                    `👤 *${data.nama}*\n` +
-                    `📍 ${data.alamat} (${data.jarak} KM)\n` +
-                    `🥥 Order: ${data.jumlah} Butir\n` +
+                    `👤 *${orderData.nama}*\n` +
+                    `📍 ${orderData.alamat} (${orderData.jarak_km} KM)\n` +
+                    `🥥 Order: ${orderData.jumlah_butir} Butir\n` +
                     `----------------------------------\n` +
-                    `💵 Subtotal: ${formatRupiah(data.subtotal)}\n` +
-                    `🚚 Ongkir: ${formatRupiah(data.ongkirMurni)}\n` +
-                    (data.discOngkir > 0 ? `✂️ Disc Ongkir: -${formatRupiah(data.discOngkir)}\n` : '') +
-                    (data.discBarang > 0 ? `🎁 Disc Barang: -${formatRupiah(data.discBarang)}\n` : '') +
+                    `💵 Subtotal: ${formatRupiah(orderData.harga_barang_awal)}\n` +
+                    `🚚 Ongkir Asli: ${formatRupiah(orderData.ongkir_murni)}\n` +
+                    (orderData.potongan_ongkir > 0 ? `✂️ Potongan Ongkir: -${formatRupiah(orderData.potongan_ongkir)}\n` : '') +
+                    (orderData.potongan_barang > 0 ? `🎁 Diskon Barang: -${formatRupiah(orderData.potongan_barang)}\n` : '') +
                     `----------------------------------\n` +
-                    `*TOTAL: ${formatRupiah(data.totalBayar)}*\n` +
-                    `💳 Via: ${data.metode}\n` +
-                    `📄 Bukti: ${buktiUrl || 'Cash'}`;
+                    `*TOTAL BAYAR: ${formatRupiah(orderData.total_bayar)}*\n` +
+                    `💳 Via: ${orderData.metode_bayar}\n` +
+                    `📄 Bukti: ${orderData.bukti_url || 'Cash'}`;
 
                 setTimeout(() => {
                     window.open(`https://wa.me/${config.wa}?text=${encodeURIComponent(waMsg)}`, '_blank');
@@ -798,7 +810,8 @@
                 }, 2000);
 
             } catch (err) {
-                alert("Info: " + err.message);
+                alert("Gagal mengirim pesanan: " + err.message);
+                console.error(err); // Cek console browser jika error
                 ui.btnSubmit.disabled = false;
                 ui.btnSubmit.innerText = "KIRIM PESANAN";
             }
@@ -890,6 +903,7 @@ initPromoAnimation();
 </script>
 </body>
 </html>
+
 
 
 
