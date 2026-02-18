@@ -171,12 +171,43 @@
         .success-overlay.active { opacity: 1; visibility: visible; }
         .check-icon { width: 80px; height: 80px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 40px; margin-bottom: 20px; animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(15, 122, 99, 0.3); }
         @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+        .running-promo-container {
+            width: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, #0b5e4b 100%); /* Gradasi Hijau Mewah */
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 8px 0;
+            margin-bottom: 20px; /* Jarak ke Logo */
+            border-radius: 50px;
+            overflow: hidden; /* Wajib agar teks tidak tumpah */
+            white-space: nowrap;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(15, 122, 99, 0.2);
+        }
+        
+        .running-text {
+            display: inline-block;
+            padding-left: 100%; /* Mulai dari luar kanan */
+            animation: scrolling-text 15s linear infinite; /* 15 detik putaran */
+        }
+        
+        @keyframes scrolling-text {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
+        <div class="running-promo-container">
+            <div class="running-text">
+                🌙 Promo Awal Ramadhan: Dapatkan Voucher Diskon 20% untuk 20 Orang Pertama! 🌙 Buruan sebelum kehabisan!
+            </div>
+        </div>
         <div class="header-content">
             <div class="promo-badge left" onclick="openPromoModal('barang')">
                 <span class="emoji">🎁</span>
@@ -670,6 +701,13 @@
                 hitungTotal();
                 return;
             }
+            
+            if (localStorage.getItem('voucher_used_' + inputCode)) {
+                msgEl.innerText = "⛔ Maaf, Anda sudah pernah menggunakan voucher ini sebelumnya.";
+                msgEl.style.color = "var(--danger)";
+                hitungTotal();
+                return;
+            }
 
             // ATURAN 1: Kode Harus Benar (Misal: "HEMAT20")
             if (inputCode !== "HEMAT20") {
@@ -783,7 +821,10 @@
                 if (dbError) throw dbError;
 
                 document.getElementById('successPopup').classList.add('active');
-                
+
+                if (orderData.kode_voucher) {
+                    localStorage.setItem('voucher_used_' + orderData.kode_voucher, 'true');
+                }
                 // Format Pesan WA dengan Enter
                 const waMsg = 
                     `*PESANAN BARU - COCONUT BUMI JELLY D'HASNA*\n` +
@@ -821,6 +862,7 @@
 </script>
 </body>
 </html>
+
 
 
 
