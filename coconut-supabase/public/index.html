@@ -173,41 +173,86 @@
         @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
         .running-promo-container {
-            width: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, #0b5e4b 100%); /* Gradasi Hijau Mewah */
+            width: calc(100% + 60px); /* Melebar dikit biar full ke pinggir */
+            margin-left: -30px; /* Kompensasi melebar */
+            margin-top: -35px; /* MENARIK KE ATAS (Mepet Batas Formulir) */
+            margin-bottom: 20px;
+            
+            background: linear-gradient(90deg, var(--primary) 0%, #0b5e4b 100%);
             color: #fff;
-            font-size: 11px;
+            font-size: 14px; /* UKURAN TEKS LEBIH BESAR */
             font-weight: 600;
-            padding: 8px 0;
-            margin-bottom: 20px; /* Jarak ke Logo */
-            border-radius: 50px;
-            overflow: hidden; /* Wajib agar teks tidak tumpah */
-            white-space: nowrap;
+            padding: 12px 0; /* Padding vertikal agar teks lega */
+            
+            border-radius: 20px 20px 0 0; /* Melengkung hanya di atas */
+            overflow: hidden; 
             position: relative;
             box-shadow: 0 4px 10px rgba(15, 122, 99, 0.2);
+            display: flex;
+            justify-content: center; /* Untuk memposisikan saat fase diam */
+            align-items: center;
         }
         
         .running-text {
             display: inline-block;
-            padding-left: 100%; /* Mulai dari luar kanan */
-            animation: scrolling-text 15s linear infinite; /* 15 detik putaran */
+            white-space: nowrap;
+            /* Animasi Kompleks: Durasi 18 detik, Linear, Selamanya */
+            animation: master-sequence 18s linear infinite; 
         }
         
-        @keyframes scrolling-text {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
+        /* --- RUMUS ANIMASI KOMPLEKS --- */
+        @keyframes master-sequence {
+            /* FASE 1: BERJALAN DARI KANAN KE KIRI (0% - 40%) */
+            0% {
+                transform: translateX(100vw); /* Mulai dari luar kanan */
+                opacity: 1;
+            }
+            40% {
+                transform: translateX(-100%); /* Jalan sampai hilang ke kiri */
+                opacity: 1;
+            }
+        
+            /* FASE 2: TELEPORT KE TENGAH & BERKEDIP (40.1% - 60%) */
+            40.1% { 
+                transform: translateX(0); /* Pindah instan ke tengah */
+                opacity: 0; /* Sembunyi dulu */
+            }
+            42% { opacity: 1; } /* Muncul */
+            44% { opacity: 0; } /* Hilang (Kedip) */
+            46% { opacity: 1; } /* Muncul */
+            48% { opacity: 0; } /* Hilang (Kedip) */
+            50% { opacity: 1; } /* Muncul Standby */
+            60% { 
+                transform: translateX(0); 
+                opacity: 1; 
+            }
+        
+            /* FASE 3: GOYANG KANAN KIRI (60% - 90%) */
+            65% { transform: translateX(-30px); } /* Geser Kiri */
+            70% { transform: translateX(30px); }  /* Geser Kanan */
+            75% { transform: translateX(-30px); } /* Geser Kiri */
+            80% { transform: translateX(30px); }  /* Geser Kanan */
+            85% { transform: translateX(0); }     /* Kembali Tengah */
+        
+            /* FASE 4: ISTIRAHAT SEBELUM ULANG (90% - 100%) */
+            90% { opacity: 1; }
+            99% { opacity: 0; } /* Hilang pelan-pelan */
+            100% { 
+                transform: translateX(100vw); /* Reset ke posisi awal kanan */
+                opacity: 0; 
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <div class="running-promo-container">
-            <div class="running-text">
-                🌙 Promo Awal Ramadhan: Dapatkan Voucher Diskon 20% untuk 20 Orang Pertama! 🌙 Buruan sebelum kehabisan!
-            </div>
+    <div class="running-promo-container">
+        <div class="running-text">
+            🌙 Promo Awal Ramadhan: Dapatkan Voucher Diskon 20% untuk 20 Orang Pertama! 🌙 Buruan sebelum kehabisan!
         </div>
+    </div>
+    <header>
         <div class="header-content">
             <div class="promo-badge left" onclick="openPromoModal('barang')">
                 <span class="emoji">🎁</span>
@@ -862,6 +907,7 @@
 </script>
 </body>
 </html>
+
 
 
 
