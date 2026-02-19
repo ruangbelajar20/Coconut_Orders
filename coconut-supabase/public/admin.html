@@ -23,8 +23,13 @@
         
         /* LAYOUT GRID */
         .dashboard-container {
-            max-width: 1200px; margin: 0 auto; padding: 20px;
-            display: grid; grid-template-columns: 1fr; gap: 20px;
+            max-width: 1200px; 
+            width: 95%; /* PENTING: Gunakan % agar fleksibel di HP */
+            margin: 20px auto; /* 'auto' membuat kiri-kanan seimbang */
+            padding: 0; /* Padding dihandle oleh elemen di dalamnya */
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 20px;
         }
 
         /* HEADER */
