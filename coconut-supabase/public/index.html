@@ -438,6 +438,21 @@
             
             display: block;
         }
+        /* --- OVERLAY LOADING MODERN --- */
+        .loading-overlay {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(2px);
+        }
+        .loading-overlay.active { opacity: 1; visibility: visible; }
+        
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid var(--bg); border-top: 4px solid var(--primary);
+            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .loading-text { color: var(--primary); font-weight: 600; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -633,6 +648,11 @@
     </div>
 </div>
 
+<div class="loading-overlay" id="global-loading">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-message">Memproses...</div>
+</div>
+
 <div class="success-overlay" id="successPopup">
     <div class="check-icon">✓</div>
     <h3 style="color:var(--primary); margin:0;">Pesanan Berhasil!</h3>
@@ -697,6 +717,16 @@
         let GLOBAL_VOUCHER_NILAI = 0;
         let GLOBAL_VOUCHER_LIMIT = 0;
         let GLOBAL_VOUCHER_USED = 0;
+        let GLOBAL_KET_ONGKIR = "";
+        let GLOBAL_KET_BARANG = "";
+        let GLOBAL_MAX_JARAK = 25;
+        let GLOBAL_SYARAT_QTY_BARANG = 0;
+        let GLOBAL_SYARAT_JARAK_BARANG = 0;
+        let GLOBAL_KUOTA_BARANG = 0;
+        let GLOBAL_TERPAKAI_BARANG = 0;
+        let GLOBAL_KELIPATAN_BARANG = 0;
+        let GLOBAL_SYARAT_QTY_VOUCHER = 0;
+        let GLOBAL_SYARAT_MAX_JARAK_VOUCHER = 0;
         
         // Tipe Diskon (Nominal / Persen)
         let TYPE_DISKON_BARANG = 'nominal';
@@ -780,23 +810,15 @@
             let content = "";
             if (type === 'barang') {
                 title.innerHTML = "🎁 Promo Diskon Barang";
-                content = `
-                    <ul class="promo-list">
-                        <li>Beli <span class="promo-highlight">Kelipatan 5 Butir</span> langsung dapat potongan harga.</li>
-                        <li>Diskon <span class="promo-highlight">Rp 5.000</span> untuk setiap 5 butir.</li>
-                        <li>Contoh: Beli 10 butir, diskon Rp 10.000. Beli 15 butir, diskon Rp 15.000.</li>
-                        <li>Berlaku kelipatan seterusnya!</li>
-                    </ul>`;
+                // Gunakan replace untuk mengubah Enter menjadi tag <br>
+                content = `<div style="font-size:13px; line-height:1.6; color:#444;">
+                              ${(window.GLOBAL_KET_BARANG || "Tidak ada promo saat ini.").replace(/\n/g, '<br>')}
+                           </div>`;
             } else if (type === 'ongkir') {
                 title.innerHTML = "🚚 Promo Diskon Ongkir";
-                content = `
-                    <ul class="promo-list">
-                        <li><b>Gratis Ongkir Full:</b><br>Jarak < 2.5 KM (Tanpa Min. Order)</li>
-                        <li><b>Diskon Ongkir 50%:</b><br>Jarak 2.5 - 6.5 KM (Min. Order 3 butir)</li>
-                        <li><b>Gratis Ongkir Full:</b><br>Jarak 2.5 - 6.5 KM (Min. Order 6 butir)</li>
-                        <li><b>Diskon Ongkir 50%:</b><br>Jarak 5 - 12 KM (Min. Order 6 butir)</li>
-                        <li><b>Gratis Ongkir Full:</b><br>Jarak 5 - 12 KM (Min. Order 11 butir)</li>
-                    </ul>`;
+                content = `<div style="font-size:13px; line-height:1.6; color:#444;">
+                              ${(window.GLOBAL_KET_ONGKIR || "Tidak ada promo saat ini.").replace(/\n/g, '<br>')}
+                           </div>`;
             }
             body.innerHTML = content;
             modal.classList.remove('hidden');
@@ -823,29 +845,37 @@
         // --- FUNGSI LOAD PENGATURAN DARI SUPABASE ---
         async function loadStoreSettings() {
             try {
-                // Ambil data dari tabel store_settings (Baris ID 1)
+                // Ambil data, pastikan nama kolom teks disertakan
                 const { data, error } = await db.from('store_settings').select('*').eq('id', 1).single();
                 
                 if (data) {
-                    // 1. Update Teks Promo Berjalan (Marquee)
                     const runningText = document.querySelector('.running-text');
                     if(runningText) runningText.innerText = `📢 ${data.teks_promo}`;
 
-                    // 2. Simpan Nilai ke Variabel Global
-                   window.GLOBAL_SHIPPING_RULES = data.shipping_rules || [];
-                    window.GLOBAL_DISKON_BARANG = data.diskon_barang;
+                    window.GLOBAL_SHIPPING_RULES = data.shipping_rules || [];
+                    window.GLOBAL_DISKON_BARANG = data.diskon_barang || 0;
                     window.GLOBAL_VOUCHER_KODE = data.voucher_kode;
-                    window.GLOBAL_VOUCHER_NILAI = data.voucher_nilai;
-                    window.GLOBAL_VOUCHER_LIMIT = data.voucher_limit;
-                    window.GLOBAL_VOUCHER_USED = data.voucher_used;
+                    window.GLOBAL_VOUCHER_NILAI = data.voucher_nilai || 0;
+                    window.GLOBAL_VOUCHER_LIMIT = data.voucher_limit || 0;
+                    window.GLOBAL_VOUCHER_USED = data.voucher_used || 0;
 
-                    // 3. Simpan Tipe (Rp atau %)
                     window.TYPE_DISKON_BARANG = data.tipe_barang || 'nominal';
                     window.TYPE_VOUCHER = data.tipe_voucher || 'nominal';
+                    
+                    // --- SIMPAN TEKS KETERANGAN DARI DATABASE ---
+                    window.GLOBAL_KET_ONGKIR = data.ket_diskon_ongkir || "Belum ada keterangan promo ongkir.";
+                    window.GLOBAL_KET_BARANG = data.ket_diskon_barang || "Belum ada keterangan promo barang.";
+
+                    window.GLOBAL_MAX_JARAK = data.max_jarak_pengiriman || 25;
+                    window.GLOBAL_SYARAT_QTY_BARANG = data.syarat_qty_diskon_barang || 0;
+                    window.GLOBAL_SYARAT_JARAK_BARANG = data.syarat_jarak_diskon_barang || 0;
+                    window.GLOBAL_KUOTA_BARANG = data.kuota_diskon_barang || 0;
+                    window.GLOBAL_TERPAKAI_BARANG = data.terpakai_diskon_barang || 0;
+                    window.GLOBAL_KELIPATAN_BARANG = data.diskon_barang_kelipatan_qty || 0;
+                    window.GLOBAL_SYARAT_QTY_VOUCHER = data.syarat_qty_voucher || 0;
+                    window.GLOBAL_SYARAT_MAX_JARAK_VOUCHER = data.syarat_max_jarak_voucher || 0;
 
                     console.log("✅ Pengaturan Toko Terupdate!");
-                    
-                    // Hitung ulang total dengan data terbaru
                     hitungTotal(); 
                 }
             } catch (err) {
@@ -899,12 +929,39 @@
             // Validasi: Diskon ongkir tidak boleh lebih besar dari ongkirnya sendiri
             if (discOngkir > ongkirMurni) discOngkir = ongkirMurni;
 
-            // 5. HITUNG DISKON BARANG (Dari Pengaturan Admin)
+            // 5. HITUNG DISKON BARANG (DENGAN SYARAT & KUOTA)
             let discBarang = 0;
+            
             if (window.GLOBAL_DISKON_BARANG > 0) {
-                // Jika Persen: Dihitung dari Subtotal
-                // Jika Rupiah: Nominal langsung
-                discBarang = hitungNilaiDiskon(window.GLOBAL_DISKON_BARANG, window.TYPE_DISKON_BARANG, subtotal);
+                let syaratTerpenuhi = true;
+
+                // A. Cek Syarat Jumlah (Misal: Min 5 butir)
+                if (window.GLOBAL_SYARAT_QTY_BARANG > 0 && qty < window.GLOBAL_SYARAT_QTY_BARANG) {
+                    syaratTerpenuhi = false;
+                }
+                
+                // B. Cek Syarat Jarak (Misal: Jarak harus di atas 5 KM)
+                // Jika nilai di database > 0, maka jarak pembeli harus LEBIH BESAR dari syarat tersebut
+                if (window.GLOBAL_SYARAT_JARAK_BARANG > 0 && dist <= window.GLOBAL_SYARAT_JARAK_BARANG) {
+                    syaratTerpenuhi = false;
+                }
+
+                // C. Cek Kuota Diskon Barang (Angka 0 = Kuota Unlimited)
+                if (window.GLOBAL_KUOTA_BARANG > 0 && window.GLOBAL_TERPAKAI_BARANG >= window.GLOBAL_KUOTA_BARANG) {
+                    syaratTerpenuhi = false; 
+                }
+
+                // D. Eksekusi Diskon Jika Semua Syarat Lulus
+                if (syaratTerpenuhi) {
+                    if (window.GLOBAL_KELIPATAN_BARANG > 0) {
+                        // LOGIKA KELIPATAN (Misal beli 12, kelipatan 5 -> Dapat 2x diskon)
+                        let jumlahKelipatan = Math.floor(qty / window.GLOBAL_KELIPATAN_BARANG);
+                        discBarang = jumlahKelipatan * window.GLOBAL_DISKON_BARANG;
+                    } else {
+                        // LOGIKA NORMAL (Sekali diskon)
+                        discBarang = hitungNilaiDiskon(window.GLOBAL_DISKON_BARANG, window.TYPE_DISKON_BARANG, subtotal);
+                    }
+                }
             }
 
             // 6. Hitung Total Akhir
@@ -956,20 +1013,46 @@
         };
 
         const fetchRouteOSRM = async (lat, lng) => {
+            const MAX_JARAK_KM = window.GLOBAL_MAX_JARAK || 25;
+            const loadingOverlay = document.getElementById('global-loading');
+            const loadingMsg = document.getElementById('loading-message');
+            
+            loadingMsg.innerText = "Menghitung rute terbaik...";
+            loadingOverlay.classList.add('active'); // Tampilkan Pop-up Loading
+
             try {
                 const url = `https://router.project-osrm.org/route/v1/driving/${config.store.lng},${config.store.lat};${lng},${lat}?overview=false`;
                 const res = await fetch(url);
                 const data = await res.json();
+                
+                loadingOverlay.classList.remove('active'); // Sembunyikan Loading
+                
                 if (data.code === "Ok") {
+                    let jarakHitung = (data.routes[0].distance / 1000).toFixed(1);
+                    
+                    // --- CEK BATAS JARAK ---
+                    if (jarakHitung > MAX_JARAK_KM) {
+                        showCustomAlert(`Maaf, lokasi terlalu jauh (${jarakHitung} KM). Maksimal pengiriman adalah ${MAX_JARAK_KM} KM.`);
+                        ui.jarak.value = "";
+                        ui.statusGps.innerText = "❌ Lokasi di luar jangkauan";
+                        ui.statusGps.style.color = "red";
+                        return false;
+                    }
+
                     selectedLat = lat;
                     selectedLng = lng;
-                    ui.jarak.value = (data.routes[0].distance / 1000).toFixed(1);
+                    ui.jarak.value = jarakHitung;
                     document.getElementById('lat_coordinate').value = lat;
                     document.getElementById('lng_coordinate').value = lng;
-                    hitungTotal();
+                    
+                    hitungTotal(); // Panggil fungsi hitung ulang harga
                     return true;
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e); 
+                loadingOverlay.classList.remove('active');
+                showCustomAlert("Gagal terhubung ke server pemetaan. Coba lagi.");
+            }
             return false;
         };
 
@@ -1231,7 +1314,9 @@
 
                 // --- TAHAP SIMPAN KE DATABASE ---
                 const { error: dbError } = await db.from('orders').insert([orderData]);
-                if (dbError) throw new Error("Gagal menyimpan pesanan: " + dbError.message);
+                if (dbError) {
+                    throw new Error(dbError.message); 
+                }
 
                 // --- TAHAP SUKSES ---
                 window.closeQrisModal(); // Tutup modal jika terbuka
@@ -1300,10 +1385,11 @@
         const cekVoucher = async () => {
             const inputCode = document.getElementById('voucher_code').value.trim().toUpperCase();
             const msgEl = document.getElementById('voucher-msg');
+            const subtotal = (parseInt(ui.jumlah.value) || 0) * 15000; // Harga satuan 15000
+            const dist = parseFloat(ui.jarak.value) || 0;
             const qty = parseInt(ui.jumlah.value) || 0;
-            const subtotal = qty * 10000; // Harga satuan
 
-            // Reset dulu
+            // Reset
             voucherValue = 0;
             activeVoucherCode = "";
             msgEl.innerText = "Memeriksa...";
@@ -1315,32 +1401,40 @@
                 return;
             }
             
+            // Cek apakah pernah dipakai di HP ini
             if (localStorage.getItem('voucher_used_' + inputCode)) {
-                msgEl.innerText = "⛔ Maaf, Anda sudah pernah menggunakan voucher ini sebelumnya.";
+                msgEl.innerText = "⛔ Anda sudah pernah menggunakan voucher ini.";
                 msgEl.style.color = "var(--danger)";
                 hitungTotal();
                 return;
             }
 
-            // ATURAN 1: Kode Harus Benar (Misal: "HEMAT20")
-            if (inputCode !== "HEMAT20") {
-                msgEl.innerText = "❌ Kode voucher tidak dikenali.";
+            // ATURAN 1: Cek Kode dengan Database (Dinamis)
+            if (inputCode !== window.GLOBAL_VOUCHER_KODE) {
+                msgEl.innerText = "❌ Kode voucher tidak dikenali atau salah.";
                 msgEl.style.color = "var(--danger)";
                 hitungTotal();
                 return;
             }
 
-            // ATURAN 2: Minimal Beli 3 Butir
-            if (qty < 3) {
-                msgEl.innerText = "⚠️ Minimal pembelian 3 butir untuk voucher ini.";
-                msgEl.style.color = "#e67e22"; // Orange
+            // ATURAN TAMBAHAN A: Syarat Minimal Pembelian
+            if (window.GLOBAL_SYARAT_QTY_VOUCHER > 0 && qty < window.GLOBAL_SYARAT_QTY_VOUCHER) {
+                msgEl.innerText = `⚠️ Minimal pembelian ${window.GLOBAL_SYARAT_QTY_VOUCHER} butir untuk voucher ini.`;
+                msgEl.style.color = "var(--danger)";
+                hitungTotal();
+                return;
+            }
+
+            // ATURAN TAMBAHAN B: Syarat Maksimal Jarak
+            if (window.GLOBAL_SYARAT_MAX_JARAK_VOUCHER > 0 && dist > window.GLOBAL_SYARAT_MAX_JARAK_VOUCHER) {
+                msgEl.innerText = `⚠️ Voucher hanya berlaku untuk jarak maksimal ${window.GLOBAL_SYARAT_MAX_JARAK_VOUCHER} KM.`;
+                msgEl.style.color = "var(--danger)";
                 hitungTotal();
                 return;
             }
 
             try {
-                // ATURAN 3: Cek Kuota (Maksimal 20 Orang) di Supabase
-                // Kita hitung berapa kali kode ini sudah muncul di tabel 'orders'
+                // ATURAN 2: Cek Kuota di Database
                 const { count, error } = await db
                     .from('orders')
                     .select('*', { count: 'exact', head: true })
@@ -1348,28 +1442,31 @@
 
                 if (error) throw error;
 
-                if (count >= 20) {
-                    msgEl.innerText = "❌ Yah, kuota voucher ini sudah habis (Maks 20 orang).";
+                // Cek Limit, jika GLOBAL_VOUCHER_LIMIT > 0 maka batasi
+                if (window.GLOBAL_VOUCHER_LIMIT > 0 && count >= window.GLOBAL_VOUCHER_LIMIT) {
+                    msgEl.innerText = `❌ Kuota voucher sudah habis (Maks ${window.GLOBAL_VOUCHER_LIMIT} orang).`;
                     msgEl.style.color = "var(--danger)";
                     hitungTotal();
                     return;
                 }
 
-                // ATURAN 4: Hitung Diskon (20% Max 15rb)
-                let diskon = subtotal * 0.20; // 20%
-                if (diskon > 15000) diskon = 15000; // Mentok 15rb
+                // ATURAN 3: Hitung Diskon (Dinamis dari Admin)
+                let diskon = hitungNilaiDiskon(window.GLOBAL_VOUCHER_NILAI, window.TYPE_VOUCHER, subtotal);
+                
+                // Mencegah voucher lebih besar dari harga barang
+                if (diskon > subtotal) diskon = subtotal; 
 
                 // Sukses
                 voucherValue = diskon;
                 activeVoucherCode = inputCode;
-                msgEl.innerText = `✅ Voucher dipakai! Hemat Rp ${diskon.toLocaleString()}`;
+                msgEl.innerText = `✅ Berhasil! Hemat Rp ${diskon.toLocaleString('id-ID')}`;
                 msgEl.style.color = "var(--success)";
                 
-                hitungTotal(); // Update total harga
+                hitungTotal();
 
             } catch (err) {
                 console.error(err);
-                msgEl.innerText = "Gagal mengecek voucher (Koneksi error).";
+                msgEl.innerText = "Gagal mengecek server.";
                 msgEl.style.color = "var(--danger)";
             }
         };
@@ -1378,8 +1475,24 @@
         document.getElementById('btn-apply-voucher').onclick = cekVoucher;
         // Reset voucher jika jumlah berubah (karena ada syarat min 3 butir)
         ui.jumlah.addEventListener('input', () => {
-            if(activeVoucherCode) cekVoucher();
-            else hitungTotal();
+            const qty = parseInt(ui.jumlah.value) || 0;
+            
+            if (activeVoucherCode) {
+                // Misal syarat voucher adalah minimal beli 3
+                // (Ini hanya contoh dasar, idealnya syarat min beli voucher juga ditarik dari database)
+                if (qty < 3) {
+                    showCustomAlert("Jumlah dikurangi. Voucher dibatalkan karena tidak memenuhi syarat minimal pembelian.");
+                    document.getElementById('voucher_code').value = ""; // Kosongkan input
+                    voucherValue = 0;
+                    activeVoucherCode = "";
+                    document.getElementById('voucher-msg').innerText = "";
+                    hitungTotal();
+                } else {
+                    cekVoucher(); // Cek ulang diskonnya jika jumlahnya berubah tapi masih memenuhi syarat
+                }
+            } else {
+                hitungTotal();
+            }
         });
         
 
@@ -1407,6 +1520,3 @@
 </script>
 </body>
 </html>
-
-
-
