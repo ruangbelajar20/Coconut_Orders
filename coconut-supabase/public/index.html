@@ -691,7 +691,7 @@
         let selectedLat = null;
         let selectedLng = null;
         // --- VARIABEL GLOBAL PENGATURAN TOKO (BARU) ---
-        let GLOBAL_DISKON_ONGKIR = 0;
+        let GLOBAL_SHIPPING_RULES = [];
         let GLOBAL_DISKON_BARANG = 0;
         let GLOBAL_VOUCHER_KODE = "";
         let GLOBAL_VOUCHER_NILAI = 0;
@@ -699,7 +699,6 @@
         let GLOBAL_VOUCHER_USED = 0;
         
         // Tipe Diskon (Nominal / Persen)
-        let TYPE_DISKON_ONGKIR = 'nominal';
         let TYPE_DISKON_BARANG = 'nominal';
         let TYPE_VOUCHER = 'nominal';
 
@@ -833,7 +832,7 @@
                     if(runningText) runningText.innerText = `📢 ${data.teks_promo}`;
 
                     // 2. Simpan Nilai ke Variabel Global
-                    window.GLOBAL_DISKON_ONGKIR = data.diskon_ongkir;
+                   window.GLOBAL_SHIPPING_RULES = data.shipping_rules || [];
                     window.GLOBAL_DISKON_BARANG = data.diskon_barang;
                     window.GLOBAL_VOUCHER_KODE = data.voucher_kode;
                     window.GLOBAL_VOUCHER_NILAI = data.voucher_nilai;
@@ -841,7 +840,6 @@
                     window.GLOBAL_VOUCHER_USED = data.voucher_used;
 
                     // 3. Simpan Tipe (Rp atau %)
-                    window.TYPE_DISKON_ONGKIR = data.tipe_ongkir || 'nominal';
                     window.TYPE_DISKON_BARANG = data.tipe_barang || 'nominal';
                     window.TYPE_VOUCHER = data.tipe_voucher || 'nominal';
 
@@ -877,8 +875,26 @@
             // 4. HITUNG DISKON ONGKIR (Dari Pengaturan Admin)
             // Menggunakan helper 'hitungNilaiDiskon' yang baru dibuat
             let discOngkir = 0;
-            if (window.GLOBAL_DISKON_ONGKIR > 0) {
-                discOngkir = hitungNilaiDiskon(window.GLOBAL_DISKON_ONGKIR, window.TYPE_DISKON_ONGKIR, ongkirMurni);
+            if (window.GLOBAL_SHIPPING_RULES && window.GLOBAL_SHIPPING_RULES.length > 0) {
+                for (let i = 0; i < window.GLOBAL_SHIPPING_RULES.length; i++) {
+                    const rule = window.GLOBAL_SHIPPING_RULES[i];
+                    
+                    // Cek Syarat: Apakah Jarak & Jumlah masuk dalam aturan ini?
+                    const passDist = dist >= rule.minDist && dist <= rule.maxDist;
+                    const passQty = qty >= rule.minQty;
+                    
+                    if (passDist && passQty) {
+                        // JIKA COCOK, HITUNG DISKONNYA
+                        if (rule.type === 'persen') {
+                            discOngkir = (ongkirMurni * rule.val) / 100;
+                        } else {
+                            discOngkir = rule.val;
+                        }
+                        
+                        // Ketemu satu aturan yang cocok? Langsung BERHENTI mencari (biar tidak bentrok)
+                        break; 
+                    }
+                }
             }
             // Validasi: Diskon ongkir tidak boleh lebih besar dari ongkirnya sendiri
             if (discOngkir > ongkirMurni) discOngkir = ongkirMurni;
@@ -1391,5 +1407,6 @@
 </script>
 </body>
 </html>
+
 
 
