@@ -159,46 +159,44 @@
             margin-bottom: 6px;
             display: block;
         }
-        
-        /* 3. TEKNIK INPUT GROUP (Menyatukan Input & Select) */
+
+        /* Container Input Gabungan */
         .input-group-merged {
-            display: flex; /* Kunci agar nempel */
+            display: flex;
             width: 100%;
             border: 1px solid #d1d5db;
             border-radius: 8px;
-            overflow: hidden; /* Agar sudut tumpul tidak bocor */
-            transition: 0.3s;
+            overflow: hidden;
             background: #fff;
-        }
-        
-        /* Efek saat diklik jadi hijau */
-        .input-group-merged:focus-within {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(15, 122, 99, 0.1);
+            box-sizing: border-box; /* PENTING: Agar padding tidak menambah lebar */
         }
         
         /* Input Angka */
         .input-group-merged input {
-            flex: 1; /* Mengisi sisa ruang */
-            border: none !important; /* Hapus border bawaan */
-            border-radius: 0 !important;
+            flex: 1;            /* Mengisi ruang sisa */
+            min-width: 0;       /* KUNCI PERBAIKAN: Izinkan input mengecil jika sempit */
+            width: 100%;        /* Pastikan lebar penuh */
+            border: none !important;
             padding: 10px 12px;
             font-size: 14px;
             outline: none;
+            box-sizing: border-box;
         }
         
         /* Dropdown Pilihan (Rp/%) */
         .input-group-merged select {
-            width: 70px;
+            width: 60px; /* Perkecil sedikit dari 70px jadi 60px */
+            flex-shrink: 0; /* Jangan biarkan dropdown tergencet */
             border: none !important;
-            border-left: 1px solid #eee !important; /* Pemisah tipis */
+            border-left: 1px solid #eee !important;
             background: #f9fafb;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary);
             padding: 0 5px;
             cursor: pointer;
             outline: none;
             text-align: center;
+            font-size: 13px;
         }
         
         /* Mobile Responsif untuk Modal */
@@ -279,7 +277,7 @@
 </div>
 <div id="settingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
     
-    <div style="background:white; padding:30px; border-radius:16px; width:95%; max-width:480px; box-shadow:0 10px 40px rgba(0,0,0,0.2); position:relative;">
+    <div style="background:white; padding:30px; border-radius:16px; width:95%; max-width:600px; box-shadow:0 10px 40px rgba(0,0,0,0.2); position:relative;">
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3 style="margin:0; color:var(--primary); font-size:18px;">⚙️ Pengaturan Toko</h3>
