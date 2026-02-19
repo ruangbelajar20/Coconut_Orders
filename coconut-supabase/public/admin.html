@@ -201,8 +201,49 @@
             <div id="loading">Mengambil data dari Supabase...</div>
         </div>
     </div>
-</div>
 
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="refresh-btn" onclick="openSettings()"><i data-lucide="settings"></i> Atur Toko</button>
+    <button class="refresh-btn" onclick="fetchData()"><i data-lucide="refresh-cw"></i> Refresh</button>
+    <button class="refresh-btn" onclick="logout()" style="background:#ef4444;"><i data-lucide="log-out"></i> Keluar</button>
+</div>
+<div id="settingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:999;">
+    <div style="background:white; padding:25px; border-radius:16px; width:90%; max-width:400px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+        <h3 style="margin-top:0; color:var(--primary);">⚙️ Pengaturan Toko</h3>
+        
+        <label style="font-size:12px; font-weight:bold;">Teks Promo Berjalan:</label>
+        <input type="text" id="set_promo" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div>
+                <label style="font-size:12px; font-weight:bold;">Diskon Ongkir (Rp):</label>
+                <input type="number" id="set_ongkir" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+            </div>
+            <div>
+                <label style="font-size:12px; font-weight:bold;">Diskon Barang (Rp):</label>
+                <input type="number" id="set_barang" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+            </div>
+        </div>
+
+        <hr style="border:none; border-top:1px dashed #ddd; margin:10px 0;">
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div>
+                <label style="font-size:12px; font-weight:bold;">Kode Voucher:</label>
+                <input type="text" id="set_v_code" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+            </div>
+            <div>
+                <label style="font-size:12px; font-weight:bold;">Nilai Voucher (Rp):</label>
+                <input type="number" id="set_v_val" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="document.getElementById('settingsModal').style.display='none'" style="flex:1; padding:12px; background:#ddd; border:none; border-radius:8px; cursor:pointer;">Batal</button>
+            <button onclick="saveSettings()" style="flex:1; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Simpan Perubahan</button>
+        </div>
+    </div>
+</div>
 <script>
     // --- 1. KONFIGURASI SUPABASE (SAMA DENGAN FILE ORDER) ---
     const config = {
@@ -449,6 +490,61 @@
 
     // Load Data Awal
     document.addEventListener('DOMContentLoaded', fetchData);
+
+    // --- FITUR PENGATURAN TOKO ---
+
+    // 1. Buka Modal & Ambil Data Lama
+    async function openSettings() {
+        const modal = document.getElementById('settingsModal');
+        modal.style.display = 'flex'; // Munculkan modal
+
+        // Ambil data dari tabel store_settings (ID = 1)
+        const { data, error } = await db
+            .from('store_settings')
+            .select('*')
+            .eq('id', 1) // Kita asumsi baris pertama ID-nya 1
+            .single();
+
+        if (data) {
+            document.getElementById('set_promo').value = data.teks_promo;
+            document.getElementById('set_ongkir').value = data.diskon_ongkir;
+            document.getElementById('set_barang').value = data.diskon_barang;
+            document.getElementById('set_v_code').value = data.voucher_kode;
+            document.getElementById('set_v_val').value = data.voucher_nilai;
+        }
+    }
+
+    // 2. Simpan Data Baru
+    async function saveSettings() {
+        const promo = document.getElementById('set_promo').value;
+        const ongkir = parseInt(document.getElementById('set_ongkir').value) || 0;
+        const barang = parseInt(document.getElementById('set_barang').value) || 0;
+        const vCode = document.getElementById('set_v_code').value.toUpperCase();
+        const vVal = parseInt(document.getElementById('set_v_val').value) || 0;
+
+        // Tampilkan Loading di tombol (opsional)
+        const btn = event.target;
+        btn.innerText = "Menyimpan...";
+
+        const { error } = await db
+            .from('store_settings')
+            .update({
+                teks_promo: promo,
+                diskon_ongkir: ongkir,
+                diskon_barang: barang,
+                voucher_kode: vCode,
+                voucher_nilai: vVal
+            })
+            .eq('id', 1); // Update baris ID 1
+
+        if (error) {
+            alert("Gagal menyimpan: " + error.message);
+        } else {
+            alert("✅ Pengaturan Toko Berhasil Diupdate!");
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+        btn.innerText = "Simpan Perubahan";
+    }
 
 </script>
 
