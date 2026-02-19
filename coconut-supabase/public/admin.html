@@ -85,6 +85,48 @@
         @media (max-width: 768px) {
             .charts-wrapper { grid-template-columns: 1fr; }
         }
+        /* --- TAMBAHAN KHUSUS MOBILE (Agar Header Tidak Berantakan) --- */
+        @media (max-width: 640px) {
+            .header {
+                flex-direction: column; /* Judul di atas, Tombol di bawah */
+                text-align: center;
+                gap: 15px;
+            }
+    
+            .header > div {
+                width: 100%;
+                justify-content: center;
+            }
+    
+            .header h1 {
+                font-size: 20px; /* Ukuran font judul sedikit diperkecil */
+            }
+    
+            .grouping-controls {
+                justify-content: center; /* Tombol filter rata tengah */
+            }
+    
+            .filter-btn {
+                font-size: 11px; /* Tombol filter lebih kecil sedikit */
+                padding: 6px 12px;
+                flex-grow: 1; /* Tombol memenuhi lebar layar */
+                text-align: center;
+            }
+            
+            /* Tombol Refresh & Logout jadi penuh */
+            .header button {
+                width: 100%; 
+                justify-content: center;
+            }
+            
+            /* Container tombol di header dibuat stack */
+            .header > div:last-child {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
