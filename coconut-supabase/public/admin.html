@@ -24,8 +24,14 @@
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text-main); }
         
         .dashboard-container {
-            max-width: 1600px; width: 98%; margin: 20px auto; padding: 0 10px;
-            display: grid; grid-template-columns: 1fr; gap: 20px; box-sizing: border-box;
+            max-width: 1200px; /* Lebar maksimal diperbaiki agar lebih proporsional di PC */
+            width: 100%; 
+            margin: 0 auto; 
+            padding: 20px 16px; /* Memberikan batas margin tipis yang konsisten di kiri & kanan layar HP */
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            box-sizing: border-box;
         }
         
         @media (max-width: 768px) { .dashboard-container { width: 95%; } }
@@ -99,8 +105,13 @@
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 
         @media (max-width: 640px) {
-            .header { flex-direction: column; text-align: center; gap: 15px; }
-            .btn-group, .refresh-btn { width: 100%; justify-content: center; }
+            .header { flex-direction: column; text-align: center; gap: 15px; padding: 20px 15px; }
+            .btn-group { display: flex; flex-direction: column; width: 100%; gap: 10px; }
+            .refresh-btn { width: 100%; justify-content: center; padding: 12px; font-size: 14px; }
+
+            /* Baris ini memaksa kotak statistik menjadi 1 susun ke bawah di layar HP */
+            .stats-grid { grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; }
+
             .charts-wrapper { grid-template-columns: 1fr; }
         }
 
