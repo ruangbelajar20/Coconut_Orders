@@ -6,7 +6,7 @@
     <title>Dashboard Penjual - Bumi Jelly D'Hasna</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdeliFvr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script> 
     
@@ -415,8 +415,13 @@
         }
     }
 
+    // --- GANTI FUNGSI saveSettings LAMA DENGAN INI ---
     async function saveSettings() {
-        // 1. Ambil semua value dari input (SAMA SEPERTI SEBELUMNYA)
+        const btnSimpan = event.target; // Tombol yang diklik
+        btnSimpan.innerText = "🕵️ Sedang Mendiagnosa...";
+        btnSimpan.disabled = true;
+
+        // 1. AMBIL DATA DARI INPUT
         const promo = document.getElementById('set_promo').value;
         const barang = parseInt(document.getElementById('set_barang').value) || 0;
         const tBarang = document.getElementById('type_barang').value;
@@ -425,13 +430,13 @@
         const tVoucher = document.getElementById('type_voucher').value;
         const vLimit = parseInt(document.getElementById('set_v_limit').value) || 0;
 
-        // Reset logika voucher used
+        // 2. CEK LOGIKA VOUCHER USED
         const { data: oldData } = await db.from('store_settings').select('voucher_kode').limit(1).single();
-        
         let newUsedCount = undefined;
-        // Jika data lama ada dan kode berubah, reset hitungan
         if (oldData && oldData.voucher_kode !== vCode) newUsedCount = 0;
 
+        // 3. SIAPKAN DATA UPDATE
+        // Perhatikan: shipping_rules mengambil dari variabel global currentRules
         const updateData = {
             teks_promo: promo,
             diskon_barang: barang,
@@ -440,42 +445,57 @@
             voucher_nilai: vVal,
             tipe_voucher: tVoucher,
             voucher_limit: vLimit,
-            
-            // PENTING: Pastikan ini array (bukan undefined)
-            shipping_rules: currentRules || [] 
+            shipping_rules: currentRules // <--- Pastikan ini tidak kosong
         };
 
         if (newUsedCount !== undefined) updateData.voucher_used = 0;
 
-        // 2. DEBUGGING UPDATE
-        // Kita tidak pakai .eq('id', 1) lagi, tapi kita update baris APAPUN yang pertama ditemukan.
-        // Atau kita pastikan dulu ID nya.
+        // --- DIAGNOSA 1: CEK ARRAY RULES ---
+        console.log("Data yang akan dikirim:", updateData.shipping_rules);
+        if (currentRules.length === 0) {
+            let konfirmasi = confirm("⚠️ PERHATIAN: Anda belum menambahkan 'Aturan Ongkir' (Daftar aturan kosong).\n\nApakah Anda yakin ingin menyimpan tanpa aturan ongkir?");
+            if (!konfirmasi) {
+                btnSimpan.innerText = "Simpan Perubahan";
+                btnSimpan.disabled = false;
+                return; // Batalkan simpan
+            }
+        }
+
+        // --- DIAGNOSA 2: CARI ID ASLI DI DATABASE ---
+        // Kita cari baris pertama yang ada di tabel, apapun ID-nya
+        const { data: checkID, error: errID } = await db.from('store_settings').select('id').limit(1).single();
         
-        // Logika Paling Aman: Update baris pertama yang ditemukan (Id berapapun)
-        // Namun Supabase butuh ID spesifik untuk update.
-        
-        // Cek ID dulu:
-        const { data: checkID } = await db.from('store_settings').select('id').limit(1).single();
-        
-        if (!checkID) {
-            alert("❌ ERROR FATAL: Tabel store_settings kosong! Harap isi 1 baris data di Supabase dulu.");
+        if (errID || !checkID) {
+            alert("❌ ERROR DATABASE: Tabel 'store_settings' kosong atau tidak bisa dibaca.\nPastikan Anda sudah Insert 1 baris data di Supabase.");
+            btnSimpan.innerText = "Simpan Perubahan";
+            btnSimpan.disabled = false;
             return;
         }
 
-        const realID = checkID.id; // Ambil ID asli (entah 1, 2, atau 99)
+        const REAL_ID = checkID.id; // Ini ID yang benar (misal: 1, 2, atau 15)
+        console.log("ID Asli di Database adalah:", REAL_ID);
 
-        const { error } = await db
+        // 4. EKSEKUSI UPDATE DENGAN ID YANG BENAR
+        const { data: hasilUpdate, error: errUpdate } = await db
             .from('store_settings')
             .update(updateData)
-            .eq('id', realID); // Gunakan ID asli
+            .eq('id', REAL_ID) // Pakai ID asli, bukan hardcode 1
+            .select(); // Minta balikan data untuk bukti
 
-        if (error) {
-            console.error(error); // Cek Console browser (F12) jika alert muncul
-            alert("Gagal menyimpan: " + error.message);
+        // 5. LAPORAN HASIL
+        if (errUpdate) {
+            alert("❌ GAGAL MENYIMPAN (Error System):\n" + errUpdate.message);
         } else {
-            alert("✅ Pengaturan Berhasil Disimpan! (ID Database: " + realID + ")");
-            document.getElementById('settingsModal').style.display = 'none';
+            if (hasilUpdate.length > 0) {
+                alert(`✅ SUKSES MUTLAK!\nData berhasil disimpan ke ID: ${REAL_ID}\nJumlah Aturan Ongkir: ${currentRules.length}`);
+                document.getElementById('settingsModal').style.display = 'none';
+            } else {
+                alert("⚠️ ANEH: Tidak ada error, tapi data tidak berubah. Cek Policy RLS (Update Policy).");
+            }
         }
+
+        btnSimpan.innerText = "Simpan Perubahan";
+        btnSimpan.disabled = false;
     }
 </script>
 
