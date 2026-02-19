@@ -6,7 +6,7 @@
     <title>Dashboard Penjual - Bumi Jelly D'Hasna</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script> 
     
@@ -398,9 +398,50 @@
     }
 
     function createChart(id, type, data) {
-        if(charts[id]) charts[id].destroy(); 
-        const ctx = document.getElementById(id).getContext('2d');
-        charts[id] = new Chart(ctx, { type: type, data: data, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+        // 1. PENGAMAN (SAFETY CHECK)
+        // Cek apakah elemen kanvas ada DAN apakah library Chart sudah dimuat
+        const canvas = document.getElementById(id);
+        
+        if (!canvas) {
+            console.warn(`Elemen grafik dengan ID '${id}' tidak ditemukan.`);
+            return;
+        }
+
+        if (typeof Chart === 'undefined') {
+            console.error("Library Chart.js gagal dimuat (Cek koneksi internet). Grafik dilewati.");
+            // Tampilkan pesan error di tempat grafik agar user tahu
+            canvas.parentNode.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:red;font-size:12px;">Gagal memuat grafik (Koneksi Error)</div>';
+            return;
+        }
+
+        // 2. BERSIHKAN CHART LAMA (MEMORY OPTIMIZATION)
+        // Mencegah memory leak atau grafik menumpuk saat refresh
+        if (charts[id]) {
+            charts[id].destroy();
+        }
+
+        // 3. RENDER CHART
+        const ctx = canvas.getContext('2d');
+        charts[id] = new Chart(ctx, {
+            type: type,
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 11 },
+                            boxWidth: 12
+                        }
+                    }
+                },
+                animation: {
+                    duration: 800 // Optimalisasi animasi agar tidak berat di HP
+                }
+            }
+        });
     }
 
     // --- PENGELOMPOKAN (GROUPING) ---
