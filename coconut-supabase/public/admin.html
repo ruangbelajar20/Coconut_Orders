@@ -132,6 +132,45 @@
                 gap: 10px;
             }
         }
+        /* --- CSS BARU UNTUK INPUT GROUP & JARAK --- */
+        .grid-2-col {
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* Membagi 2 kolom sama besar */
+            gap: 25px; /* JARAK ANTAR KOLOM AGAR TIDAK NEMPEL */
+            align-items: end; /* Agar label sejajar */
+        }
+        
+        .input-group {
+            display: flex; /* Input dan Pilihan % sejajar */
+            gap: 0;
+            width: 100%;
+        }
+        
+        .input-group input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            flex: 1; /* Input ambil sisa ruang */
+            min-width: 0;
+        }
+        
+        .input-group select {
+            width: 70px;
+            background: #eee;
+            border: 1px solid #e5e7eb;
+            border-left: none;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            outline: none;
+        }
+        .input-group select:focus { border-color: var(--primary); }
+        
+        /* Perbaikan Mobile: Jika layar kecil, jadi 1 kolom saja */
+        @media (max-width: 480px) {
+            .grid-2-col { grid-template-columns: 1fr; gap: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -212,27 +251,73 @@
         <input type="text" id="set_promo" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div>
-                <label style="font-size:12px; font-weight:bold;">Diskon Ongkir (Rp):</label>
-                <input type="number" id="set_ongkir" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+            <div class="grid-2-col">
+                <div>
+                    <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
+                        🚚 Diskon Ongkir:
+                    </label>
+                    <div class="input-group">
+                        <input type="number" id="set_ongkir" placeholder="0" min="0">
+                        <select id="type_ongkir">
+                            <option value="nominal">Rp</option>
+                            <option value="persen">%</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <div>
+                    <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
+                        📦 Diskon Barang:
+                    </label>
+                    <div class="input-group">
+                        <input type="number" id="set_barang" placeholder="0" min="0">
+                        <select id="type_barang">
+                            <option value="nominal">Rp</option>
+                            <option value="persen">%</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-            <div>
-                <label style="font-size:12px; font-weight:bold;">Diskon Barang (Rp):</label>
-                <input type="number" id="set_barang" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
+    
+            <hr style="border:none; border-top:1px dashed #e5e7eb; margin:20px 0;">
+            
+            <div class="grid-2-col">
+                <div>
+                    <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
+                        🎟️ Kode Voucher:
+                    </label>
+                    <input type="text" id="set_v_code" placeholder="CONTOH: MERDEKA" autocomplete="off" 
+                           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+                </div>
+    
+                <div>
+                    <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
+                        💰 Nilai Potongan:
+                    </label>
+                    <div class="input-group">
+                        <input type="number" id="set_v_val" placeholder="0" min="0">
+                        <select id="type_voucher">
+                            <option value="nominal">Rp</option>
+                            <option value="persen">%</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-        </div>
+    
+            <div style="margin-top:15px;">
+                 <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
+                    📊 Batas Kuota Voucher (Orang):
+                 </label>
+                 <div style="display:flex; align-items:center; gap:10px;">
+                     <input type="number" id="set_v_limit" placeholder="Tanpa Batas: 0" min="0" 
+                            style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                     
+                     <div style="background:#f3f4f6; padding:10px 15px; border-radius:8px; font-size:11px; color:#555; white-space:nowrap;">
+                        Terpakai: <strong id="view_used" style="color:var(--primary); font-size:14px;">0</strong> kali
+                     </div>
+                 </div>
+            </div>
 
-        <hr style="border:none; border-top:1px dashed #ddd; margin:10px 0;">
-        
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div>
-                <label style="font-size:12px; font-weight:bold;">Kode Voucher:</label>
-                <input type="text" id="set_v_code" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
-            </div>
-            <div>
-                <label style="font-size:12px; font-weight:bold;">Nilai Voucher (Rp):</label>
-                <input type="number" id="set_v_val" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
-            </div>
         </div>
 
         <div style="display:flex; gap:10px; margin-top:20px;">
@@ -493,21 +578,28 @@
     // 1. Buka Modal & Ambil Data Lama
     async function openSettings() {
         const modal = document.getElementById('settingsModal');
-        modal.style.display = 'flex'; // Munculkan modal
+        modal.style.display = 'flex';
 
-        // Ambil data dari tabel store_settings (ID = 1)
-        const { data, error } = await db
-            .from('store_settings')
-            .select('*')
-            .eq('id', 1) // Kita asumsi baris pertama ID-nya 1
-            .single();
+        const { data } = await db.from('store_settings').select('*').eq('id', 1).single();
 
         if (data) {
             document.getElementById('set_promo').value = data.teks_promo;
+            
+            // Ongkir
             document.getElementById('set_ongkir').value = data.diskon_ongkir;
+            document.getElementById('type_ongkir').value = data.tipe_ongkir || 'nominal'; // Load tipe
+            
+            // Barang
             document.getElementById('set_barang').value = data.diskon_barang;
+            document.getElementById('type_barang').value = data.tipe_barang || 'nominal'; // Load tipe
+
+            // Voucher
             document.getElementById('set_v_code').value = data.voucher_kode;
             document.getElementById('set_v_val').value = data.voucher_nilai;
+            document.getElementById('type_voucher').value = data.tipe_voucher || 'nominal'; // Load tipe
+            
+            document.getElementById('set_v_limit').value = data.voucher_limit;
+            document.getElementById('view_used').innerText = data.voucher_used;
         }
     }
 
@@ -518,29 +610,44 @@
         const barang = parseInt(document.getElementById('set_barang').value) || 0;
         const vCode = document.getElementById('set_v_code').value.toUpperCase();
         const vVal = parseInt(document.getElementById('set_v_val').value) || 0;
+        const vLimit = parseInt(document.getElementById('set_v_limit').value) || 0;
 
-        // Tampilkan Loading di tombol (opsional)
-        const btn = event.target;
-        btn.innerText = "Menyimpan...";
+        // AMBIL NILAI TIPE (Rp atau %)
+        const tOngkir = document.getElementById('type_ongkir').value;
+        const tBarang = document.getElementById('type_barang').value;
+        const tVoucher = document.getElementById('type_voucher').value;
 
-        const { error } = await db
-            .from('store_settings')
-            .update({
-                teks_promo: promo,
-                diskon_ongkir: ongkir,
-                diskon_barang: barang,
-                voucher_kode: vCode,
-                voucher_nilai: vVal
-            })
-            .eq('id', 1); // Update baris ID 1
+        // Logika Reset Terpakai (Sama seperti sebelumnya)
+        const { data: oldData } = await db.from('store_settings').select('voucher_kode').eq('id', 1).single();
+        let newUsedCount = undefined;
+        if (oldData && oldData.voucher_kode !== vCode) {
+            newUsedCount = 0;
+        }
+
+        const updateData = {
+            teks_promo: promo,
+            diskon_ongkir: ongkir,
+            diskon_barang: barang,
+            voucher_kode: vCode,
+            voucher_nilai: vVal,
+            voucher_limit: vLimit,
+            
+            // SIMPAN TIPE KE DATABASE
+            tipe_ongkir: tOngkir,
+            tipe_barang: tBarang,
+            tipe_voucher: tVoucher
+        };
+
+        if (newUsedCount !== undefined) updateData.voucher_used = 0;
+
+        const { error } = await db.from('store_settings').update(updateData).eq('id', 1);
 
         if (error) {
-            alert("Gagal menyimpan: " + error.message);
+            alert("Gagal: " + error.message);
         } else {
-            alert("✅ Pengaturan Toko Berhasil Diupdate!");
+            alert("✅ Pengaturan Tersimpan!");
             document.getElementById('settingsModal').style.display = 'none';
         }
-        btn.innerText = "Simpan Perubahan";
     }
 
 </script>
