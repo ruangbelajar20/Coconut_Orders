@@ -416,6 +416,7 @@
     }
 
     async function saveSettings() {
+        // 1. Ambil semua value dari input (SAMA SEPERTI SEBELUMNYA)
         const promo = document.getElementById('set_promo').value;
         const barang = parseInt(document.getElementById('set_barang').value) || 0;
         const tBarang = document.getElementById('type_barang').value;
@@ -424,8 +425,11 @@
         const tVoucher = document.getElementById('type_voucher').value;
         const vLimit = parseInt(document.getElementById('set_v_limit').value) || 0;
 
-        const { data: oldData } = await db.from('store_settings').select('voucher_kode').eq('id', 1).single();
+        // Reset logika voucher used
+        const { data: oldData } = await db.from('store_settings').select('voucher_kode').limit(1).single();
+        
         let newUsedCount = undefined;
+        // Jika data lama ada dan kode berubah, reset hitungan
         if (oldData && oldData.voucher_kode !== vCode) newUsedCount = 0;
 
         const updateData = {
@@ -436,17 +440,41 @@
             voucher_nilai: vVal,
             tipe_voucher: tVoucher,
             voucher_limit: vLimit,
-            shipping_rules: currentRules 
+            
+            // PENTING: Pastikan ini array (bukan undefined)
+            shipping_rules: currentRules || [] 
         };
 
         if (newUsedCount !== undefined) updateData.voucher_used = 0;
 
-        const { error } = await db.from('store_settings').update(updateData).eq('id', 1);
-        if (error) alert("Gagal: " + error.message);
-        else {
-            alert("✅ Pengaturan Berhasil Disimpan!");
+        // 2. DEBUGGING UPDATE
+        // Kita tidak pakai .eq('id', 1) lagi, tapi kita update baris APAPUN yang pertama ditemukan.
+        // Atau kita pastikan dulu ID nya.
+        
+        // Logika Paling Aman: Update baris pertama yang ditemukan (Id berapapun)
+        // Namun Supabase butuh ID spesifik untuk update.
+        
+        // Cek ID dulu:
+        const { data: checkID } = await db.from('store_settings').select('id').limit(1).single();
+        
+        if (!checkID) {
+            alert("❌ ERROR FATAL: Tabel store_settings kosong! Harap isi 1 baris data di Supabase dulu.");
+            return;
+        }
+
+        const realID = checkID.id; // Ambil ID asli (entah 1, 2, atau 99)
+
+        const { error } = await db
+            .from('store_settings')
+            .update(updateData)
+            .eq('id', realID); // Gunakan ID asli
+
+        if (error) {
+            console.error(error); // Cek Console browser (F12) jika alert muncul
+            alert("Gagal menyimpan: " + error.message);
+        } else {
+            alert("✅ Pengaturan Berhasil Disimpan! (ID Database: " + realID + ")");
             document.getElementById('settingsModal').style.display = 'none';
-            // Refresh data jika perlu agar teks promo langsung berubah tanpa reload (opsional)
         }
     }
 </script>
