@@ -291,26 +291,15 @@
         </div>
 
         <div class="settings-grid">
-            <div>
-                <label class="settings-label">🚚 Diskon Ongkir:</label>
-                <div class="input-group-merged">
-                    <input type="number" id="set_ongkir" placeholder="0" min="0">
-                    <select id="type_ongkir">
-                        <option value="nominal">Rp</option>
-                        <option value="persen">%</option>
-                    </select>
+            <div style="margin-bottom: 20px; border: 1px solid #e5e7eb; padding: 15px; border-radius: 12px; background: #f9fafb;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <label style="font-weight:bold; color:var(--primary);">🚚 Aturan Diskon Ongkir</label>
+                    <button onclick="addRule()" style="background:var(--primary); color:white; border:none; padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer;">+ Tambah Aturan</button>
                 </div>
-            </div>
-
-            <div>
-                <label class="settings-label">📦 Diskon Barang:</label>
-                <div class="input-group-merged">
-                    <input type="number" id="set_barang" placeholder="0" min="0">
-                    <select id="type_barang">
-                        <option value="nominal">Rp</option>
-                        <option value="persen">%</option>
-                    </select>
-                </div>
+                
+                <div id="rules-container" style="max-height: 200px; overflow-y: auto; padding-right:5px;">
+                    </div>
+                <small style="color:#666; font-size:10px;">*Sistem akan membaca aturan dari atas ke bawah. Aturan pertama yang cocok akan dipakai.</small>
             </div>
         </div>
 
@@ -361,6 +350,7 @@
     </div>
 </div>
 <script>
+    let currentRules = [];
     // --- 1. KONFIGURASI SUPABASE (SAMA DENGAN FILE ORDER) ---
     const config = {
         url: "https://iltvpnplysjeaxufiokg.supabase.co",
@@ -618,70 +608,122 @@
 
         if (data) {
             document.getElementById('set_promo').value = data.teks_promo;
-            
-            // Ongkir
-            document.getElementById('set_ongkir').value = data.diskon_ongkir;
-            document.getElementById('type_ongkir').value = data.tipe_ongkir || 'nominal'; // Load tipe
-            
-            // Barang
+            // Load Diskon Barang (Masih sama)
             document.getElementById('set_barang').value = data.diskon_barang;
-            document.getElementById('type_barang').value = data.tipe_barang || 'nominal'; // Load tipe
+            document.getElementById('type_barang').value = data.tipe_barang || 'nominal';
 
-            // Voucher
+            // Load Voucher (Masih sama)
             document.getElementById('set_v_code').value = data.voucher_kode;
             document.getElementById('set_v_val').value = data.voucher_nilai;
-            document.getElementById('type_voucher').value = data.tipe_voucher || 'nominal'; // Load tipe
-            
+            document.getElementById('type_voucher').value = data.tipe_voucher || 'nominal';
             document.getElementById('set_v_limit').value = data.voucher_limit;
             document.getElementById('view_used').innerText = data.voucher_used;
+
+            // --- LOAD RULES BARU ---
+            // Jika database kosong/null, pakai array kosong
+            currentRules = data.shipping_rules || [];
+            renderRules(); 
         }
     }
 
     // 2. Simpan Data Baru
     async function saveSettings() {
         const promo = document.getElementById('set_promo').value;
-        const ongkir = parseInt(document.getElementById('set_ongkir').value) || 0;
         const barang = parseInt(document.getElementById('set_barang').value) || 0;
+        const tBarang = document.getElementById('type_barang').value;
         const vCode = document.getElementById('set_v_code').value.toUpperCase();
         const vVal = parseInt(document.getElementById('set_v_val').value) || 0;
+        const tVoucher = document.getElementById('type_voucher').value;
         const vLimit = parseInt(document.getElementById('set_v_limit').value) || 0;
 
-        // AMBIL NILAI TIPE (Rp atau %)
-        const tOngkir = document.getElementById('type_ongkir').value;
-        const tBarang = document.getElementById('type_barang').value;
-        const tVoucher = document.getElementById('type_voucher').value;
-
-        // Logika Reset Terpakai (Sama seperti sebelumnya)
+        // Reset logika voucher used (sama seperti sebelumnya)
         const { data: oldData } = await db.from('store_settings').select('voucher_kode').eq('id', 1).single();
         let newUsedCount = undefined;
-        if (oldData && oldData.voucher_kode !== vCode) {
-            newUsedCount = 0;
-        }
+        if (oldData && oldData.voucher_kode !== vCode) newUsedCount = 0;
 
         const updateData = {
             teks_promo: promo,
-            diskon_ongkir: ongkir,
             diskon_barang: barang,
+            tipe_barang: tBarang,
             voucher_kode: vCode,
             voucher_nilai: vVal,
+            tipe_voucher: tVoucher,
             voucher_limit: vLimit,
             
-            // SIMPAN TIPE KE DATABASE
-            tipe_ongkir: tOngkir,
-            tipe_barang: tBarang,
-            tipe_voucher: tVoucher
+            // SIMPAN JSON RULES
+            shipping_rules: currentRules 
         };
 
         if (newUsedCount !== undefined) updateData.voucher_used = 0;
 
         const { error } = await db.from('store_settings').update(updateData).eq('id', 1);
 
-        if (error) {
-            alert("Gagal: " + error.message);
-        } else {
-            alert("✅ Pengaturan Tersimpan!");
+        if (error) alert("Gagal: " + error.message);
+        else {
+            alert("✅ Pengaturan Berhasil Disimpan!");
             document.getElementById('settingsModal').style.display = 'none';
         }
+    }
+
+    // --- LOGIKA ATURAN ONGKIR ---
+
+    function renderRules() {
+        const container = document.getElementById('rules-container');
+        container.innerHTML = "";
+
+        if (currentRules.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:10px; color:#999; font-size:12px;">Belum ada aturan diskon ongkir.</div>';
+            return;
+        }
+
+        currentRules.forEach((rule, index) => {
+            const div = document.createElement('div');
+            div.style.cssText = "background:white; border:1px solid #ddd; padding:10px; border-radius:8px; margin-bottom:8px; position:relative;";
+            div.innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+                    <div>
+                        <label style="font-size:10px; font-weight:bold;">Jarak (KM):</label>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <input type="number" placeholder="Min" value="${rule.minDist}" onchange="updateRule(${index}, 'minDist', this.value)" style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; font-size:11px;">
+                            <span>-</span>
+                            <input type="number" placeholder="Max" value="${rule.maxDist}" onchange="updateRule(${index}, 'maxDist', this.value)" style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; font-size:11px;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:10px; font-weight:bold;">Min. Order (Butir):</label>
+                        <input type="number" value="${rule.minQty}" onchange="updateRule(${index}, 'minQty', this.value)" style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; font-size:11px;">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:10px; font-weight:bold;">Diskon:</label>
+                    <div style="display:flex; border:1px solid #eee; border-radius:4px; overflow:hidden;">
+                         <input type="number" value="${rule.val}" onchange="updateRule(${index}, 'val', this.value)" style="border:none; padding:5px; width:100%; font-size:11px;">
+                         <select onchange="updateRule(${index}, 'type', this.value)" style="border:none; background:#eee; font-size:11px;">
+                            <option value="nominal" ${rule.type === 'nominal' ? 'selected' : ''}>Rp</option>
+                            <option value="persen" ${rule.type === 'persen' ? 'selected' : ''}>%</option>
+                         </select>
+                    </div>
+                </div>
+                <button onclick="removeRule(${index})" style="position:absolute; top:5px; right:5px; background:#fee2e2; color:red; border:none; width:20px; height:20px; border-radius:50%; font-size:10px; cursor:pointer;">✕</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function addRule() {
+        // Template aturan baru (Default)
+        currentRules.push({ minDist: 0, maxDist: 5, minQty: 1, type: 'nominal', val: 0 });
+        renderRules();
+    }
+
+    function removeRule(index) {
+        currentRules.splice(index, 1);
+        renderRules();
+    }
+
+    function updateRule(index, field, value) {
+        if(field === 'type') currentRules[index][field] = value;
+        else currentRules[index][field] = parseFloat(value) || 0;
     }
 
 </script>
