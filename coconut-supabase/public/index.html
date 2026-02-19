@@ -690,6 +690,18 @@
         let searchTimeout;
         let selectedLat = null;
         let selectedLng = null;
+        // --- VARIABEL GLOBAL PENGATURAN TOKO (BARU) ---
+        let GLOBAL_DISKON_ONGKIR = 0;
+        let GLOBAL_DISKON_BARANG = 0;
+        let GLOBAL_VOUCHER_KODE = "";
+        let GLOBAL_VOUCHER_NILAI = 0;
+        let GLOBAL_VOUCHER_LIMIT = 0;
+        let GLOBAL_VOUCHER_USED = 0;
+        
+        // Tipe Diskon (Nominal / Persen)
+        let TYPE_DISKON_ONGKIR = 'nominal';
+        let TYPE_DISKON_BARANG = 'nominal';
+        let TYPE_VOUCHER = 'nominal';
 
         const ui = {
             form: document.getElementById('orderForm'),
@@ -730,6 +742,8 @@
             }, 4000);
         }
         initPromoAnimation();
+        // Panggil Pengaturan Toko Saat Web Dibuka
+        loadStoreSettings();
 
         // --- CUSTOM ALERT LOGIC (PERBAIKAN UTAMA) ---
         const showCustomAlert = (message, fieldId = null) => {
@@ -798,51 +812,124 @@
 
         const formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');
 
+        // --- FUNGSI BANTUAN HITUNG (Persen vs Rupiah) ---
+        function hitungNilaiDiskon(nilai, tipe, hargaDasar) {
+            if (tipe === 'persen') {
+                return (hargaDasar * nilai) / 100; // Rumus Persen
+            } else {
+                return nilai; // Rumus Rupiah Biasa
+            }
+        }
+
+        // --- FUNGSI LOAD PENGATURAN DARI SUPABASE ---
+        async function loadStoreSettings() {
+            try {
+                // Ambil data dari tabel store_settings (Baris ID 1)
+                const { data, error } = await db.from('store_settings').select('*').eq('id', 1).single();
+                
+                if (data) {
+                    // 1. Update Teks Promo Berjalan (Marquee)
+                    const runningText = document.querySelector('.running-text');
+                    if(runningText) runningText.innerText = `📢 ${data.teks_promo}`;
+
+                    // 2. Simpan Nilai ke Variabel Global
+                    window.GLOBAL_DISKON_ONGKIR = data.diskon_ongkir;
+                    window.GLOBAL_DISKON_BARANG = data.diskon_barang;
+                    window.GLOBAL_VOUCHER_KODE = data.voucher_kode;
+                    window.GLOBAL_VOUCHER_NILAI = data.voucher_nilai;
+                    window.GLOBAL_VOUCHER_LIMIT = data.voucher_limit;
+                    window.GLOBAL_VOUCHER_USED = data.voucher_used;
+
+                    // 3. Simpan Tipe (Rp atau %)
+                    window.TYPE_DISKON_ONGKIR = data.tipe_ongkir || 'nominal';
+                    window.TYPE_DISKON_BARANG = data.tipe_barang || 'nominal';
+                    window.TYPE_VOUCHER = data.tipe_voucher || 'nominal';
+
+                    console.log("✅ Pengaturan Toko Terupdate!");
+                    
+                    // Hitung ulang total dengan data terbaru
+                    hitungTotal(); 
+                }
+            } catch (err) {
+                console.error("Gagal memuat pengaturan toko:", err);
+            }
+        }
+        
+        // --- LOGIKA HITUNG HARGA (DINAMIS DARI DATABASE) ---
         const hitungTotal = () => {
+            // 1. Ambil Data Input
             const qty = parseFloat(ui.jumlah.value) || 0;
             const dist = parseFloat(ui.jarak.value) || 0;
             const HARGA_SATUAN = 15000;
 
+            // 2. Hitung Subtotal Barang
             const subtotal = qty * HARGA_SATUAN;
             
+            // 3. Hitung Ongkir Murni (Berdasarkan Jarak)
             let ongkirMurni = 0;
             if (dist > 2.5) {
+                // Rumus: Gratis 2.5KM pertama, sisanya bayar Rp 1.000 per 0.5KM
                 let sisaJarak = dist - 2.5;
                 let blok = Math.ceil(sisaJarak / 0.5); 
                 ongkirMurni = blok * 1000;
             }
 
+            // 4. HITUNG DISKON ONGKIR (Dari Pengaturan Admin)
+            // Menggunakan helper 'hitungNilaiDiskon' yang baru dibuat
             let discOngkir = 0;
-            if (dist > 2.5 && dist <= 6.5) {
-                if (qty > 2 && qty <= 5) discOngkir = ongkirMurni * 0.5;
-                else if (qty > 5) discOngkir = ongkirMurni; 
-            } else if (dist > 5 && dist <= 12) {
-                if (qty >= 6 && qty <= 10) discOngkir = ongkirMurni * 0.5;
-                else if (qty > 10) discOngkir = ongkirMurni; 
-            } else if (dist > 10 && dist <= 20) {
-                if (qty > 10 && qty <= 15) discOngkir = ongkirMurni * 0.5;
-                else if (qty > 15) discOngkir = ongkirMurni; 
+            if (window.GLOBAL_DISKON_ONGKIR > 0) {
+                discOngkir = hitungNilaiDiskon(window.GLOBAL_DISKON_ONGKIR, window.TYPE_DISKON_ONGKIR, ongkirMurni);
+            }
+            // Validasi: Diskon ongkir tidak boleh lebih besar dari ongkirnya sendiri
+            if (discOngkir > ongkirMurni) discOngkir = ongkirMurni;
+
+            // 5. HITUNG DISKON BARANG (Dari Pengaturan Admin)
+            let discBarang = 0;
+            if (window.GLOBAL_DISKON_BARANG > 0) {
+                // Jika Persen: Dihitung dari Subtotal
+                // Jika Rupiah: Nominal langsung
+                discBarang = hitungNilaiDiskon(window.GLOBAL_DISKON_BARANG, window.TYPE_DISKON_BARANG, subtotal);
             }
 
-            let discBarang = Math.floor(qty / 5) * 5000;
-            const totalBayar = subtotal + ongkirMurni - discOngkir - discBarang - voucherValue;
+            // 6. Hitung Total Akhir
+            // (Subtotal + Ongkir) - (Semua Diskon & Voucher)
+            let totalBayar = subtotal + ongkirMurni - discOngkir - discBarang - voucherValue;
+            
+            // Pastikan tidak minus
+            if (totalBayar < 0) totalBayar = 0;
 
-            calculatedData = { subtotal, ongkirMurni, discOngkir, discBarang, totalBayar };
+            // 7. Simpan Data ke Global (Untuk dikirim ke Database nanti)
+            calculatedData = { 
+                subtotal, 
+                ongkirMurni, 
+                discOngkir, 
+                discBarang, 
+                totalBayar,
+                voucherVal: voucherValue 
+            };
 
+            // 8. UPDATE TAMPILAN KE LAYAR (Invoice)
             ui.txtSubtotal.innerText = formatRupiah(subtotal);
             ui.txtOngkir.innerText = formatRupiah(ongkirMurni);
             ui.txtTotal.innerText = formatRupiah(totalBayar);
 
+            // Toggle Tampilan Baris Diskon Ongkir
             if (discOngkir > 0) {
                 ui.rowDiscOngkir.classList.remove('hidden');
                 ui.txtDiscOngkir.innerText = '-' + formatRupiah(discOngkir);
-            } else { ui.rowDiscOngkir.classList.add('hidden'); }
+            } else { 
+                ui.rowDiscOngkir.classList.add('hidden'); 
+            }
 
+            // Toggle Tampilan Baris Diskon Barang
             if (discBarang > 0) {
                 ui.rowDiscBarang.classList.remove('hidden');
                 ui.txtDiscBarang.innerText = '-' + formatRupiah(discBarang);
-            } else { ui.rowDiscBarang.classList.add('hidden'); }
+            } else { 
+                ui.rowDiscBarang.classList.add('hidden'); 
+            }
 
+            // Toggle Tampilan Baris Voucher
             const rowVoucher = document.getElementById('row-disc-voucher');
             if (voucherValue > 0) {
                 rowVoucher.classList.remove('hidden');
@@ -1304,4 +1391,5 @@
 </script>
 </body>
 </html>
+
 
