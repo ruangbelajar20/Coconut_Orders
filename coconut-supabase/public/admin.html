@@ -23,13 +23,21 @@
         
         /* LAYOUT GRID */
         .dashboard-container {
-            max-width: 1200px; 
-            width: 95%; /* PENTING: Gunakan % agar fleksibel di HP */
-            margin: 20px auto; /* 'auto' membuat kiri-kanan seimbang */
-            padding: 0; /* Padding dihandle oleh elemen di dalamnya */
+            max-width: 1600px; /* Diperlebar agar pas di Laptop */
+            width: 98%;        /* Mengambil 98% lebar layar */
+            margin: 20px auto; /* Posisi Tengah */
+            padding: 0 10px;   /* Sedikit napas di kiri kanan */
             display: grid; 
             grid-template-columns: 1fr; 
             gap: 20px;
+            box-sizing: border-box;
+        }
+        
+        /* Khusus HP: Sedikit lebih kecil agar aman */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                width: 95%;
+            }
         }
 
         /* HEADER */
@@ -132,44 +140,70 @@
                 gap: 10px;
             }
         }
-        /* --- CSS BARU UNTUK INPUT GROUP & JARAK --- */
-        .grid-2-col {
-            display: grid; 
-            grid-template-columns: 1fr 1fr; /* Membagi 2 kolom sama besar */
-            gap: 25px; /* JARAK ANTAR KOLOM AGAR TIDAK NEMPEL */
-            align-items: end; /* Agar label sejajar */
+        
+        /* --- CSS KHUSUS MODAL PENGATURAN (AGAR RAPI) --- */
+
+        /* 1. Grid 2 Kolom yang Seimbang */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Kiri Kanan sama besar */
+            gap: 20px; /* Jarak antar kolom */
+            margin-bottom: 15px;
         }
         
-        .input-group {
-            display: flex; /* Input dan Pilihan % sejajar */
-            gap: 0;
+        /* 2. Style Label agar Konsisten */
+        .settings-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            display: block;
+        }
+        
+        /* 3. TEKNIK INPUT GROUP (Menyatukan Input & Select) */
+        .input-group-merged {
+            display: flex; /* Kunci agar nempel */
             width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            overflow: hidden; /* Agar sudut tumpul tidak bocor */
+            transition: 0.3s;
+            background: #fff;
         }
         
-        .input-group input {
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-            flex: 1; /* Input ambil sisa ruang */
-            min-width: 0;
+        /* Efek saat diklik jadi hijau */
+        .input-group-merged:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(15, 122, 99, 0.1);
         }
         
-        .input-group select {
-            width: 70px;
-            background: #eee;
-            border: 1px solid #e5e7eb;
-            border-left: none;
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
+        /* Input Angka */
+        .input-group-merged input {
+            flex: 1; /* Mengisi sisa ruang */
+            border: none !important; /* Hapus border bawaan */
+            border-radius: 0 !important;
+            padding: 10px 12px;
+            font-size: 14px;
             outline: none;
         }
-        .input-group select:focus { border-color: var(--primary); }
         
-        /* Perbaikan Mobile: Jika layar kecil, jadi 1 kolom saja */
+        /* Dropdown Pilihan (Rp/%) */
+        .input-group-merged select {
+            width: 70px;
+            border: none !important;
+            border-left: 1px solid #eee !important; /* Pemisah tipis */
+            background: #f9fafb;
+            font-weight: 600;
+            color: var(--primary);
+            padding: 0 5px;
+            cursor: pointer;
+            outline: none;
+            text-align: center;
+        }
+        
+        /* Mobile Responsif untuk Modal */
         @media (max-width: 480px) {
-            .grid-2-col { grid-template-columns: 1fr; gap: 15px; }
+            .settings-grid { grid-template-columns: 1fr; gap: 10px; }
         }
     </style>
 </head>
@@ -243,87 +277,89 @@
     </div>
 
 </div>
-<div id="settingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:999;">
-    <div style="background:white; padding:25px; border-radius:16px; width:90%; max-width:400px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-        <h3 style="margin-top:0; color:var(--primary);">⚙️ Pengaturan Toko</h3>
+<div id="settingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+    
+    <div style="background:white; padding:30px; border-radius:16px; width:95%; max-width:480px; box-shadow:0 10px 40px rgba(0,0,0,0.2); position:relative;">
         
-        <label style="font-size:12px; font-weight:bold;">Teks Promo Berjalan:</label>
-        <input type="text" id="set_promo" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div class="grid-2-col">
-                <div>
-                    <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
-                        🚚 Diskon Ongkir:
-                    </label>
-                    <div class="input-group">
-                        <input type="number" id="set_ongkir" placeholder="0" min="0">
-                        <select id="type_ongkir">
-                            <option value="nominal">Rp</option>
-                            <option value="persen">%</option>
-                        </select>
-                    </div>
-                </div>
-    
-                <div>
-                    <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
-                        📦 Diskon Barang:
-                    </label>
-                    <div class="input-group">
-                        <input type="number" id="set_barang" placeholder="0" min="0">
-                        <select id="type_barang">
-                            <option value="nominal">Rp</option>
-                            <option value="persen">%</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-    
-            <hr style="border:none; border-top:1px dashed #e5e7eb; margin:20px 0;">
-            
-            <div class="grid-2-col">
-                <div>
-                    <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
-                        🎟️ Kode Voucher:
-                    </label>
-                    <input type="text" id="set_v_code" placeholder="CONTOH: MERDEKA" autocomplete="off" 
-                           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-                </div>
-    
-                <div>
-                    <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
-                        💰 Nilai Potongan:
-                    </label>
-                    <div class="input-group">
-                        <input type="number" id="set_v_val" placeholder="0" min="0">
-                        <select id="type_voucher">
-                            <option value="nominal">Rp</option>
-                            <option value="persen">%</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-    
-            <div style="margin-top:15px;">
-                 <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">
-                    📊 Batas Kuota Voucher (Orang):
-                 </label>
-                 <div style="display:flex; align-items:center; gap:10px;">
-                     <input type="number" id="set_v_limit" placeholder="Tanpa Batas: 0" min="0" 
-                            style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                     
-                     <div style="background:#f3f4f6; padding:10px 15px; border-radius:8px; font-size:11px; color:#555; white-space:nowrap;">
-                        Terpakai: <strong id="view_used" style="color:var(--primary); font-size:14px;">0</strong> kali
-                     </div>
-                 </div>
-            </div>
-
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="margin:0; color:var(--primary); font-size:18px;">⚙️ Pengaturan Toko</h3>
+            <button onclick="document.getElementById('settingsModal').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button onclick="document.getElementById('settingsModal').style.display='none'" style="flex:1; padding:12px; background:#ddd; border:none; border-radius:8px; cursor:pointer;">Batal</button>
-            <button onclick="saveSettings()" style="flex:1; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Simpan Perubahan</button>
+        <div style="margin-bottom:20px;">
+            <label class="settings-label">📢 Teks Promo Berjalan:</label>
+            <input type="text" id="set_promo" placeholder="Contoh: Diskon Hari Ini!" 
+                   style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box;">
         </div>
+
+        <div class="settings-grid">
+            <div>
+                <label class="settings-label">🚚 Diskon Ongkir:</label>
+                <div class="input-group-merged">
+                    <input type="number" id="set_ongkir" placeholder="0" min="0">
+                    <select id="type_ongkir">
+                        <option value="nominal">Rp</option>
+                        <option value="persen">%</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="settings-label">📦 Diskon Barang:</label>
+                <div class="input-group-merged">
+                    <input type="number" id="set_barang" placeholder="0" min="0">
+                    <select id="type_barang">
+                        <option value="nominal">Rp</option>
+                        <option value="persen">%</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <hr style="border:none; border-top:1px dashed #e5e7eb; margin:20px 0;">
+
+        <div class="settings-grid">
+            <div>
+                <label class="settings-label">🎟️ Kode Voucher:</label>
+                <input type="text" id="set_v_code" placeholder="MERDEKA" 
+                       style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box;">
+            </div>
+
+            <div>
+                <label class="settings-label">💰 Nilai Potongan:</label>
+                <div class="input-group-merged">
+                    <input type="number" id="set_v_val" placeholder="0" min="0">
+                    <select id="type_voucher">
+                        <option value="nominal">Rp</option>
+                        <option value="persen">%</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#f9fafb; padding:15px; border-radius:10px; border:1px solid #f3f4f6;">
+            <label class="settings-label" style="margin-bottom:8px;">📊 Batas Kuota Voucher:</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="number" id="set_v_limit" placeholder="0 (Tanpa Batas)" min="0" 
+                       style="flex:1; padding:10px; border:1px solid #d1d5db; border-radius:8px;">
+                
+                <div style="font-size:12px; color:#555; background:white; padding:8px 12px; border-radius:8px; border:1px solid #eee;">
+                    Terpakai: <strong id="view_used" style="color:var(--primary); font-size:14px;">0</strong>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:25px;">
+            <button onclick="document.getElementById('settingsModal').style.display='none'" 
+                    style="flex:1; padding:12px; background:#f3f4f6; color:#374151; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+                Batal
+            </button>
+            <button onclick="saveSettings()" 
+                    style="flex:2; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; box-shadow:0 4px 6px rgba(15,122,99,0.2);">
+                Simpan Perubahan
+            </button>
+        </div>
+
     </div>
 </div>
 <script>
