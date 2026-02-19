@@ -727,7 +727,7 @@
         let GLOBAL_KELIPATAN_BARANG = 0;
         let GLOBAL_SYARAT_QTY_VOUCHER = 0;
         let GLOBAL_SYARAT_MAX_JARAK_VOUCHER = 0;
-        
+        let GLOBAL_VOUCHER_MAX_POTONGAN = 0;
         // Tipe Diskon (Nominal / Persen)
         let TYPE_DISKON_BARANG = 'nominal';
         let TYPE_VOUCHER = 'nominal';
@@ -874,6 +874,7 @@
                     window.GLOBAL_KELIPATAN_BARANG = data.diskon_barang_kelipatan_qty || 0;
                     window.GLOBAL_SYARAT_QTY_VOUCHER = data.syarat_qty_voucher || 0;
                     window.GLOBAL_SYARAT_MAX_JARAK_VOUCHER = data.syarat_max_jarak_voucher || 0;
+                    window.GLOBAL_VOUCHER_MAX_POTONGAN = data.voucher_max_potongan || 0;
 
                     console.log("✅ Pengaturan Toko Terupdate!");
                     hitungTotal(); 
@@ -1452,6 +1453,13 @@
 
                 // ATURAN 3: Hitung Diskon (Dinamis dari Admin)
                 let diskon = hitungNilaiDiskon(window.GLOBAL_VOUCHER_NILAI, window.TYPE_VOUCHER, subtotal);
+
+                // BATAS MAKSIMAL POTONGAN (KHUSUS PERSEN)
+                if (window.TYPE_VOUCHER === 'persen' && window.GLOBAL_VOUCHER_MAX_POTONGAN > 0) {
+                    if (diskon > window.GLOBAL_VOUCHER_MAX_POTONGAN) {
+                        diskon = window.GLOBAL_VOUCHER_MAX_POTONGAN; // Mentok di angka maksimal
+                    }
+                }
                 
                 // Mencegah voucher lebih besar dari harga barang
                 if (diskon > subtotal) diskon = subtotal; 
@@ -1520,3 +1528,4 @@
 </script>
 </body>
 </html>
+
