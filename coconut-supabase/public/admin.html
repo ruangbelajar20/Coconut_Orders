@@ -103,6 +103,77 @@
             .btn-group, .refresh-btn { width: 100%; justify-content: center; }
             .charts-wrapper { grid-template-columns: 1fr; }
         }
+
+        /* Container utama aturan */
+        .rule-item {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            /* PENTING: Padding kanan dibuat 35px agar ada ruang kosong khusus untuk tombol X */
+            padding: 12px 35px 12px 12px; 
+            border-radius: 8px;
+            margin-bottom: 10px;
+            position: relative; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        /* Label kecil di dalam kotak aturan */
+        .rule-sub-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* Tombol Hapus: Dimasukkan ke DALAM kotak agar tidak terpotong */
+        .btn-delete-rule {
+            position: absolute;
+            top: 10px;    /* Nilai Positif (Masuk ke dalam) */
+            right: 10px;  /* Nilai Positif (Masuk ke dalam) */
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-delete-rule:hover { 
+            background: #ef4444; 
+            color: white; 
+        }
+
+        /* --- Kustomisasi Modal Konfirmasi Hapus --- */
+        .pulse-icon-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px; /* Rata tengah */
+            background: #fee2e2; /* Merah sangat muda */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pulse-danger-ring {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            border: 2px solid #ef4444; /* Merah Danger */
+            animation: pulse-red-anim 1.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+
+        @keyframes pulse-red-anim {
+            0% { transform: scale(0.95); opacity: 1; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -114,6 +185,8 @@
             <div style="font-size:13px; opacity:0.9;">Analisis & Pengelompokan Pesanan</div>
         </div>
         <div class="btn-group">
+            <button class="refresh-btn" onclick="openTextSettings()"><i data-lucide="message-square-text"></i> Ket. Diskon</button>
+
             <button class="refresh-btn" onclick="openSettings()"><i data-lucide="settings"></i> Atur Toko</button>
             <button class="refresh-btn" onclick="fetchData()"><i data-lucide="refresh-cw"></i> Refresh</button>
             <button class="refresh-btn" onclick="logout()" style="background:#ef4444;"><i data-lucide="log-out"></i> Keluar</button>
@@ -197,12 +270,41 @@
             <div id="rules-container" style="max-height: 120px; overflow-y: auto; font-size:12px;"></div>
         </div>
 
-        <div style="margin-bottom:15px;">
-             <label class="settings-label">📦 Diskon Barang</label>
-             <div class="input-group-merged">
-                <input type="number" id="set_barang" placeholder="0" min="0">
+        <div style="margin-bottom:15px; background: #fff4f4; padding: 10px; border-radius: 8px; border: 1px dashed #fca5a5;">
+            <label class="settings-label" style="color: #ef4444;">🚫 Batas Maksimal Pengiriman (KM)</label>
+            <input type="number" id="set_max_jarak" placeholder="Contoh: 25" style="width:100%; padding:8px 12px; border:1px solid #fecaca; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box;">
+        </div>
+
+        <div style="border: 1px dashed #d1d5db; padding: 12px; border-radius: 10px; margin-bottom: 15px; background: #fdfdfd;">
+             <label class="settings-label" style="color:var(--primary);">📦 Pengaturan Diskon Barang</label>
+             <div class="input-group-merged" style="margin-bottom: 10px;">
+                <input type="number" id="set_barang" placeholder="Nilai Diskon" min="0">
                 <select id="type_barang"><option value="nominal">Rp</option><option value="persen">%</option></select>
             </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                <div>
+                    <label style="font-size:9px; font-weight:bold; color:#666;">MIN. BELI (Butir)</label>
+                    <input type="number" id="set_syarat_qty_barang" placeholder="0 = Bebas" min="0" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:11px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-size:9px; font-weight:bold; color:#666;">MIN. JARAK (KM)</label>
+                    <input type="number" id="set_syarat_jarak_barang" placeholder="0 = Bebas" min="0" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:11px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-size:9px; font-weight:bold; color:#666;">KUOTA (Orang)</label>
+                    <input type="number" id="set_kuota_barang" placeholder="0 = Unlimited" min="0" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:11px; box-sizing:border-box;">
+                </div>
+            </div>
+            <div style="font-size:10px; color:#999; margin-top:5px; text-align:right;">
+                Terpakai: <b id="view_used_barang" style="color:var(--danger);">0</b>
+            </div>
+
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #eee;">
+                <label style="font-size:9px; font-weight:bold; color:#0f7a63;">BERLAKU KELIPATAN? (Butir)</label>
+                <input type="number" id="set_kelipatan_barang" placeholder="Isi 5 jika tiap kelipatan 5. Isi 0 jika tidak." min="0" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:11px; box-sizing:border-box;">
+            </div>
+            
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
@@ -216,6 +318,17 @@
                     <input type="number" id="set_v_val" min="0">
                     <select id="type_voucher"><option value="nominal">Rp</option><option value="persen">%</option></select>
                 </div>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+            <div>
+                <label style="font-size:9px; font-weight:bold; color:#666;">SYARAT MIN. BELI (Butir)</label>
+                <input type="number" id="set_v_min_qty" placeholder="0 = Bebas" min="0" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:11px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:9px; font-weight:bold; color:#666;">SYARAT MAKS. JARAK (KM)</label>
+                <input type="number" id="set_v_max_jarak" placeholder="0 = Bebas" min="0" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:11px; box-sizing:border-box;">
             </div>
         </div>
 
@@ -235,6 +348,59 @@
         </div>
     </div>
 </div>
+
+<div id="textSettingsModal" class="modal-overlay">
+    <div class="modal-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f3f4f6; padding-bottom:10px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <h3 style="margin:0; color:var(--primary); font-size:16px; font-weight:800;">📝 Keterangan Diskon</h3>
+            </div>
+            <button onclick="document.getElementById('textSettingsModal').style.display='none'" style="background:none; border:none; color:#999; cursor:pointer;"><i data-lucide="x" size="20"></i></button>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label class="settings-label">🚚 Keterangan Teks Diskon Ongkir</label>
+            <textarea id="set_ket_ongkir" rows="3" placeholder="Contoh: Nikmati gratis ongkir untuk radius di bawah 5 KM..." style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:13px; font-family:inherit; outline:none; resize:vertical; box-sizing:border-box; color:var(--text-main);"></textarea>
+            <small style="color:#9ca3af; font-size:10px;">*Teks ini akan muncul saat pembeli mengklik ikon (i) Diskon Ongkir.</small>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label class="settings-label">📦 Keterangan Teks Diskon Barang</label>
+            <textarea id="set_ket_barang" rows="3" placeholder="Contoh: Dapatkan potongan spesial untuk setiap pembelian minimal..." style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:13px; font-family:inherit; outline:none; resize:vertical; box-sizing:border-box; color:var(--text-main);"></textarea>
+            <small style="color:#9ca3af; font-size:10px;">*Teks ini akan muncul saat pembeli mengklik ikon (i) Diskon Barang.</small>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button onclick="document.getElementById('textSettingsModal').style.display='none'" style="flex:1; padding:12px; background:#f3f4f6; color:#6b7280; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; transition:0.2s;">Batal</button>
+            <button onclick="saveTextSettings(event)" style="flex:2; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; box-shadow:0 4px 10px rgba(15,122,99,0.2); transition:0.2s;">Simpan Keterangan</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteConfirmModal" class="modal-overlay" style="z-index: 10001;">
+    <div class="modal-box" style="max-width: 340px; text-align: center; padding: 30px 25px;">
+        
+        <div class="pulse-icon-container">
+            <div class="pulse-danger-ring"></div>
+            <i data-lucide="trash-2" size="28" color="#ef4444"></i>
+        </div>
+        
+        <h3 style="margin: 0 0 10px; color: var(--text-main); font-size: 18px; font-weight: 800;">Hapus Aturan?</h3>
+        <p style="color: var(--text-light); font-size: 13px; margin: 0 0 25px; line-height: 1.5;">
+            Apakah Anda yakin ingin menghapus aturan diskon ongkir ini? Tindakan ini akan hilang setelah Anda menyimpan perubahan.
+        </p>
+        
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="closeDeleteModal()" style="flex: 1; padding: 12px; background: #f3f4f6; color: #6b7280; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s;">
+                Batal
+            </button>
+            <button onclick="confirmDeleteRule()" style="flex: 1; padding: 12px; background: var(--danger); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); transition: 0.2s;">
+                Ya, Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
 
 <script>
     // --- 1. CONFIG ---
@@ -342,6 +508,7 @@
     }
 
     // --- 5. SETTINGS ENGINE ---
+    // --- 5. SETTINGS ENGINE ---
     async function openSettings() {
         const modal = document.getElementById('settingsModal');
         modal.style.display = 'flex';
@@ -349,11 +516,25 @@
             const { data } = await db.from('store_settings').select('*').limit(1).single();
             if (data) {
                 document.getElementById('set_promo').value = data.teks_promo;
+                document.getElementById('set_max_jarak').value = data.max_jarak_pengiriman || 25;
+                document.getElementById('set_syarat_qty_barang').value = data.syarat_qty_diskon_barang || 0;
+                document.getElementById('set_syarat_jarak_barang').value = data.syarat_jarak_diskon_barang || 0;
+                document.getElementById('set_kuota_barang').value = data.kuota_diskon_barang || 0;
+                document.getElementById('view_used_barang').innerText = data.terpakai_diskon_barang || 0;
                 document.getElementById('set_barang').value = data.diskon_barang;
                 document.getElementById('type_barang').value = data.tipe_barang || 'nominal';
+                
+                // KODE BARU: Load Kelipatan Diskon Barang
+                document.getElementById('set_kelipatan_barang').value = data.diskon_barang_kelipatan_qty || 0;
+
                 document.getElementById('set_v_code').value = data.voucher_kode;
                 document.getElementById('set_v_val').value = data.voucher_nilai;
                 document.getElementById('type_voucher').value = data.tipe_voucher || 'nominal';
+                
+                // KODE BARU: Load Syarat Voucher
+                document.getElementById('set_v_min_qty').value = data.syarat_qty_voucher || 0;
+                document.getElementById('set_v_max_jarak').value = data.syarat_max_jarak_voucher || 0;
+
                 document.getElementById('set_v_limit').value = data.voucher_limit;
                 document.getElementById('view_used').innerText = data.voucher_used;
                 currentRules = data.shipping_rules || [];
@@ -365,46 +546,193 @@
 
     async function saveSettings() {
         const btn = event.target;
-        btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
-
-        const updateData = {
-            teks_promo: document.getElementById('set_promo').value,
-            diskon_barang: parseInt(document.getElementById('set_barang').value) || 0,
-            tipe_barang: document.getElementById('type_barang').value,
-            voucher_kode: document.getElementById('set_v_code').value.toUpperCase(),
-            voucher_nilai: parseInt(document.getElementById('set_v_val').value) || 0,
-            tipe_voucher: document.getElementById('type_voucher').value,
-            voucher_limit: parseInt(document.getElementById('set_v_limit').value) || 0,
-            shipping_rules: currentRules
-        };
+        btn.innerText = "⏳ Menyimpan...";
+        btn.disabled = true;
 
         try {
+            const updateData = {
+                teks_promo: document.getElementById('set_promo').value,
+                max_jarak_pengiriman: parseFloat(document.getElementById('set_max_jarak').value) || 0,
+                syarat_qty_diskon_barang: parseInt(document.getElementById('set_syarat_qty_barang').value) || 0,
+                syarat_jarak_diskon_barang: parseFloat(document.getElementById('set_syarat_jarak_barang').value) || 0,
+                kuota_diskon_barang: parseInt(document.getElementById('set_kuota_barang').value) || 0,
+                diskon_barang: parseInt(document.getElementById('set_barang').value) || 0,
+                tipe_barang: document.getElementById('type_barang').value,
+                
+                // KODE BARU: Simpan Kelipatan Diskon Barang
+                diskon_barang_kelipatan_qty: parseInt(document.getElementById('set_kelipatan_barang').value) || 0,
+
+                voucher_kode: document.getElementById('set_v_code').value.toUpperCase(),
+                voucher_nilai: parseInt(document.getElementById('set_v_val').value) || 0,
+                tipe_voucher: document.getElementById('type_voucher').value,
+                
+                // KODE BARU: Simpan Syarat Voucher
+                syarat_qty_voucher: parseInt(document.getElementById('set_v_min_qty').value) || 0,
+                syarat_max_jarak_voucher: parseFloat(document.getElementById('set_v_max_jarak').value) || 0,
+
+                voucher_limit: parseInt(document.getElementById('set_v_limit').value) || 0,
+                shipping_rules: currentRules // Mengirim Array JSON terbaru (termasuk hasil hapus)
+            };
+
+            // Ambil ID pertama dari tabel (Mencegah error ID not found)
             const { data: check } = await db.from('store_settings').select('id').limit(1).single();
+            if (!check) throw new Error("Gagal menemukan data di database.");
+
             const { error } = await db.from('store_settings').update(updateData).eq('id', check.id);
+            
             if (error) throw error;
 
+            // Sukses
             document.getElementById('settingsModal').style.display = 'none';
             const toast = document.getElementById('successToast');
             toast.classList.add('active');
-            lucide.createIcons();
             setTimeout(() => toast.classList.remove('active'), 3000);
-        } catch (e) { alert(e.message); }
-        btn.innerText = "Simpan Perubahan"; btn.disabled = false;
+
+        } catch (err) {
+            alert("Gagal: " + err.message);
+        } finally {
+            btn.innerText = "Simpan Perubahan";
+            btn.disabled = false;
+        }
+    }
+    // --- FUNGSI UNTUK MEMBUKA MODAL KETERANGAN DISKON ---
+    async function openTextSettings() {
+        const modal = document.getElementById('textSettingsModal');
+        modal.style.display = 'flex';
+        
+        try {
+            // Ambil data teks dari database
+            const { data } = await db.from('store_settings').select('ket_diskon_ongkir, ket_diskon_barang').limit(1).single();
+            if (data) {
+                document.getElementById('set_ket_ongkir').value = data.ket_diskon_ongkir || '';
+                document.getElementById('set_ket_barang').value = data.ket_diskon_barang || '';
+            }
+        } catch (e) { 
+            console.error("Gagal memuat keterangan:", e); 
+        }
+        lucide.createIcons(); // Pastikan ikon 'x' terender
+    }
+
+    // --- FUNGSI UNTUK MENYIMPAN KETERANGAN DISKON ---
+    async function saveTextSettings(event) {
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ Menyimpan...";
+        btn.disabled = true;
+
+        try {
+            const updateData = {
+                ket_diskon_ongkir: document.getElementById('set_ket_ongkir').value,
+                ket_diskon_barang: document.getElementById('set_ket_barang').value
+            };
+
+            // Deteksi ID dinamis
+            const { data: check } = await db.from('store_settings').select('id').limit(1).single();
+            if (!check) throw new Error("Database kosong.");
+
+            const { error } = await db.from('store_settings').update(updateData).eq('id', check.id);
+            if (error) throw error;
+
+            // Tutup pop-up & tampilkan notifikasi sukses
+            document.getElementById('textSettingsModal').style.display = 'none';
+            
+            const toast = document.getElementById('successToast');
+            const toastText = toast.querySelector('.toast-text');
+            const defaultToastMsg = toastText.innerText; // Simpan pesan default
+            
+            toastText.innerText = "Keterangan Diskon Berhasil Diperbarui!";
+            toast.classList.add('active');
+            
+            setTimeout(() => { 
+                toast.classList.remove('active'); 
+                setTimeout(() => toastText.innerText = defaultToastMsg, 500); // Kembalikan teks asli
+            }, 3000);
+
+        } catch (err) {
+            alert("Gagal: " + err.message);
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
     }
 
     function renderRules() {
-        const c = document.getElementById('rules-container');
-        c.innerHTML = currentRules.length ? "" : "<p style='color:#999;text-align:center;'>Belum ada aturan khusus.</p>";
-        currentRules.forEach((r, i) => {
-            const d = document.createElement('div');
-            d.style.cssText = "background:#fff; border:1px solid #eee; padding:8px; border-radius:8px; margin-bottom:5px; position:relative;";
-            d.innerHTML = `
-                <div style="font-size:11px; font-weight:600;">Jarak: ${r.minDist}-${r.maxDist}km | Min: ${r.minQty}</div>
-                <div style="font-size:11px; color:var(--primary);">Diskon: ${r.val}${r.type === 'persen' ? '%' : 'Rp'}</div>
-                <button onclick="currentRules.splice(${i},1);renderRules();" style="position:absolute; top:8px; right:8px; border:none; color:red; background:none; cursor:pointer;">✕</button>
+        const container = document.getElementById('rules-container');
+        container.innerHTML = "";
+
+        if (currentRules.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:15px; color:#9ca3af; font-size:12px; border:1px dashed #d1d5db; border-radius:8px;">Belum ada aturan diskon ongkir.</div>';
+            return;
+        }
+
+        currentRules.forEach((rule, index) => {
+            const div = document.createElement('div');
+            div.className = 'rule-item';
+            
+            // Menggunakan Flexbox agar lebar inputan proporsional dan tidak kebesaran
+            div.innerHTML = `
+                <button type="button" class="btn-delete-rule" onclick="removeRule(${index})" title="Hapus Aturan">✕</button>
+                
+                <div style="display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-end;">
+                    <div style="flex: 1.5;">
+                        <label class="rule-sub-label">Jarak (KM)</label>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="number" value="${rule.minDist}" onchange="updateRule(${index}, 'minDist', this.value)" style="width:100%; padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:12px; outline:none; text-align:center;">
+                            <span style="color:#9ca3af; font-weight:bold;">-</span>
+                            <input type="number" value="${rule.maxDist}" onchange="updateRule(${index}, 'maxDist', this.value)" style="width:100%; padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:12px; outline:none; text-align:center;">
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="rule-sub-label">Min. Qty</label>
+                        <input type="number" value="${rule.minQty}" onchange="updateRule(${index}, 'minQty', this.value)" style="width:100%; padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:12px; outline:none; text-align:center;">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="rule-sub-label">Nilai Diskon</label>
+                    <div class="input-group-merged" style="border-radius:6px;">
+                        <input type="number" value="${rule.val}" onchange="updateRule(${index}, 'val', this.value)" style="padding:6px 10px; font-size:12px; font-weight:600;">
+                        <select onchange="updateRule(${index}, 'type', this.value)" style="width:55px; font-size:12px; padding:0;">
+                            <option value="nominal" ${rule.type === 'nominal' ? 'selected' : ''}>Rp</option>
+                            <option value="persen" ${rule.type === 'persen' ? 'selected' : ''}>%</option>
+                        </select>
+                    </div>
+                </div>
             `;
-            c.appendChild(d);
+            container.appendChild(div);
         });
+    }
+
+    let ruleIndexToDelete = null;
+
+    // Fungsi Menghapus Aturan
+    function removeRule(index) {
+        ruleIndexToDelete = index; 
+        document.getElementById('deleteConfirmModal').style.display = 'flex'; 
+        lucide.createIcons(); 
+    }
+    // 2. Fungsi saat tombol 'Batal' ditekan di Pop-up
+    function closeDeleteModal() {
+        document.getElementById('deleteConfirmModal').style.display = 'none'; // Sembunyikan
+        ruleIndexToDelete = null; // Lupakan memori
+    }
+
+    // 3. Fungsi saat tombol 'Ya, Hapus' ditekan di Pop-up
+    function confirmDeleteRule() {
+        if (ruleIndexToDelete !== null) {
+            currentRules.splice(ruleIndexToDelete, 1); // Hapus dari memori array
+            renderRules(); // Render ulang tampilannya
+        }
+        closeDeleteModal(); // Tutup Pop-up setelah sukses
+    }
+
+    // Fungsi Update Data (Penting agar saat diketik data tersimpan di variabel)
+    function updateRule(index, field, value) {
+        if (field === 'type') {
+            currentRules[index][field] = value;
+        } else {
+            currentRules[index][field] = parseFloat(value) || 0;
+        }
     }
 
     function addRule() {
