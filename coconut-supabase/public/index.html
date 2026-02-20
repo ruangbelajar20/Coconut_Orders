@@ -903,9 +903,9 @@
                 ongkirMurni = blok * 1000;
             }
 
-            // 4. HITUNG DISKON ONGKIR (Dari Pengaturan Admin)
-            // Menggunakan helper 'hitungNilaiDiskon' yang baru dibuat
+            // 4. HITUNG DISKON ONGKIR (LOGIKA "CARI DISKON TERBESAR")
             let discOngkir = 0;
+            
             if (window.GLOBAL_SHIPPING_RULES && window.GLOBAL_SHIPPING_RULES.length > 0) {
                 for (let i = 0; i < window.GLOBAL_SHIPPING_RULES.length; i++) {
                     const rule = window.GLOBAL_SHIPPING_RULES[i];
@@ -915,18 +915,26 @@
                     const passQty = qty >= rule.minQty;
                     
                     if (passDist && passQty) {
-                        // JIKA COCOK, HITUNG DISKONNYA
+                        let hitungSementara = 0;
+                        
+                        // Hitung nilai diskon untuk aturan ini
                         if (rule.type === 'persen') {
-                            discOngkir = (ongkirMurni * rule.val) / 100;
+                            hitungSementara = (ongkirMurni * rule.val) / 100;
                         } else {
-                            discOngkir = rule.val;
+                            hitungSementara = rule.val;
                         }
                         
-                        // Ketemu satu aturan yang cocok? Langsung BERHENTI mencari (biar tidak bentrok)
-                        break; 
+                        // PERBAIKAN: Jangan pakai 'break;'. 
+                        // Bandingkan diskon ini dengan diskon sebelumnya, ambil yang paling besar!
+                        if (hitungSementara > discOngkir) {
+                            discOngkir = hitungSementara;
+                        }
                     }
                 }
             }
+            
+            // Validasi: Diskon ongkir tidak boleh lebih besar dari ongkirnya sendiri
+            if (discOngkir > ongkirMurni) discOngkir = ongkirMurni;
             // Validasi: Diskon ongkir tidak boleh lebih besar dari ongkirnya sendiri
             if (discOngkir > ongkirMurni) discOngkir = ongkirMurni;
 
@@ -1528,4 +1536,5 @@
 </script>
 </body>
 </html>
+
 
